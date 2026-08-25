@@ -91,31 +91,31 @@ export const Navbar: React.FC<NavbarProps> = ({
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const roleLabels: Record<Role, { label: string; badgeColor: string }> = {
-    owner: { label: t.roleOwner, badgeColor: 'bg-[#8BA888]/15 text-[#4D6E4A] dark:text-[#8BA888] border-[#8BA888]/30' },
-    manager: { label: t.roleManager, badgeColor: 'bg-[#D4A373]/15 text-[#9E6B38] dark:text-[#D4A373] border-[#D4A373]/30' },
-    technician: { label: t.roleTech, badgeColor: 'bg-[#6B9080]/15 text-[#4B7060] dark:text-[#A4C3B2] border-[#6B9080]/30' },
-    receptionist: { label: t.roleReception, badgeColor: 'bg-[#A3B18A]/20 text-[#588157] dark:text-[#CCD5AE] border-[#A3B18A]/30' },
+    owner: { label: t.roleOwner, badgeColor: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' },
+    manager: { label: t.roleManager, badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700' },
+    technician: { label: t.roleTech, badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
+    receptionist: { label: t.roleReception, badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#1A1C19]/90 backdrop-blur-md border-b border-[#E2E6DF] dark:border-[#2D312C] transition-colors">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#141619]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#5A7D57] to-[#8BA888] dark:from-[#8BA888] dark:to-[#A3C2A0] flex items-center justify-center text-white dark:text-[#121412] shadow-md shadow-[#8BA888]/20">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg tracking-tight text-[#1C211B] dark:text-[#E0E2DF]">
+                <span className="font-bold text-lg tracking-tight text-zinc-950 dark:text-zinc-50">
                   {t.appName}
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-[#8BA888]/20 text-[#4D6E4A] dark:text-[#8BA888]">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
                   PRO
                 </span>
               </div>
-              <p className="text-xs text-[#5E665B] dark:text-[#9BA198] hidden sm:block">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
                 {t.appTagline}
               </p>
             </div>
@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-nav-quick-booking"
                 onClick={handleBooking}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm transition-all"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all"
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
                 <span>{t.newBooking}</span>
@@ -137,7 +137,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="btn-nav-quick-invoice"
                   onClick={handleCheckout}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3EF] hover:bg-[#E5EAE3] dark:bg-[#222621] dark:hover:bg-[#2A2F29] text-[#1C211B] dark:text-[#E0E2DF] border border-[#E2E6DF] dark:border-[#2D312C] transition-all"
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all"
                 >
                   <Receipt className="w-3.5 h-3.5" />
                   <span>{t.newInvoice}</span>
@@ -158,10 +158,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#1A1C19] rounded-2xl shadow-2xl border border-[#E2E6DF] dark:border-[#2D312C] p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
-                  <div className="px-2 py-1 text-[11px] font-bold text-[#5E665B] dark:text-[#9BA198] uppercase tracking-wider border-b border-[#E2E6DF] dark:border-[#2D312C] pb-1.5 flex items-center justify-between">
+                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
+                  <div className="px-2 py-1 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 pb-1.5 flex items-center justify-between">
                     <span>{t.currentRole} (Phân Quyền):</span>
-                    <span className="text-[10px] font-normal text-[#5A7D57] dark:text-[#8BA888]">RBAC</span>
+                    <span className="text-[10px] font-normal text-zinc-900 dark:text-zinc-100 font-mono">RBAC</span>
                   </div>
                   {[
                     {
@@ -198,22 +198,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                       }}
                       className={`w-full text-left p-2.5 rounded-xl text-xs transition-all border ${
                         currentRole === item.role
-                          ? 'bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 border-[#5A7D57]/40 dark:border-[#8BA888]/40 ring-1 ring-[#5A7D57]/30'
-                          : 'border-transparent hover:bg-[#F5F7F4] dark:hover:bg-[#222621]'
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm'
+                          : 'border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800/60 text-zinc-800 dark:text-zinc-200'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1.5">
+                        <span className="font-bold flex items-center space-x-1.5">
                           <span>{item.title}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded font-normal bg-[#E2E6DF]/60 dark:bg-[#2D312C] text-[#5E665B] dark:text-[#9BA198]">
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded font-normal ${
+                            currentRole === item.role
+                              ? 'bg-white/20 dark:bg-black/20 text-current'
+                              : 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                          }`}>
                             {item.badge}
                           </span>
                         </span>
                         {currentRole === item.role && (
-                          <CheckCircle className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888] shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-current shrink-0" />
                         )}
                       </div>
-                      <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198] mt-0.5 leading-snug">
+                      <p className={`text-[11px] mt-0.5 leading-snug ${
+                        currentRole === item.role ? 'text-zinc-300 dark:text-zinc-700' : 'text-zinc-500 dark:text-zinc-400'
+                      }`}>
                         {item.desc}
                       </p>
                     </button>
@@ -227,17 +233,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-firebase-sync-center"
                 onClick={onOpenFirebaseSync}
-                className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 transition-all shadow-sm group"
+                className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm group"
                 title="Quản lý kết nối & Dữ liệu sạch Firebase Firestore (spa2026-68441)"
               >
                 <div className="relative">
-                  <Database className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+                  <Database className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300 group-hover:scale-110 transition-transform" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 </div>
                 <span className="hidden sm:inline">Firebase Cloud</span>
                 {isFirebaseSyncing && (
-                  <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                  <RefreshCw className="w-3 h-3 text-zinc-600 dark:text-zinc-400 animate-spin" />
                 )}
               </button>
             )}
@@ -246,24 +252,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-lang-toggle"
               onClick={handleToggleLang}
-              className="p-2 rounded-lg text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621] transition-colors flex items-center space-x-1 text-xs font-medium"
+              className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-medium"
               title="Đổi ngôn ngữ / Switch Language"
             >
               <Globe className="w-4 h-4" />
               <span className="uppercase text-[11px] font-bold">{lang}</span>
             </button>
 
-            {/* Dark / Light Mode Toggle */}
+            {/* Dark / Light Mode Minimalist Toggle */}
             <button
               id="btn-theme-toggle"
               onClick={handleToggleDark}
-              className="p-2 rounded-lg text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621] transition-colors"
-              title={effectiveDarkMode ? t.lightMode : t.darkMode}
+              className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-all active:scale-95 shadow-sm"
+              title={effectiveDarkMode ? (lang === 'vi' ? 'Chuyển sang chế độ Sáng (Light Mode)' : 'Switch to Light Mode') : (lang === 'vi' ? 'Chuyển sang chế độ Tối (Dark Mode)' : 'Switch to Dark Mode')}
+              aria-label="Toggle Dark Mode"
             >
               {effectiveDarkMode ? (
-                <Sun className="w-4 h-4 text-[#D4A373]" />
+                <Sun className="w-4 h-4 text-zinc-100 transition-transform hover:rotate-45" />
               ) : (
-                <Moon className="w-4 h-4 text-[#5E665B]" />
+                <Moon className="w-4 h-4 text-zinc-900 transition-transform hover:-rotate-12" />
               )}
             </button>
 
@@ -272,17 +279,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-lg text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621] transition-colors"
+                className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-colors"
                 title={t.notifications}
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#8BA888] ring-2 ring-white dark:ring-[#1A1C19]" />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-zinc-900 dark:bg-white ring-2 ring-white dark:ring-zinc-900" />
                 )}
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#1A1C19] rounded-xl shadow-xl border border-[#E2E6DF] dark:border-[#2D312C] p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-3 z-50 animate-in fade-in slide-in-from-top-2">
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E2E6DF] dark:border-[#2D312C]">
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold text-xs text-[#1C211B] dark:text-[#E0E2DF]">

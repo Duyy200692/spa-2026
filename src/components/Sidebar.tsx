@@ -107,27 +107,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
     owner: {
       title: lang === 'vi' ? 'Chủ Spa (Admin)' : 'Spa Owner (Admin)',
       desc: lang === 'vi' ? 'Toàn quyền điều hành, tài chính & hệ thống' : 'Full system & financial access',
-      badgeClass: 'bg-[#5A7D57]/15 text-[#30522E] dark:text-[#A3C2A0] border-[#5A7D57]/30',
+      badgeClass: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200',
     },
     manager: {
       title: lang === 'vi' ? 'Quản Lý Spa' : 'Spa Manager',
       desc: lang === 'vi' ? 'Toàn quyền vận hành (Giới hạn bảo mật hệ thống)' : 'Operations access (Security limited)',
-      badgeClass: 'bg-[#D4A373]/15 text-[#9E6B38] dark:text-[#D4A373] border-[#D4A373]/30',
+      badgeClass: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700',
     },
     technician: {
       title: lang === 'vi' ? 'Kỹ Thuật Viên' : 'Therapist',
       desc: lang === 'vi' ? 'Xem Lịch hẹn, Chấm công, Khuyến mãi & Tin' : 'Appointments, Timekeeping, Promotions',
-      badgeClass: 'bg-[#6B9080]/15 text-[#4B7060] dark:text-[#A4C3B2] border-[#6B9080]/30',
+      badgeClass: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700',
     },
     receptionist: {
       title: lang === 'vi' ? 'Lễ Tân / Thu Ngân' : 'Receptionist / Cashier',
       desc: lang === 'vi' ? 'Lịch hẹn, Chấm công, Khuyến mãi, Xếp tour KTV' : 'Bookings, Timekeeping, Shifts & Tours',
-      badgeClass: 'bg-[#A3B18A]/20 text-[#588157] dark:text-[#CCD5AE] border-[#A3B18A]/30',
+      badgeClass: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700',
     },
   };
 
   return (
-    <aside className="w-64 bg-white dark:bg-[#1A1C19] border border-[#E2E6DF] dark:border-[#2D312C] rounded-2xl p-4 space-y-5 shrink-0 transition-colors shadow-sm flex flex-col justify-between min-h-[580px]">
+    <aside className="w-64 bg-white dark:bg-[#141619] border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-5 shrink-0 transition-colors shadow-sm flex flex-col justify-between min-h-[580px]">
       <div className="space-y-5">
         {/* Active Role Status Card */}
         <div className={`p-3 rounded-xl border text-xs ${roleRoleDetails[currentRole].badgeClass}`}>
@@ -140,10 +140,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </p>
         </div>
 
-        {/* Category: Vận Hành Spa (nếu có tab thuộc nhóm này) */}
+        {/* Category: Vận Hành Spa */}
         {opTabs.length > 0 && (
           <div>
-            <div className="text-[11px] font-bold text-[#5E665B] dark:text-[#9BA198] uppercase tracking-wider px-3 mb-1.5">
+            <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1.5 font-mono">
               {lang === 'vi' ? 'Quản Trị Vận Hành' : 'Operations'}
             </div>
             <nav className="space-y-1">
@@ -157,20 +157,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => handleSelect(tab.id)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       isActive
-                        ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm font-semibold'
-                        : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621] hover:text-[#1C211B] dark:hover:text-[#E0E2DF]'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-950 dark:hover:text-zinc-100'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white dark:text-[#121412]' : 'text-[#5E665B] dark:text-[#9BA198]'}`} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-white dark:text-zinc-950' : 'text-zinc-500 dark:text-zinc-400'}`} />
                       <span>{tab.label}</span>
                     </div>
                     {tab.badge && tab.badge > 0 ? (
                       <span
                         className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                           isActive
-                            ? 'bg-white text-[#5A7D57] dark:bg-[#121412] dark:text-[#8BA888]'
-                            : 'bg-[#8BA888]/20 text-[#4D6E4A] dark:bg-[#8BA888]/20 dark:text-[#8BA888]'
+                            ? 'bg-white text-zinc-950 dark:bg-zinc-950 dark:text-white'
+                            : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
                         }`}
                       >
                         {tab.badge}
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Category: Nhân Sự & Tiếp Thị / Tài Chính */}
         {hrTabs.length > 0 && (
           <div>
-            <div className="text-[11px] font-bold text-[#5E665B] dark:text-[#9BA198] uppercase tracking-wider px-3 mb-1.5">
+            <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-3 mb-1.5 font-mono">
               {lang === 'vi' ? 'Nhân Sự & Dịch Vụ' : 'People & Services'}
             </div>
             <nav className="space-y-1">
@@ -200,12 +200,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => handleSelect(tab.id)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       isActive
-                        ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm font-semibold'
-                        : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621] hover:text-[#1C211B] dark:hover:text-[#E0E2DF]'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-950 dark:hover:text-zinc-100'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white dark:text-[#121412]' : 'text-[#5E665B] dark:text-[#9BA198]'}`} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-white dark:text-zinc-950' : 'text-zinc-500 dark:text-zinc-400'}`} />
                       <span>{tab.label}</span>
                     </div>
                   </button>
@@ -217,13 +217,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* System info / Role note */}
-      <div className="pt-3 border-t border-[#E2E6DF] dark:border-[#2D312C]">
-        <div className="bg-[#F0F3EF] dark:bg-[#222621]/60 rounded-xl p-2.5 text-[11px] space-y-1">
-          <div className="flex items-center space-x-1.5 text-[#1C211B] dark:text-[#E0E2DF] font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[#5A7D57] dark:bg-[#8BA888]" />
+      <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="bg-zinc-50 dark:bg-zinc-900/60 rounded-xl p-2.5 text-[11px] space-y-1 border border-zinc-100 dark:border-zinc-800/80">
+          <div className="flex items-center space-x-1.5 text-zinc-900 dark:text-zinc-100 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-zinc-900 dark:bg-white" />
             <span>Phân quyền RBAC Chuẩn</span>
           </div>
-          <p className="text-[#5E665B] dark:text-[#9BA198] text-[10px] leading-tight">
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] leading-tight">
             {lang === 'vi'
               ? 'Tự động mở/khóa tính năng và bảo mật lương theo đúng vai trò.'
               : 'Auto restricts modules & masks payroll per security role.'}

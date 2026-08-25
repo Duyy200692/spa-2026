@@ -2,34 +2,35 @@
 
 @layer base {
   :root {
-    --natural-bg: #F5F7F4;
+    --natural-bg: #F8F9FA;
     --natural-surface: #FFFFFF;
-    --natural-surface-subtle: #F0F3EF;
-    --natural-border: #E2E6DF;
-    --natural-text: #1C211B;
-    --natural-text-muted: #5E665B;
-    --natural-primary: #5A7D57;
-    --natural-primary-hover: #4D6D4A;
-    --natural-earth: #B88352;
+    --natural-surface-subtle: #F1F3F5;
+    --natural-border: #E5E7EB;
+    --natural-text: #09090B;
+    --natural-text-muted: #64748B;
+    --natural-primary: #18181B;
+    --natural-primary-hover: #27272A;
+    --natural-earth: #3F3F46;
   }
 
   .dark {
-    --natural-bg: #121412;
-    --natural-surface: #1A1C19;
-    --natural-surface-subtle: #222621;
-    --natural-border: #2D312C;
-    --natural-text: #E0E2DF;
-    --natural-text-muted: #9BA198;
-    --natural-primary: #8BA888;
-    --natural-primary-hover: #7A9877;
-    --natural-earth: #D4A373;
+    --natural-bg: #09090B;
+    --natural-surface: #141619;
+    --natural-surface-subtle: #1C1F24;
+    --natural-border: #27272A;
+    --natural-text: #FAFAFA;
+    --natural-text-muted: #A1A1AA;
+    --natural-primary: #FFFFFF;
+    --natural-primary-hover: #F4F4F5;
+    --natural-earth: #D4D4D8;
   }
 
   body {
     background-color: var(--natural-bg);
     color: var(--natural-text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   @media print {

@@ -51,7 +51,14 @@ import {
 export default function App() {
   // Global Settings State
   const [lang, setLang] = useState<Language>('vi');
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('spa_theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const [currentRole, setCurrentRole] = useState<UserRole>('owner');
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -77,12 +84,22 @@ export default function App() {
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
   const [showQuickBookingModal, setShowQuickBookingModal] = useState<boolean>(false);
 
-  // Dark Mode Sync
+  // Dark Mode Sync & Local Persistence
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      try {
+        localStorage.setItem('spa_theme', 'dark');
+      } catch (e) {
+        /* ignore */
+      }
     } else {
       document.documentElement.classList.remove('dark');
+      try {
+        localStorage.setItem('spa_theme', 'light');
+      } catch (e) {
+        /* ignore */
+      }
     }
   }, [isDarkMode]);
 
