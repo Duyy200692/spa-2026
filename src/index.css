@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --natural-bg: #F5F7F4;
+    --natural-surface: #FFFFFF;
+    --natural-surface-subtle: #F0F3EF;
+    --natural-border: #E2E6DF;
+    --natural-text: #1C211B;
+    --natural-text-muted: #5E665B;
+    --natural-primary: #5A7D57;
+    --natural-primary-hover: #4D6D4A;
+    --natural-earth: #B88352;
+  }
+
+  .dark {
+    --natural-bg: #121412;
+    --natural-surface: #1A1C19;
+    --natural-surface-subtle: #222621;
+    --natural-border: #2D312C;
+    --natural-text: #E0E2DF;
+    --natural-text-muted: #9BA198;
+    --natural-primary: #8BA888;
+    --natural-primary-hover: #7A9877;
+    --natural-earth: #D4A373;
+  }
+
+  body {
+    background-color: var(--natural-bg);
+    color: var(--natural-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    .print\:hidden {
+      display: none !important;
+    }
+  }
+}
+
+/* Natural Tones smooth scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 168, 136, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 168, 136, 0.45);
+}
+
+

@@ -1,0 +1,6 @@
+{
+  "name": "SpaMaster - Hệ Thống Quản Trị Spa & Salon Toàn Diện",
+  "description": "Hệ thống quản lý spa chuyên nghiệp: hồ sơ khách hàng, doanh thu, lịch hẹn, nhân viên & chấm công, tính giá cost dịch vụ, kho mỹ phẩm, khuyến mãi, đa thanh toán và báo cáo thời gian thực.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
