@@ -13,7 +13,8 @@ import {
   DollarSign,
   Package,
   CalendarPlus,
-  Receipt
+  Receipt,
+  Building
 } from 'lucide-react';
 import { Appointment, Customer, Service, Staff, InventoryItem, Language, Role, TabType, Invoice } from '../types';
 import { translations, formatCurrency } from '../i18n';
@@ -37,6 +38,7 @@ interface DashboardViewProps {
   onOpenCheckoutModal?: () => void;
   onOpenCheckout?: (appointment?: Appointment) => void;
   onUpdateAppointmentStatus?: (id: string, status: Appointment['status']) => void;
+  onOpenEditSpaProfile?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -58,6 +60,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenCheckoutModal,
   onOpenCheckout,
   onUpdateAppointmentStatus,
+  onOpenEditSpaProfile,
 }) => {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | 'year'>('7d');
   const t = translations[lang];
@@ -176,7 +179,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="flex items-center space-x-2 w-full sm:w-auto flex-wrap gap-2">
+            {onOpenEditSpaProfile && (currentRole === 'owner' || currentRole === 'manager') && (
+              <button
+                id="btn-dash-edit-spa"
+                onClick={onOpenEditSpaProfile}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/20 dark:bg-[#1A1C19] hover:bg-white/30 dark:hover:bg-[#222621] text-white dark:text-[#E0E2DF] border border-white/30 dark:border-[#2D312C] transition-all shadow-sm"
+                title="Chỉnh sửa thông tin cơ sở, địa chỉ & logo Spa"
+              >
+                <Building className="w-4 h-4" />
+                <span>Sửa Info & Logo</span>
+              </button>
+            )}
+
             <button
               id="btn-dash-booking"
               onClick={onOpenBookingModal}

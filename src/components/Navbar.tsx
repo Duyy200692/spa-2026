@@ -13,15 +13,17 @@ import {
   X,
   Database,
   CloudCheck,
-  RefreshCw
+  RefreshCw,
+  Building
 } from 'lucide-react';
-import { Role, Language, Theme, AppNotification, TabType } from '../types';
+import { Role, Language, Theme, AppNotification, TabType, SpaProfile } from '../types';
 import { translations } from '../i18n';
 import { FIREBASE_PROJECT_ID } from '../firebase';
 
 interface NavbarProps {
   currentRole: Role;
   onRoleChange: (role: Role) => void;
+  onRequestRoleSwitch?: (role: Role) => void;
   lang: Language;
   onLangChange?: (lang: Language) => void;
   onLangToggle?: () => void;
@@ -40,11 +42,14 @@ interface NavbarProps {
   isFirebaseSyncing?: boolean;
   activeTab?: TabType;
   onTabSelect?: (tab: TabType) => void;
+  spaProfile?: SpaProfile;
+  onOpenEditSpaProfile?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentRole,
   onRoleChange,
+  onRequestRoleSwitch,
   lang,
   onLangChange,
   onLangToggle,
@@ -61,6 +66,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCheckout,
   onOpenFirebaseSync,
   isFirebaseSyncing = false,
+  spaProfile,
+  onOpenEditSpaProfile,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
@@ -88,13 +95,28 @@ export const Navbar: React.FC<NavbarProps> = ({
     if (id === 'all' && onMarkNotificationsRead) onMarkNotificationsRead();
   };
 
+  const handleSelectRole = (target: Role) => {
+    setShowRoleMenu(false);
+    if (target === currentRole) return;
+    if (target === 'customer') {
+      onRoleChange('customer');
+      return;
+    }
+    if (onRequestRoleSwitch) {
+      onRequestRoleSwitch(target);
+    } else {
+      onRoleChange(target);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const roleLabels: Record<Role, { label: string; badgeColor: string }> = {
-    owner: { label: t.roleOwner, badgeColor: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' },
-    manager: { label: t.roleManager, badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700' },
-    technician: { label: t.roleTech, badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
-    receptionist: { label: t.roleReception, badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
+    owner: { label: t.roleOwner || 'Chủ Spa', badgeColor: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' },
+    manager: { label: t.roleManager || 'Quản Lý', badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700' },
+    technician: { label: t.roleTech || 'Kỹ Thuật Viên', badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
+    receptionist: { label: t.roleReception || 'Lễ Tân / Thu Ngân', badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
+    customer: { label: 'Khách Hàng (Portal)', badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700' },
   };
 
   return (
@@ -103,41 +125,69 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800">
+              {spaProfile?.logo ? (
+                <img
+                  src={spaProfile.logo}
+                  alt="Spa logo"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as any).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Sparkles className="w-5 h-5" />
+              )}
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg tracking-tight text-zinc-950 dark:text-zinc-50">
-                  {t.appName}
+                <span className="font-bold text-base sm:text-lg tracking-tight text-zinc-950 dark:text-zinc-50 truncate max-w-[200px] sm:max-w-[280px]">
+                  {spaProfile?.name || t.appName}
                 </span>
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
-                  PRO
+                  {currentRole === 'customer' ? 'PORTAL' : 'PRO'}
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
-                {t.appTagline}
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block truncate max-w-[320px]">
+                {currentRole === 'customer'
+                  ? (spaProfile?.address || 'Cổng Thông Tin & Khuyến Mãi Khách Hàng')
+                  : (spaProfile?.tagline || t.appTagline)}
               </p>
             </div>
           </div>
 
           {/* Controls: Role switcher, Quick actions, Language, Theme, Notifications */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Quick Action Button (Desktop & Tablet) */}
-            <div className="hidden md:flex items-center space-x-2">
+            {/* Edit Spa Info & Logo Button for Admin/Manager */}
+            {onOpenEditSpaProfile && (currentRole === 'owner' || currentRole === 'manager') && (
+              <button
+                id="btn-nav-edit-spa-profile"
+                onClick={onOpenEditSpaProfile}
+                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm"
+                title="Chỉnh sửa thông tin cơ sở, địa chỉ & logo Spa"
+              >
+                <Building className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
+                <span>Sửa Info & Logo</span>
+              </button>
+            )}
+
+            {/* Quick Action Button */}
+            <div className="flex items-center space-x-2">
               <button
                 id="btn-nav-quick-booking"
                 onClick={handleBooking}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all"
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
-                <span>{t.newBooking}</span>
+                <span>{currentRole === 'customer' ? 'Đặt Lịch Hẹn' : t.newBooking}</span>
               </button>
-              {currentRole !== 'technician' && (
+
+              {currentRole !== 'technician' && currentRole !== 'customer' && (
                 <button
                   id="btn-nav-quick-invoice"
                   onClick={handleCheckout}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all"
+                  className="hidden md:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all"
                 >
                   <Receipt className="w-3.5 h-3.5" />
                   <span>{t.newInvoice}</span>
@@ -145,12 +195,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Role Switcher (RBAC) */}
+            {/* Role Switcher (RBAC with Password Protection) */}
             <div className="relative">
               <button
                 id="btn-role-switcher"
                 onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${roleLabels[currentRole].badgeColor}`}
+                className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all ${roleLabels[currentRole].badgeColor}`}
                 title={t.currentRole}
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -158,44 +208,48 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
                   <div className="px-2 py-1 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 pb-1.5 flex items-center justify-between">
-                    <span>{t.currentRole} (Phân Quyền):</span>
-                    <span className="text-[10px] font-normal text-zinc-900 dark:text-zinc-100 font-mono">RBAC</span>
+                    <span>Phân Quyền & Bảo Mật Mật Khẩu:</span>
+                    <span className="text-[10px] font-mono text-zinc-900 dark:text-zinc-100">PIN LOCK</span>
                   </div>
+
                   {[
+                    {
+                      role: 'customer' as Role,
+                      title: 'Khách Hàng (Customer Portal)',
+                      desc: 'Chỉ xem Bài giới thiệu, Menu dịch vụ, Khuyến mãi & Tin tức (Công khai, không cần mật khẩu)',
+                      badge: 'Công Khai',
+                    },
                     {
                       role: 'owner' as Role,
                       title: 'Chủ Spa (Admin)',
-                      desc: 'Toàn quyền tất cả (Tài chính, P&L, Cấu hình, Nhân sự, Cost, Kho)',
-                      badge: 'Toàn Quyền',
+                      desc: 'Toàn quyền tài chính P&L, Nhân sự, Costing, Kho, Báo cáo & Cài đặt hệ thống (PIN: 123456)',
+                      badge: 'Mật Khẩu',
                     },
                     {
                       role: 'manager' as Role,
-                      title: 'Quản Lý Spa',
-                      desc: 'Toàn quyền vận hành (Giới hạn bảo mật lương gốc & cấu hình admin)',
-                      badge: 'Vận Hành',
+                      title: 'Quản Lý Spa (Manager)',
+                      desc: 'Vận hành lịch hẹn, danh sách khách hàng, kho mỹ phẩm & dịch vụ (PIN: 888888)',
+                      badge: 'Mật Khẩu',
                     },
                     {
                       role: 'technician' as Role,
-                      title: 'Kỹ Thuật Viên',
-                      desc: 'Chỉ xem Lịch hẹn cá nhân, Chấm công ca & Khuyến mãi/Tin tức',
-                      badge: 'Chuyên Môn',
+                      title: 'Kỹ Thuật Viên (Therapist)',
+                      desc: 'Xem lịch hẹn điều trị cá nhân, chấm công ca làm & quy trình dịch vụ (PIN: 666666)',
+                      badge: 'Mật Khẩu',
                     },
                     {
                       role: 'receptionist' as Role,
                       title: 'Lễ Tân / Thu Ngân',
-                      desc: 'Lịch hẹn, Chấm công, Khuyến mãi & Xem Nhân viên/Ca để xếp tour',
-                      badge: 'Điều Phối',
+                      desc: 'Đặt lịch hẹn, xuất hóa đơn tính tiền, tiếp đón & điều phối tour (PIN: 666666)',
+                      badge: 'Mật Khẩu',
                     },
                   ].map(item => (
                     <button
                       key={item.role}
                       id={`btn-select-role-${item.role}`}
-                      onClick={() => {
-                        onRoleChange(item.role);
-                        setShowRoleMenu(false);
-                      }}
+                      onClick={() => handleSelectRole(item.role)}
                       className={`w-full text-left p-2.5 rounded-xl text-xs transition-all border ${
                         currentRole === item.role
                           ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm'
@@ -228,20 +282,31 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
+            {/* Quick Logout to Customer Portal if logged in as staff/owner */}
+            {currentRole !== 'customer' && (
+              <button
+                onClick={() => onRoleChange('customer')}
+                className="hidden lg:inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                title="Đăng xuất về chế độ Khách Hàng an toàn"
+              >
+                <span>Cổng Khách</span>
+              </button>
+            )}
+
             {/* Firebase Realtime Cloud Sync Status Button */}
             {onOpenFirebaseSync && (
               <button
                 id="btn-firebase-sync-center"
                 onClick={onOpenFirebaseSync}
-                className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm group"
-                title="Quản lý kết nối & Dữ liệu sạch Firebase Firestore (spa2026-68441)"
+                className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm group"
+                title="Firebase Firestore Tự Động Đồng Bộ Realtime (spa2026-68441)"
               >
                 <div className="relative">
                   <Database className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300 group-hover:scale-110 transition-transform" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 </div>
-                <span className="hidden sm:inline">Firebase Cloud</span>
+                <span className="hidden sm:inline">Firebase Live</span>
                 {isFirebaseSyncing && (
                   <RefreshCw className="w-3 h-3 text-zinc-600 dark:text-zinc-400 animate-spin" />
                 )}
@@ -252,7 +317,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-lang-toggle"
               onClick={handleToggleLang}
-              className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-medium"
+              className="p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-medium border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
               title="Đổi ngôn ngữ / Switch Language"
             >
               <Globe className="w-4 h-4" />
@@ -290,13 +355,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E2E6DF] dark:border-[#2D312C]">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-zinc-800">
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                      <span className="font-semibold text-xs text-zinc-950 dark:text-zinc-50">
                         {t.notifications}
                       </span>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#8BA888]/20 text-[#4D6E4A] dark:text-[#8BA888]">
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-900 text-white dark:bg-white dark:text-zinc-950">
                           {unreadCount} mới
                         </span>
                       )}
@@ -305,14 +370,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {unreadCount > 0 && (
                         <button
                           onClick={() => handleMarkRead('all')}
-                          className="text-[11px] text-[#5A7D57] dark:text-[#8BA888] hover:underline"
+                          className="text-[11px] text-zinc-900 dark:text-zinc-100 font-semibold hover:underline"
                         >
                           Đọc hết
                         </button>
                       )}
                       <button
                         onClick={() => setShowNotifications(false)}
-                        className="text-[#9BA198] hover:text-[#1C211B] dark:hover:text-[#E0E2DF]"
+                        className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -321,7 +386,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                   <div className="max-h-72 overflow-y-auto space-y-2">
                     {notifications.length === 0 ? (
-                      <p className="text-center py-4 text-xs text-[#5E665B] dark:text-[#9BA198]">
+                      <p className="text-center py-4 text-xs text-zinc-500 dark:text-zinc-400">
                         Không có thông báo mới
                       </p>
                     ) : (
@@ -329,17 +394,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <div
                           key={notif.id}
                           onClick={() => handleMarkRead(notif.id)}
-                          className={`p-2.5 rounded-lg text-xs cursor-pointer transition-colors ${
+                          className={`p-2.5 rounded-xl text-xs cursor-pointer transition-colors ${
                             notif.read
-                              ? 'bg-[#F0F3EF] dark:bg-[#222621]/60 text-[#5E665B] dark:text-[#9BA198]'
-                              : 'bg-[#8BA888]/10 dark:bg-[#8BA888]/15 text-[#1C211B] dark:text-[#E0E2DF] border-l-2 border-[#5A7D57] dark:border-[#8BA888]'
+                              ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 border-l-2 border-zinc-950 dark:border-white'
                           }`}
                         >
                           <div className="flex items-center justify-between font-semibold mb-0.5">
                             <span>{notif.title}</span>
-                            <span className="text-[10px] text-[#5E665B] dark:text-[#9BA198]">{notif.timestamp}</span>
+                            <span className="text-[10px] text-zinc-400">{notif.timestamp}</span>
                           </div>
-                          <p className="text-[11px] leading-relaxed text-[#5E665B] dark:text-[#9BA198]">
+                          <p className="text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
                             {notif.message}
                           </p>
                         </div>

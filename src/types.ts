@@ -1,4 +1,4 @@
-export type Role = 'owner' | 'manager' | 'technician' | 'receptionist';
+export type Role = 'owner' | 'manager' | 'technician' | 'receptionist' | 'customer';
 export type UserRole = Role;
 
 export type TabType =
@@ -10,7 +10,12 @@ export type TabType =
   | 'staff'
   | 'timekeeping'
   | 'promotions'
-  | 'reports';
+  | 'reports'
+  | 'customer_portal'
+  | 'customer_intro'
+  | 'customer_promotions'
+  | 'customer_services'
+  | 'customer_news';
 
 export type Language = 'vi' | 'en';
 
@@ -167,6 +172,14 @@ export interface Promotion {
   status: 'active' | 'expired' | 'scheduled';
   targetTier?: string; // 'All' | 'VIP' | 'Gold' etc.
   bannerColor?: string;
+  image?: string;
+  highlightBadge?: string;
+  category?: 'all' | 'facial' | 'body' | 'combo' | 'special';
+  originalPrice?: number;
+  promotionalPrice?: number;
+  applicableServices?: string[];
+  termsAndConditions?: string[];
+  featured?: boolean;
 }
 
 export type PaymentMethodType = 'cash' | 'card' | 'vietqr' | 'momo' | 'vnpay' | 'zalopay' | 'apple_pay';
@@ -207,3 +220,44 @@ export interface AppNotification {
   read: boolean;
   targetAudience?: string;
 }
+
+export interface RolePasswords {
+  ownerPin: string;
+  managerPin: string;
+  staffPin: string;
+}
+
+export interface SpaProfile {
+  id: string;
+  name: string;
+  tagline: string;
+  logo?: string;
+  bannerImage?: string;
+  story: string;
+  philosophy: string;
+  address: string;
+  phone: string;
+  email: string;
+  openHours: string;
+  socialFacebook?: string;
+  socialZalo?: string;
+  highlights: {
+    title: string;
+    description: string;
+  }[];
+  commitments: string[];
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  category: 'Cẩm nang làm đẹp' | 'Thông báo' | 'Sự kiện' | 'Khuyến mãi' | 'Công nghệ mới';
+  date: string;
+  author: string;
+  summary: string;
+  content: string;
+  image?: string;
+  readTime: string;
+  featured?: boolean;
+}
+

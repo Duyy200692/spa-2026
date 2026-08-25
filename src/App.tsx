@@ -12,7 +12,10 @@ import {
   AttendanceRecord,
   Promotion,
   Invoice,
-  AppNotification
+  AppNotification,
+  SpaProfile,
+  NewsArticle,
+  RolePasswords
 } from './types';
 import {
   initialServices,
@@ -23,7 +26,10 @@ import {
   initialAttendance,
   initialPromotions,
   initialInvoices,
-  initialNotifications
+  initialNotifications,
+  initialSpaProfile,
+  initialNewsArticles,
+  initialRolePasswords
 } from './mockData';
 import { translations } from './i18n';
 import { Navbar } from './components/Navbar';
@@ -37,9 +43,12 @@ import { InventoryView } from './components/InventoryView';
 import { StaffView } from './components/StaffView';
 import { PromotionsView } from './components/PromotionsView';
 import { ReportsView } from './components/ReportsView';
+import { CustomerPortalView } from './components/CustomerPortalView';
+import { RolePasswordModal } from './components/RolePasswordModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import { QuickBookingModal } from './components/QuickBookingModal';
 import { FirebaseSyncModal } from './components/FirebaseSyncModal';
+import { SpaProfileEditModal } from './components/SpaProfileEditModal';
 import {
   COLLECTIONS,
   subscribeToCollection,
@@ -59,10 +68,19 @@ export default function App() {
     }
     return false;
   });
-  const [currentRole, setCurrentRole] = useState<UserRole>('owner');
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+
+  // Current Role & Navigation
+  const [currentRole, setCurrentRole] = useState<Role>('customer');
+  const [activeTab, setActiveTab] = useState<TabType>('customer_intro');
+
+  // Security Passwords
+  const [rolePasswords, setRolePasswords] = useState<RolePasswords>(initialRolePasswords);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
+  const [pendingTargetRole, setPendingTargetRole] = useState<Role>('owner');
 
   // Application Data States
+  const [spaProfile, setSpaProfile] = useState<SpaProfile>(initialSpaProfile);
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>(initialNewsArticles);
   const [services, setServices] = useState<Service[]>(initialServices);
   const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
@@ -78,11 +96,14 @@ export default function App() {
   const [isFirebaseSyncing, setIsFirebaseSyncing] = useState<boolean>(false);
   const [lastSyncedTime, setLastSyncedTime] = useState<Date | null>(new Date());
   const [showFirebaseModal, setShowFirebaseModal] = useState<boolean>(false);
+  const [isEditSpaProfileOpen, setIsEditSpaProfileOpen] = useState<boolean>(false);
 
   // Modal States
   const [checkoutAppointment, setCheckoutAppointment] = useState<Appointment | null>(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
   const [showQuickBookingModal, setShowQuickBookingModal] = useState<boolean>(false);
+  const [bookingInitialServiceId, setBookingInitialServiceId] = useState<string | undefined>(undefined);
+  const [bookingInitialPromoCode, setBookingInitialPromoCode] = useState<string | undefined>(undefined);
 
   // Dark Mode Sync & Local Persistence
   useEffect(() => {
@@ -103,13 +124,20 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // Realtime Firebase Firestore Subscriptions
+  // Realtime Firebase Firestore Subscriptions & Auto Initial Sync
   useEffect(() => {
     let unsubs: (() => void)[] = [];
     try {
+      // Auto seed clean initial data if needed on mount in background
+      seedCleanDataToFirebase().then(() => {
+        setLastSyncedTime(new Date());
+      }).catch((err) => {
+        console.warn('Auto-seed check note:', err);
+      });
+
       // Subscribe to Customers
       unsubs.push(
-        subscribeToCollection<Customer>(COLLECTIONS.CUSTOMERS, items => {
+        subscribeToCollection<Customer>(COLLECTIONS.CUSTOMERS, (items) => {
           if (items && items.length > 0) {
             setCustomers(items);
             setLastSyncedTime(new Date());
@@ -119,7 +147,7 @@ export default function App() {
 
       // Subscribe to Staff
       unsubs.push(
-        subscribeToCollection<Staff>(COLLECTIONS.STAFF, items => {
+        subscribeToCollection<Staff>(COLLECTIONS.STAFF, (items) => {
           if (items && items.length > 0) {
             setStaff(items);
             setLastSyncedTime(new Date());
@@ -129,7 +157,7 @@ export default function App() {
 
       // Subscribe to Services
       unsubs.push(
-        subscribeToCollection<Service>(COLLECTIONS.SERVICES, items => {
+        subscribeToCollection<Service>(COLLECTIONS.SERVICES, (items) => {
           if (items && items.length > 0) {
             setServices(items);
             setLastSyncedTime(new Date());
@@ -139,7 +167,7 @@ export default function App() {
 
       // Subscribe to Appointments
       unsubs.push(
-        subscribeToCollection<Appointment>(COLLECTIONS.APPOINTMENTS, items => {
+        subscribeToCollection<Appointment>(COLLECTIONS.APPOINTMENTS, (items) => {
           if (items && items.length > 0) {
             setAppointments(items);
             setLastSyncedTime(new Date());
@@ -149,7 +177,7 @@ export default function App() {
 
       // Subscribe to Inventory
       unsubs.push(
-        subscribeToCollection<InventoryItem>(COLLECTIONS.INVENTORY, items => {
+        subscribeToCollection<InventoryItem>(COLLECTIONS.INVENTORY, (items) => {
           if (items && items.length > 0) {
             setInventory(items);
             setLastSyncedTime(new Date());
@@ -159,7 +187,7 @@ export default function App() {
 
       // Subscribe to Attendance
       unsubs.push(
-        subscribeToCollection<AttendanceRecord>(COLLECTIONS.ATTENDANCE, items => {
+        subscribeToCollection<AttendanceRecord>(COLLECTIONS.ATTENDANCE, (items) => {
           if (items && items.length > 0) {
             setAttendance(items);
             setLastSyncedTime(new Date());
@@ -169,7 +197,7 @@ export default function App() {
 
       // Subscribe to Promotions
       unsubs.push(
-        subscribeToCollection<Promotion>(COLLECTIONS.PROMOTIONS, items => {
+        subscribeToCollection<Promotion>(COLLECTIONS.PROMOTIONS, (items) => {
           if (items && items.length > 0) {
             setPromotions(items);
             setLastSyncedTime(new Date());
@@ -179,7 +207,7 @@ export default function App() {
 
       // Subscribe to Invoices
       unsubs.push(
-        subscribeToCollection<Invoice>(COLLECTIONS.INVOICES, items => {
+        subscribeToCollection<Invoice>(COLLECTIONS.INVOICES, (items) => {
           if (items && items.length > 0) {
             setInvoices(items);
             setLastSyncedTime(new Date());
@@ -189,9 +217,44 @@ export default function App() {
 
       // Subscribe to Notifications
       unsubs.push(
-        subscribeToCollection<AppNotification>(COLLECTIONS.NOTIFICATIONS, items => {
+        subscribeToCollection<AppNotification>(COLLECTIONS.NOTIFICATIONS, (items) => {
           if (items && items.length > 0) {
             setNotifications(items);
+            setLastSyncedTime(new Date());
+          }
+        })
+      );
+
+      // Subscribe to Spa Profile
+      unsubs.push(
+        subscribeToCollection<SpaProfile>(COLLECTIONS.SPA_PROFILE, (items) => {
+          if (items && items.length > 0) {
+            setSpaProfile(items[0]);
+            setLastSyncedTime(new Date());
+          }
+        })
+      );
+
+      // Subscribe to News
+      unsubs.push(
+        subscribeToCollection<NewsArticle>(COLLECTIONS.NEWS, (items) => {
+          if (items && items.length > 0) {
+            setNewsArticles(items);
+            setLastSyncedTime(new Date());
+          }
+        })
+      );
+
+      // Subscribe to System Settings (Passwords)
+      unsubs.push(
+        subscribeToCollection<any>(COLLECTIONS.SYSTEM, (items) => {
+          const passDoc = items?.find((i) => i.id === 'passwords');
+          if (passDoc) {
+            setRolePasswords({
+              ownerPin: passDoc.ownerPin || initialRolePasswords.ownerPin,
+              managerPin: passDoc.managerPin || initialRolePasswords.managerPin,
+              staffPin: passDoc.staffPin || initialRolePasswords.staffPin,
+            });
             setLastSyncedTime(new Date());
           }
         })
@@ -201,11 +264,11 @@ export default function App() {
     }
 
     return () => {
-      unsubs.forEach(unsub => unsub?.());
+      unsubs.forEach((unsub) => unsub?.());
     };
   }, []);
 
-  // Helper to trigger background sync indicator
+  // Helper to trigger background sync indicator and auto-update timestamp
   const trackSync = async (action: Promise<any>) => {
     setIsFirebaseSyncing(true);
     try {
@@ -221,8 +284,8 @@ export default function App() {
   // Appointment Actions
   const handleUpdateAppointmentStatus = (id: string, newStatus: Appointment['status']) => {
     let updatedApt: Appointment | null = null;
-    setAppointments(prev =>
-      prev.map(apt => {
+    setAppointments((prev) =>
+      prev.map((apt) => {
         if (apt.id === id) {
           updatedApt = { ...apt, status: newStatus };
           return updatedApt;
@@ -241,14 +304,14 @@ export default function App() {
   };
 
   const handleConfirmPayment = (newInvoice: Invoice) => {
-    setInvoices(prev => [newInvoice, ...prev]);
+    setInvoices((prev) => [newInvoice, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.INVOICES, newInvoice));
 
     // If payment was tied to an appointment, mark it completed and paid
     if (newInvoice.appointmentId) {
       let updatedApt: Appointment | null = null;
-      setAppointments(prev =>
-        prev.map(apt => {
+      setAppointments((prev) =>
+        prev.map((apt) => {
           if (apt.id === newInvoice.appointmentId) {
             updatedApt = { ...apt, status: 'completed', paid: true };
             return updatedApt;
@@ -263,8 +326,8 @@ export default function App() {
 
     // Award loyalty points and add to customer treatment history
     let updatedCust: Customer | null = null;
-    setCustomers(prev =>
-      prev.map(c => {
+    setCustomers((prev) =>
+      prev.map((c) => {
         if (c.id === newInvoice.customerId) {
           const pointsEarned = Math.floor(newInvoice.totalAmount / 10000);
           updatedCust = {
@@ -295,11 +358,11 @@ export default function App() {
 
     // Increase staff commission and completed services count
     let updatedStaffMember: Staff | null = null;
-    setStaff(prev =>
-      prev.map(st => {
+    setStaff((prev) =>
+      prev.map((st) => {
         if (st.id === newInvoice.staffId) {
           const commissionEarned = Math.round(
-            (newInvoice.subtotal * (st.commissionRate / 100)) + (newInvoice.tipAmount || 0)
+            newInvoice.subtotal * (st.commissionRate / 100) + (newInvoice.tipAmount || 0)
           );
           updatedStaffMember = {
             ...st,
@@ -317,55 +380,55 @@ export default function App() {
   };
 
   const handleSaveServiceCost = (updatedService: Service) => {
-    setServices(prev =>
-      prev.map(s => (s.id === updatedService.id ? updatedService : s))
+    setServices((prev) =>
+      prev.map((s) => (s.id === updatedService.id ? updatedService : s))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.SERVICES, updatedService));
   };
 
   const handleAddCustomer = (newCustomer: Customer) => {
-    setCustomers(prev => [newCustomer, ...prev]);
+    setCustomers((prev) => [newCustomer, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.CUSTOMERS, newCustomer));
   };
 
   const handleUpdateCustomer = (updatedCustomer: Customer) => {
-    setCustomers(prev =>
-      prev.map(c => (c.id === updatedCustomer.id ? updatedCustomer : c))
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.CUSTOMERS, updatedCustomer));
   };
 
   const handleUpdateInventory = (updatedItem: InventoryItem) => {
-    setInventory(prev =>
-      prev.map(item => (item.id === updatedItem.id ? updatedItem : item))
+    setInventory((prev) =>
+      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.INVENTORY, updatedItem));
   };
 
   const handleAddInventoryItem = (newItem: InventoryItem) => {
-    setInventory(prev => [newItem, ...prev]);
+    setInventory((prev) => [newItem, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.INVENTORY, newItem));
   };
 
   const handleDeleteInventoryItem = (itemId: string) => {
-    setInventory(prev => prev.filter(item => item.id !== itemId));
+    setInventory((prev) => prev.filter((item) => item.id !== itemId));
     trackSync(deleteDocFromFirestore(COLLECTIONS.INVENTORY, itemId));
   };
 
   const handleAddService = (newService: Service) => {
-    setServices(prev => [newService, ...prev]);
+    setServices((prev) => [newService, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.SERVICES, newService));
   };
 
   const handleUpdateService = (updatedService: Service) => {
-    setServices(prev =>
-      prev.map(s => (s.id === updatedService.id ? updatedService : s))
+    setServices((prev) =>
+      prev.map((s) => (s.id === updatedService.id ? updatedService : s))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.SERVICES, updatedService));
   };
 
   const handleClockIn = (newRecord: AttendanceRecord) => {
-    setAttendance(prev => [newRecord, ...prev]);
+    setAttendance((prev) => [newRecord, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.ATTENDANCE, newRecord));
   };
 
@@ -373,8 +436,8 @@ export default function App() {
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     let updatedAtt: AttendanceRecord | null = null;
-    setAttendance(prev =>
-      prev.map(att => {
+    setAttendance((prev) =>
+      prev.map((att) => {
         if (att.id === recordId) {
           updatedAtt = { ...att, clockOutTime: timeStr };
           return updatedAtt;
@@ -388,21 +451,25 @@ export default function App() {
   };
 
   const handleAddStaff = (newStaffMember: Staff) => {
-    setStaff(prev => [newStaffMember, ...prev]);
+    setStaff((prev) => [newStaffMember, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.STAFF, newStaffMember));
   };
 
   const handleUpdateStaff = (updatedStaff: Staff) => {
-    setStaff(prev =>
-      prev.map(st => (st.id === updatedStaff.id ? updatedStaff : st))
+    setStaff((prev) =>
+      prev.map((st) => (st.id === updatedStaff.id ? updatedStaff : st))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.STAFF, updatedStaff));
   };
 
-  const handleToggleStaffStatus = (staffId: string, newStatus: Staff['status'], resignationData?: { endDate: string; reason: string }) => {
+  const handleToggleStaffStatus = (
+    staffId: string,
+    newStatus: Staff['status'],
+    resignationData?: { endDate: string; reason: string }
+  ) => {
     let updatedMember: Staff | null = null;
-    setStaff(prev =>
-      prev.map(st => {
+    setStaff((prev) =>
+      prev.map((st) => {
         if (st.id === staffId) {
           if (newStatus === 'resigned') {
             updatedMember = {
@@ -432,85 +499,163 @@ export default function App() {
   };
 
   const handleAddPromotion = (newPromo: Promotion) => {
-    setPromotions(prev => [newPromo, ...prev]);
+    setPromotions((prev) => [newPromo, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.PROMOTIONS, newPromo));
   };
 
   const handleBroadcastNotification = (notif: AppNotification) => {
-    setNotifications(prev => [notif, ...prev]);
+    setNotifications((prev) => [notif, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.NOTIFICATIONS, notif));
   };
 
   const handleMarkNotificationsRead = () => {
-    setNotifications(prev => {
-      const updated = prev.map(n => ({ ...n, read: true }));
-      updated.forEach(n => syncDocToFirestore(COLLECTIONS.NOTIFICATIONS, n));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      updated.forEach((n) => syncDocToFirestore(COLLECTIONS.NOTIFICATIONS, n));
       return updated;
     });
   };
 
   const handleSaveNewBooking = (newApt: Appointment) => {
-    setAppointments(prev => [newApt, ...prev]);
+    setAppointments((prev) => [newApt, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.APPOINTMENTS, newApt));
   };
 
   const handleUpdateAppointment = (updatedApt: Appointment) => {
-    setAppointments(prev =>
-      prev.map(apt => (apt.id === updatedApt.id ? updatedApt : apt))
+    setAppointments((prev) =>
+      prev.map((apt) => (apt.id === updatedApt.id ? updatedApt : apt))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.APPOINTMENTS, updatedApt));
   };
 
-  const handleRoleChange = (newRole: Role) => {
-    setCurrentRole(newRole);
-    if (newRole === 'technician') {
-      const allowedForTech: TabType[] = ['appointments', 'timekeeping', 'promotions'];
-      if (!allowedForTech.includes(activeTab)) {
-        setActiveTab('appointments');
-      }
-    } else if (newRole === 'receptionist') {
-      const allowedForReception: TabType[] = ['appointments', 'timekeeping', 'promotions', 'staff'];
-      if (!allowedForReception.includes(activeTab)) {
-        setActiveTab('appointments');
-      }
+  // Role Switching with Passwords / PIN Authentication
+  const handleRequestRoleChange = (targetRole: Role) => {
+    if (targetRole === 'customer') {
+      setCurrentRole('customer');
+      setActiveTab('customer_intro');
+      return;
+    }
+
+    // If current role is already owner and switching to another internal role, allow directly
+    if (currentRole === 'owner') {
+      applyRoleChange(targetRole);
+      return;
+    }
+
+    // Require PIN modal
+    setPendingTargetRole(targetRole);
+    setIsPasswordModalOpen(true);
+  };
+
+  const applyRoleChange = (verifiedRole: Role) => {
+    setCurrentRole(verifiedRole);
+    if (verifiedRole === 'owner') {
+      setActiveTab('dashboard');
+    } else if (verifiedRole === 'manager') {
+      setActiveTab('dashboard');
+    } else if (verifiedRole === 'technician') {
+      setActiveTab('appointments');
+    } else if (verifiedRole === 'receptionist') {
+      setActiveTab('appointments');
+    } else {
+      setActiveTab('customer_intro');
     }
   };
 
+  const handleUpdateRolePasswords = (newPasswords: RolePasswords) => {
+    setRolePasswords(newPasswords);
+    trackSync(
+      syncDocToFirestore(COLLECTIONS.SYSTEM, {
+        id: 'passwords',
+        ...newPasswords,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  };
+
+  const handleSaveSpaProfile = async (updated: SpaProfile) => {
+    setSpaProfile(updated);
+    await trackSync(syncDocToFirestore(COLLECTIONS.SPA_PROFILE, updated));
+  };
+
+  // Determine which view to render based on activeTab and currentRole
+  const isCustomerTab =
+    currentRole === 'customer' ||
+    ['customer_portal', 'customer_intro', 'customer_promotions', 'customer_services', 'customer_news'].includes(
+      activeTab
+    );
+
+  const getCustomerSubTab = (): 'intro' | 'promotions' | 'services' | 'news' => {
+    if (activeTab === 'customer_promotions') return 'promotions';
+    if (activeTab === 'customer_services') return 'services';
+    if (activeTab === 'customer_news') return 'news';
+    return 'intro';
+  };
+
   return (
-    <div className="min-h-screen bg-[#F5F7F4] dark:bg-[#121412] text-[#1C211B] dark:text-[#E0E2DF] font-sans transition-colors duration-200 selection:bg-[#8BA888]/40 selection:text-[#1C211B] dark:selection:text-[#E0E2DF]">
-      {/* Top Fixed Header Navigation */}
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#09090B] text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-200 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950">
+      {/* Top Header Navigation */}
       <Navbar
         currentRole={currentRole}
         lang={lang}
         isDarkMode={isDarkMode}
         activeTab={activeTab}
         notifications={notifications}
-        onRoleChange={handleRoleChange}
-        onLangToggle={() => setLang(prev => (prev === 'vi' ? 'en' : 'vi'))}
-        onDarkModeToggle={() => setIsDarkMode(prev => !prev)}
+        passwords={rolePasswords}
+        spaProfile={spaProfile}
+        onRoleChange={handleRequestRoleChange}
+        onLangToggle={() => setLang((prev) => (prev === 'vi' ? 'en' : 'vi'))}
+        onDarkModeToggle={() => setIsDarkMode((prev) => !prev)}
         onTabSelect={setActiveTab}
         onOpenQuickBooking={() => setShowQuickBookingModal(true)}
         onOpenCheckout={() => handleOpenCheckout()}
         onOpenFirebaseSync={() => setShowFirebaseModal(true)}
+        onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
         isFirebaseSyncing={isFirebaseSyncing}
         onMarkNotificationsRead={handleMarkNotificationsRead}
       />
 
       {/* Main Layout Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20 md:pb-8 flex gap-6">
-        {/* Desktop Sidebar (Left side, Role-based filtered) */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 pb-20 md:pb-8 flex gap-6">
+        {/* Desktop Sidebar */}
         <div className="w-64 shrink-0 hidden md:block">
           <Sidebar
             currentRole={currentRole}
             activeTab={activeTab}
             lang={lang}
             onTabSelect={setActiveTab}
+            onRequestStaffLogin={() => {
+              setPendingTargetRole('owner');
+              setIsPasswordModalOpen(true);
+            }}
+            onSwitchToCustomer={() => handleRequestRoleChange('customer')}
+            onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
           />
         </div>
 
         {/* Dynamic Main Workspace Area */}
         <main className="flex-1 min-w-0">
-          {activeTab === 'dashboard' && (
+          {/* Customer Facing Portal (Intro, Promotions, Services, News) */}
+          {isCustomerTab && (
+            <CustomerPortalView
+              lang={lang}
+              services={services}
+              promotions={promotions}
+              spaProfile={spaProfile}
+              newsArticles={newsArticles}
+              currentRole={currentRole}
+              onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+              onOpenBooking={(serviceId, promoCode) => {
+                setBookingInitialServiceId(serviceId);
+                setBookingInitialPromoCode(promoCode);
+                setShowQuickBookingModal(true);
+              }}
+              activeCustomerSubTab={getCustomerSubTab()}
+            />
+          )}
+
+          {/* Internal Spa Management Tabs (Protected by RBAC) */}
+          {!isCustomerTab && activeTab === 'dashboard' && (
             <DashboardView
               appointments={appointments}
               customers={customers}
@@ -523,11 +668,12 @@ export default function App() {
               onNavigate={setActiveTab}
               onOpenCheckout={handleOpenCheckout}
               onOpenQuickBooking={() => setShowQuickBookingModal(true)}
+              onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
               onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
             />
           )}
 
-          {activeTab === 'cost_calculation' && (
+          {!isCustomerTab && activeTab === 'cost_calculation' && (
             <CostCalculationView
               services={services}
               inventory={inventory}
@@ -538,7 +684,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'appointments' && (
+          {!isCustomerTab && activeTab === 'appointments' && (
             <AppointmentsView
               appointments={appointments}
               customers={customers}
@@ -553,7 +699,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'customers' && (
+          {!isCustomerTab && activeTab === 'customers' && (
             <CustomersView
               customers={customers}
               lang={lang}
@@ -562,7 +708,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'inventory' && (
+          {!isCustomerTab && activeTab === 'inventory' && (
             <InventoryView
               inventory={inventory}
               lang={lang}
@@ -572,7 +718,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'staff' && (
+          {!isCustomerTab && activeTab === 'staff' && (
             <StaffView
               staff={staff}
               attendance={attendance}
@@ -587,7 +733,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'timekeeping' && (
+          {!isCustomerTab && activeTab === 'timekeeping' && (
             <StaffView
               staff={staff}
               attendance={attendance}
@@ -602,7 +748,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'promotions' && (
+          {!isCustomerTab && activeTab === 'promotions' && (
             <PromotionsView
               promotions={promotions}
               customers={customers}
@@ -612,12 +758,8 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'reports' && (
-            <ReportsView
-              invoices={invoices}
-              services={services}
-              lang={lang}
-            />
+          {!isCustomerTab && activeTab === 'reports' && (
+            <ReportsView invoices={invoices} services={services} lang={lang} />
           )}
         </main>
       </div>
@@ -628,6 +770,17 @@ export default function App() {
         activeTab={activeTab}
         lang={lang}
         onTabSelect={setActiveTab}
+      />
+
+      {/* Role PIN / Password Protection Modal */}
+      <RolePasswordModal
+        targetRole={pendingTargetRole}
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onSuccess={(verifiedRole) => applyRoleChange(verifiedRole)}
+        passwords={rolePasswords}
+        onUpdatePasswords={handleUpdateRolePasswords}
+        isOwnerLoggedIn={currentRole === 'owner'}
       />
 
       {/* Checkout & Multi-Payment Modal */}
@@ -654,7 +807,13 @@ export default function App() {
           services={services}
           staff={staff}
           lang={lang}
-          onClose={() => setShowQuickBookingModal(false)}
+          initialServiceId={bookingInitialServiceId}
+          initialPromoCode={bookingInitialPromoCode}
+          onClose={() => {
+            setShowQuickBookingModal(false);
+            setBookingInitialServiceId(undefined);
+            setBookingInitialPromoCode(undefined);
+          }}
           onSaveBooking={handleSaveNewBooking}
         />
       )}
@@ -672,11 +831,21 @@ export default function App() {
         attendance={attendance}
         promotions={promotions}
         invoices={invoices}
+        spaProfile={spaProfile}
+        newsArticles={newsArticles}
         isCloudConnected={isFirebaseConnected}
         isSyncing={isFirebaseSyncing}
         lastSyncedTime={lastSyncedTime}
       />
+
+      {/* Spa Profile, Address, Story & Logo Edit Modal */}
+      <SpaProfileEditModal
+        isOpen={isEditSpaProfileOpen}
+        onClose={() => setIsEditSpaProfileOpen(false)}
+        spaProfile={spaProfile}
+        lang={lang}
+        onSave={handleSaveSpaProfile}
+      />
     </div>
   );
 }
-

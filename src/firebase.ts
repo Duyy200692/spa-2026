@@ -20,7 +20,10 @@ import {
   AttendanceRecord,
   Promotion,
   Invoice,
-  AppNotification
+  AppNotification,
+  SpaProfile,
+  NewsArticle,
+  RolePasswords
 } from './types';
 import {
   initialCustomers,
@@ -31,7 +34,10 @@ import {
   initialAttendance,
   initialPromotions,
   initialInvoices,
-  initialNotifications
+  initialNotifications,
+  initialSpaProfile,
+  initialNewsArticles,
+  initialRolePasswords
 } from './mockData';
 
 // Initialize Firebase App
@@ -43,7 +49,8 @@ export const db: Firestore = (firebaseConfig as any).firestoreDatabaseId
   ? getFirestore(app, (firebaseConfig as any).firestoreDatabaseId)
   : getFirestore(app);
 
-export const FIREBASE_PROJECT_ID = firebaseConfig.projectId || 'spa2026-68441';
+export const FIREBASE_PROJECT_ID = 'spa2026-68441';
+export const RTDB_BASE_URL = 'https://spa2026-68441-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 // Helper to remove undefined fields recursively to prevent Firestore errors
 export function sanitizeForFirestore<T>(data: T): T {
@@ -65,6 +72,23 @@ export function sanitizeForFirestore<T>(data: T): T {
   return data;
 }
 
+// Sync to Realtime Database REST API in background
+export async function syncToRealtimeDatabase(path: string, data: any): Promise<void> {
+  try {
+    const cleanData = sanitizeForFirestore(data);
+    const url = `${RTDB_BASE_URL}/${path}.json`;
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cleanData),
+    }).catch(err => {
+      console.warn(`[RTDB Sync Note] Non-blocking push to RTDB (${path}):`, err);
+    });
+  } catch (err) {
+    // Non-blocking catch
+  }
+}
+
 // Collection names constants
 export const COLLECTIONS = {
   CUSTOMERS: 'customers',
@@ -76,6 +100,9 @@ export const COLLECTIONS = {
   PROMOTIONS: 'promotions',
   INVOICES: 'invoices',
   NOTIFICATIONS: 'notifications',
+  SPA_PROFILE: 'spa_profile',
+  NEWS: 'news',
+  SYSTEM: 'system_settings',
 } as const;
 
 // Generic Firestore Realtime Subscription
@@ -107,7 +134,7 @@ export function subscribeToCollection<T extends { id: string }>(
   }
 }
 
-// Save or Update Single Document (Auto-sync to Firebase)
+// Save or Update Single Document (Auto-sync to Firebase Firestore & RTDB)
 export async function syncDocToFirestore<T extends { id: string }>(
   collectionName: string,
   item: T
@@ -116,13 +143,16 @@ export async function syncDocToFirestore<T extends { id: string }>(
     const sanitized = sanitizeForFirestore(item);
     const docRef = doc(db, collectionName, item.id);
     await setDoc(docRef, sanitized, { merge: true });
+
+    // Also mirror to Realtime Database endpoint automatically
+    syncToRealtimeDatabase(`${collectionName}/${item.id}`, sanitized);
   } catch (error) {
     console.error(`Failed to sync document ${item.id} to ${collectionName}:`, error);
     throw error;
   }
 }
 
-// Delete Document from Firestore
+// Delete Document from Firestore & RTDB
 export async function deleteDocFromFirestore(
   collectionName: string,
   id: string
@@ -130,84 +160,147 @@ export async function deleteDocFromFirestore(
   try {
     const docRef = doc(db, collectionName, id);
     await deleteDoc(docRef);
+
+    // Also delete from Realtime Database endpoint
+    try {
+      fetch(`${RTDB_BASE_URL}/${collectionName}/${id}.json`, { method: 'DELETE' }).catch(() => {});
+    } catch (_) {}
   } catch (error) {
     console.error(`Failed to delete document ${id} from ${collectionName}:`, error);
     throw error;
   }
 }
 
-// Batch Upload / Seed Clean Mock Data into Firebase
+// Batch Upload / Seed Clean Mock Data into Firebase (Firestore & RTDB)
 export async function seedCleanDataToFirebase(onProgress?: (msg: string) => void): Promise<void> {
   try {
-    onProgress?.('Đang kết nối Firestore...');
+    onProgress?.('Đang kết nối Firestore & Realtime Database...');
 
     const batch = writeBatch(db);
+    const rtdbPayload: Record<string, any> = {};
 
     // 1. Customers
     onProgress?.('Đang nạp dữ liệu khách hàng sạch...');
+    rtdbPayload.customers = {};
     initialCustomers.forEach(cust => {
       const ref = doc(db, COLLECTIONS.CUSTOMERS, cust.id);
-      batch.set(ref, sanitizeForFirestore(cust));
+      const clean = sanitizeForFirestore(cust);
+      batch.set(ref, clean);
+      rtdbPayload.customers[cust.id] = clean;
     });
 
     // 2. Staff
     onProgress?.('Đang nạp dữ liệu nhân sự & thâm niên...');
+    rtdbPayload.staff = {};
     initialStaff.forEach(st => {
       const ref = doc(db, COLLECTIONS.STAFF, st.id);
-      batch.set(ref, sanitizeForFirestore(st));
+      const clean = sanitizeForFirestore(st);
+      batch.set(ref, clean);
+      rtdbPayload.staff[st.id] = clean;
     });
 
     // 3. Services
     onProgress?.('Đang nạp bảng dịch vụ & định mức cost...');
+    rtdbPayload.services = {};
     initialServices.forEach(srv => {
       const ref = doc(db, COLLECTIONS.SERVICES, srv.id);
-      batch.set(ref, sanitizeForFirestore(srv));
+      const clean = sanitizeForFirestore(srv);
+      batch.set(ref, clean);
+      rtdbPayload.services[srv.id] = clean;
     });
 
     // 4. Inventory
     onProgress?.('Đang nạp kho mỹ phẩm & vật tư...');
+    rtdbPayload.inventory = {};
     initialInventory.forEach(inv => {
       const ref = doc(db, COLLECTIONS.INVENTORY, inv.id);
-      batch.set(ref, sanitizeForFirestore(inv));
+      const clean = sanitizeForFirestore(inv);
+      batch.set(ref, clean);
+      rtdbPayload.inventory[inv.id] = clean;
     });
 
     // 5. Appointments
     onProgress?.('Đang nạp lịch hẹn & ca điều trị...');
+    rtdbPayload.appointments = {};
     initialAppointments.forEach(apt => {
       const ref = doc(db, COLLECTIONS.APPOINTMENTS, apt.id);
-      batch.set(ref, sanitizeForFirestore(apt));
+      const clean = sanitizeForFirestore(apt);
+      batch.set(ref, clean);
+      rtdbPayload.appointments[apt.id] = clean;
     });
 
     // 6. Attendance
     onProgress?.('Đang nạp nhật ký chấm công...');
+    rtdbPayload.attendance = {};
     initialAttendance.forEach(att => {
       const ref = doc(db, COLLECTIONS.ATTENDANCE, att.id);
-      batch.set(ref, sanitizeForFirestore(att));
+      const clean = sanitizeForFirestore(att);
+      batch.set(ref, clean);
+      rtdbPayload.attendance[att.id] = clean;
     });
 
     // 7. Promotions
     onProgress?.('Đang nạp chương trình khuyến mãi...');
+    rtdbPayload.promotions = {};
     initialPromotions.forEach(promo => {
       const ref = doc(db, COLLECTIONS.PROMOTIONS, promo.id);
-      batch.set(ref, sanitizeForFirestore(promo));
+      const clean = sanitizeForFirestore(promo);
+      batch.set(ref, clean);
+      rtdbPayload.promotions[promo.id] = clean;
     });
 
     // 8. Invoices
     onProgress?.('Đang nạp hóa đơn & doanh thu...');
+    rtdbPayload.invoices = {};
     initialInvoices.forEach(inv => {
       const ref = doc(db, COLLECTIONS.INVOICES, inv.id);
-      batch.set(ref, sanitizeForFirestore(inv));
+      const clean = sanitizeForFirestore(inv);
+      batch.set(ref, clean);
+      rtdbPayload.invoices[inv.id] = clean;
     });
 
     // 9. Notifications
     onProgress?.('Đang nạp thông báo hệ thống...');
+    rtdbPayload.notifications = {};
     initialNotifications.forEach(notif => {
       const ref = doc(db, COLLECTIONS.NOTIFICATIONS, notif.id);
-      batch.set(ref, sanitizeForFirestore(notif));
+      const clean = sanitizeForFirestore(notif);
+      batch.set(ref, clean);
+      rtdbPayload.notifications[notif.id] = clean;
     });
 
+    // 10. Spa Profile
+    onProgress?.('Đang nạp bài giới thiệu spa...');
+    const spaClean = sanitizeForFirestore(initialSpaProfile);
+    const spaRef = doc(db, COLLECTIONS.SPA_PROFILE, initialSpaProfile.id);
+    batch.set(spaRef, spaClean);
+    rtdbPayload.spa_profile = { [initialSpaProfile.id]: spaClean };
+
+    // 11. News Articles
+    onProgress?.('Đang nạp tin tức & cẩm nang...');
+    rtdbPayload.news = {};
+    initialNewsArticles.forEach(art => {
+      const ref = doc(db, COLLECTIONS.NEWS, art.id);
+      const clean = sanitizeForFirestore(art);
+      batch.set(ref, clean);
+      rtdbPayload.news[art.id] = clean;
+    });
+
+    // 12. System Passwords
+    onProgress?.('Đang thiết lập mật khẩu phân quyền bảo mật...');
+    const pwClean = sanitizeForFirestore(initialRolePasswords);
+    const pwRef = doc(db, COLLECTIONS.SYSTEM, 'passwords');
+    batch.set(pwRef, pwClean);
+    rtdbPayload.system_settings = { passwords: pwClean };
+
+    // Commit to Firestore
     await batch.commit();
-    onProgress?.('Đã đồng bộ thành công toàn bộ dữ liệu sạch lên Firebase!');
+
+    // Also push entire schema to Realtime Database endpoint
+    onProgress?.('Đang đồng bộ Realtime Database...');
+    await syncToRealtimeDatabase('', rtdbPayload);
+
+    onProgress?.('Đã đồng bộ thành công toàn bộ dữ liệu sạch lên Firebase & RTDB!');
   } catch (error) {
     console.error('Error seeding clean data to Firebase:', error);
     throw error;

@@ -7,7 +7,8 @@ import {
   AttendanceRecord,
   Promotion,
   Invoice,
-  AppNotification
+  AppNotification,
+  SpaProfile
 } from './types';
 
 export const initialInventory: InventoryItem[] = [
@@ -802,8 +803,8 @@ export const initialPromotions: Promotion[] = [
   {
     id: 'promo-1',
     code: 'SPASUMMER20',
-    title: 'Đại Tiệc Trẻ Hóa Da Mùa Hè - Giảm 20%',
-    description: 'Giảm 20% cho tất cả dịch vụ Chăm sóc & Cấy tảo tái sinh da mặt.',
+    title: 'Đại Tiệc Trẻ Hóa Da Mùa Hè 2026 - Giảm 20%',
+    description: 'Giảm 20% cho tất cả dịch vụ Chăm sóc & Cấy tảo tái sinh da mặt chuẩn Y Khoa. Tặng kèm bước soi da 3D & mặt nạ collagen.',
     discountType: 'percentage',
     discountValue: 20,
     minOrderValue: 400000,
@@ -815,12 +816,51 @@ export const initialPromotions: Promotion[] = [
     status: 'active',
     targetTier: 'All',
     bannerColor: 'from-amber-500 to-rose-500',
+    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80',
+    highlightBadge: '🔥 Hot Deal Mùa Hè',
+    category: 'facial',
+    featured: true,
+    applicableServices: ['Trị Mụn Chuyên Sâu Chuẩn Y Khoa', 'Cấy Tảo Xoắn Tươi Collagen', 'Hút Chì Thải Độc Tố'],
+    termsAndConditions: [
+      'Áp dụng cho hóa đơn dịch vụ từ 400.000 VNĐ.',
+      'Mức giảm tối đa 200.000 VNĐ / lượt thanh toán.',
+      'Áp dụng cho cả khách hàng mới và khách hàng thân thiết.',
+      'Khuyến khích đặt lịch hẹn trước để được phục vụ tốt nhất.'
+    ]
+  },
+  {
+    id: 'promo-combo-1',
+    code: 'COMBORELAX35',
+    title: 'Combo Thân Tâm Thư Thái - Massage Body & Gội Dưỡng Sinh',
+    description: 'Trọn gói 165 phút thư giãn sâu: Massage Body Đá Nóng 90 phút + Gội Đầu Dưỡng Sinh Trung Hoa 9 bước 75 phút. Tiết kiệm ngay 250.000đ!',
+    discountType: 'fixed_amount',
+    discountValue: 250000,
+    minOrderValue: 770000,
+    originalPrice: 770000,
+    promotionalPrice: 520000,
+    startDate: '2026-08-10',
+    endDate: '2026-09-10',
+    usageLimit: 80,
+    usedCount: 56,
+    status: 'active',
+    targetTier: 'All',
+    bannerColor: 'from-teal-600 to-emerald-600',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80',
+    highlightBadge: '⭐ Combo Bán Chạy Nhất',
+    category: 'combo',
+    featured: true,
+    applicableServices: ['Massage Body Toàn Thân Đá Nóng (90p)', 'Gội Đầu Dưỡng Sinh Trung Hoa 9 Bước (75p)'],
+    termsAndConditions: [
+      'Áp dụng trọn gói 2 dịch vụ trong cùng 1 buổi trị liệu.',
+      'Được thưởng thức trà thảo dược gừng mật ong & mứt sen miễn phí.',
+      'Có phòng đôi riêng tư cho cặp đôi hoặc bạn bè nếu đặt trước.'
+    ]
   },
   {
     id: 'promo-2',
     code: 'VIPDIAMOND100K',
-    title: 'Tri Ân Khách Hàng VIP - Tặng Ngay 100.000đ',
-    description: 'Giảm trực tiếp 100,000 VND trên tổng hóa đơn dịch vụ Massage & Liệu trình cao cấp.',
+    title: 'Tri Ân Khách Hàng Thân Thiết - Tặng Voucher 100.000đ',
+    description: 'Giảm trực tiếp 100,000 VND trên tổng hóa đơn dịch vụ Massage & Liệu trình chăm sóc da cao cấp dành riêng cho hội viên.',
     discountType: 'fixed_amount',
     discountValue: 100000,
     minOrderValue: 450000,
@@ -831,12 +871,78 @@ export const initialPromotions: Promotion[] = [
     status: 'active',
     targetTier: 'VIP',
     bannerColor: 'from-purple-600 to-indigo-600',
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80',
+    highlightBadge: '👑 Đặc Quyền Hội Viên',
+    category: 'special',
+    featured: false,
+    applicableServices: ['Tất cả dịch vụ có giá niêm yết từ 450.000đ'],
+    termsAndConditions: [
+      'Dành cho khách hàng đạt hạng Silver, Gold, VIP hoặc Diamond.',
+      'Áp dụng 01 voucher / hóa đơn thanh toán.',
+      'Được cộng dồn điểm tích lũy thành viên bình thường.'
+    ]
+  },
+  {
+    id: 'promo-laser',
+    code: 'DIODE199K',
+    title: 'Trải Nghiệm Triệt Lông Diode Laser Băng Lạnh - Chỉ 199K',
+    description: 'Công nghệ Diode Laser Ice Plus -5°C triệt tận gốc nang lông, hoàn toàn êm ái, se khít lỗ chân lông và làm sáng mịn da.',
+    discountType: 'fixed_amount',
+    discountValue: 151000,
+    minOrderValue: 350000,
+    originalPrice: 350000,
+    promotionalPrice: 199000,
+    startDate: '2026-08-01',
+    endDate: '2026-09-30',
+    usageLimit: 120,
+    usedCount: 78,
+    status: 'active',
+    targetTier: 'All',
+    bannerColor: 'from-blue-600 to-cyan-600',
+    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80',
+    highlightBadge: '❄️ Trải Nghiệm Lần Đầu',
+    category: 'body',
+    featured: false,
+    applicableServices: ['Triệt Lông Nách / Mép Diode Laser Ice Plus'],
+    termsAndConditions: [
+      'Áp dụng cho buổi trải nghiệm đầu tiên của khách hàng tại spa.',
+      'Cam kết bảo hành hiệu quả & tư vấn phác đồ miễn phí.',
+      'Không giới hạn số lần bắn xung trong 1 buổi.'
+    ]
+  },
+  {
+    id: 'promo-glow',
+    code: 'GLOWSKIN499',
+    title: 'Gói Căng Bóng Phục Hồi - Tảo Xoắn Nano & Điện Di Vitamin C',
+    description: 'Cấp ẩm đa tầng, phục hồi làn da xỉn màu mệt mỏi, thu nhỏ lỗ chân lông và mang lại diện mạo căng mướt rạng rỡ tức thì.',
+    discountType: 'fixed_amount',
+    discountValue: 180000,
+    minOrderValue: 650000,
+    originalPrice: 650000,
+    promotionalPrice: 470000,
+    startDate: '2026-08-05',
+    endDate: '2026-09-20',
+    usageLimit: 60,
+    usedCount: 34,
+    status: 'active',
+    targetTier: 'All',
+    bannerColor: 'from-emerald-600 to-teal-700',
+    image: 'https://images.unsplash.com/photo-1512290900672-1f4864c20577?w=800&q=80',
+    highlightBadge: '✨ Căng Bóng Da Tức Thì',
+    category: 'facial',
+    featured: false,
+    applicableServices: ['Cấy Tảo Xoắn Tươi Collagen', 'Điện Di Tinh Chất Vitamin C'],
+    termsAndConditions: [
+      'Áp dụng trọn gói phác đồ phục hồi căng bóng 75 phút.',
+      'Sử dụng 100% mỹ phẩm dược sinh học nhập khẩu Thụy Sĩ.',
+      'Tặng kèm 01 tuýp kem chống nắng mini cho khách hàng đặt lịch online.'
+    ]
   },
   {
     id: 'promo-3',
     code: 'BIRTHDAY50K',
     title: 'Mừng Sinh Nhật Ngọt Ngào - Tặng 50K & Trà Hoa Cúc',
-    description: 'Ưu đãi dành riêng cho quý khách hàng có ngày sinh trong tháng hiện tại.',
+    description: 'Món quà tri ân tinh tế từ L’AURA Spa dành riêng cho quý khách hàng có ngày sinh trong tháng. Chúc bạn luôn rạng rỡ và an yên!',
     discountType: 'fixed_amount',
     discountValue: 50000,
     minOrderValue: 250000,
@@ -846,7 +952,17 @@ export const initialPromotions: Promotion[] = [
     usedCount: 29,
     status: 'active',
     targetTier: 'All',
-    bannerColor: 'from-emerald-500 to-teal-700',
+    bannerColor: 'from-rose-500 to-pink-600',
+    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800&q=80',
+    highlightBadge: '🎂 Quà Tặng Sinh Nhật',
+    category: 'special',
+    featured: false,
+    applicableServices: ['Tất cả dịch vụ chăm sóc da, massage, gội đầu'],
+    termsAndConditions: [
+      'Khách hàng xuất trình CCCD hoặc thông tin ngày sinh khi thanh toán.',
+      'Được áp dụng kèm 01 phần trà hoa cúc mật ong & bánh ngọt.',
+      'Có hiệu lực trong toàn bộ tháng sinh nhật.'
+    ]
   }
 ];
 
@@ -986,3 +1102,96 @@ export const initialNotifications: AppNotification[] = [
     read: true,
   }
 ];
+
+export const initialRolePasswords: { ownerPin: string; managerPin: string; staffPin: string } = {
+  ownerPin: '123456',
+  managerPin: '888888',
+  staffPin: '666666',
+};
+
+export const initialSpaProfile: SpaProfile = {
+  id: 'spa-main-profile',
+  name: 'L’AURA BEAUTY & WELLNESS SPA',
+  tagline: 'Kiến Tạo Vẻ Đẹp Thuần Khiết Chuẩn Y Khoa & Thư Giãn Tinh Thần',
+  logo: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=200&auto=format&fit=crop&q=80',
+  bannerImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&auto=format&fit=crop&q=80',
+  story: 'Thành lập từ năm 2018, L’AURA Spa là không gian trị liệu chuẩn y khoa kết hợp nghệ thuật thư giãn Đông - Tây. Chúng tôi cam kết sử dụng 100% mỹ phẩm dược sinh học cao cấp, công nghệ thẩm mỹ chuyển giao chính hãng và đội ngũ kỹ thuật viên được đào tạo chuyên sâu.',
+  philosophy: 'Vẻ đẹp bền vững khởi nguồn từ sự tôn trọng cấu trúc da nguyên bản và sự cân bằng giữa thân - tâm - trí. Mỗi liệu trình tại L’AURA đều được cá nhân hóa theo từng tình trạng da cụ thể.',
+  address: '128 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+  phone: '0908 688 888 / 028 3822 9999',
+  email: 'contact@lauraspa.com.vn',
+  openHours: '08:30 - 20:30 (Tất cả các ngày trong tuần)',
+  socialFacebook: 'facebook.com/lauraspa.vietnam',
+  socialZalo: '0908688888',
+  highlights: [
+    {
+      title: '100% Mỹ Phẩm Chuẩn Dược Khoa',
+      description: 'Nhập khẩu chính hãng từ Thụy Sĩ, Pháp, Đức và Hàn Quốc có chứng nhận FDA/Bộ Y Tế.'
+    },
+    {
+      title: 'Phòng Trị Liệu Vô Trùng Riêng Biệt',
+      description: 'Không gian riêng tư, thơm hương tinh dầu thiên nhiên cùng âm nhạc tần số chữa lành 432Hz.'
+    },
+    {
+      title: 'Đội Ngũ Kỹ Thuật Viên 5+ Năm Kinh Nghiệm',
+      description: 'Được cấp chứng chỉ hành nghề y tế, tay nghề mát-xa và bấm huyệt chuyên sâu.'
+    },
+    {
+      title: 'Soi Da & Lên Phác Đồ Trị Liệu Miễn Phí',
+      description: 'Phân tích 8 chỉ số chuyên sâu của da bằng máy soi da 3D hiện đại trước mọi dịch vụ.'
+    }
+  ],
+  commitments: [
+    'Minh bạch tuyệt đối chi phí, không phụ phí phát sinh.',
+    'Dụng cụ sử dụng 1 lần hoặc tiệt trùng bằng nồi hấp chuẩn bệnh viện.',
+    'Cam kết hiệu quả thấy rõ ngay sau buổi trị liệu đầu tiên.',
+    'Bảo hành liệu trình và hỗ trợ tư vấn chăm sóc tại nhà 24/7.'
+  ]
+};
+
+export const initialNewsArticles: {
+  id: string;
+  title: string;
+  category: 'Cẩm nang làm đẹp' | 'Thông báo' | 'Sự kiện' | 'Khuyến mãi' | 'Công nghệ mới';
+  date: string;
+  author: string;
+  summary: string;
+  content: string;
+  readTime: string;
+  featured?: boolean;
+}[] = [
+  {
+    id: 'news-1',
+    title: 'Bí Quyết Phục Hồi Làn Da Tổn Thương & Nhạy Cảm Sau Peel Chuẩn Y Khoa',
+    category: 'Cẩm nang làm đẹp',
+    date: '2026-08-20',
+    author: 'Bs. Mai Phương (Cố vấn da liễu L’AURA)',
+    summary: 'Hướng dẫn các bước chăm sóc, cấp ẩm phục hồi và chống nắng đúng cách sau khi thực hiện peel hoặc laser trị liệu.',
+    content: 'Sau khi can thiệp các liệu trình xâm lấn nhẹ như peel da sinh học, laser hay lăn kim, hàng rào bảo vệ da tạm thời bị suy yếu. Trong 72 giờ đầu tiên, tuyệt đối không dùng sữa rửa mặt có chất tẩy mạnh. Ưu tiên xịt khoáng, serum chứa Hyaluronic Acid thuần khiết, Ceramide và kem chống nắng vật lý SPF 50+...',
+    readTime: '4 phút đọc',
+    featured: true,
+  },
+  {
+    id: 'news-2',
+    title: 'L’AURA Spa Đạt Chứng Nhận "Top 10 Thẩm Mỹ Viện An Toàn & Chuẩn Y Khoa 2026"',
+    category: 'Sự kiện',
+    date: '2026-08-15',
+    author: 'Ban Truyền Thông L’AURA',
+    summary: 'Niềm tự hào và cam kết không ngừng nâng cao chất lượng dịch vụ vì sự hài lòng tuyệt đối của quý khách hàng.',
+    content: 'Tại lễ trao giải thường niên của Hiệp Hội Thẩm Mỹ Việt Nam, L’AURA Spa vinh dự được xướng tên trong Top 10 đơn vị xuất sắc nhất về quy trình tiệt trùng, an toàn y khoa và sự hài lòng của khách hàng. Đây là minh chứng cho nỗ lực không ngừng nghỉ của toàn thể đội ngũ...',
+    readTime: '3 phút đọc',
+    featured: false,
+  },
+  {
+    id: 'news-3',
+    title: 'Công Nghệ Nâng Cơ Xóa Nhăn Hifu Smas Siêu Âm Hội Tụ Thế Hệ Mới Đã Về Đến Spa',
+    category: 'Công nghệ mới',
+    date: '2026-08-10',
+    author: 'Chuyên Gia Thiết Bị Y Tế',
+    summary: 'Trẻ hóa tầng sâu không cần phẫu thuật, định hình đường viền hàm V-line sắc nét chỉ sau 60 phút.',
+    content: 'Công nghệ Hifu Smas 2026 tác động nhiệt chính xác vào lớp cân cơ nông (SMAS) ở độ sâu 4.5mm, kích thích tăng sinh collagen và elastin tự nhiên, giúp da săn chắc, xóa mờ nếp nhăn rãnh cười và khóe mắt hiệu quả vượt trội...',
+    readTime: '5 phút đọc',
+    featured: false,
+  }
+];
+
