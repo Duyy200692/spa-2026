@@ -594,84 +594,91 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-[#09090B] text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-200 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950">
-      {/* Top Header Navigation */}
-      <Navbar
-        currentRole={currentRole}
-        lang={lang}
-        isDarkMode={isDarkMode}
-        activeTab={activeTab}
-        notifications={notifications}
-        passwords={rolePasswords}
-        spaProfile={spaProfile}
-        onRoleChange={handleRequestRoleChange}
-        onLangToggle={() => setLang((prev) => (prev === 'vi' ? 'en' : 'vi'))}
-        onDarkModeToggle={() => setIsDarkMode((prev) => !prev)}
-        onTabSelect={setActiveTab}
-        onOpenQuickBooking={() => setShowQuickBookingModal(true)}
-        onOpenCheckout={() => handleOpenCheckout()}
-        onOpenFirebaseSync={() => setShowFirebaseModal(true)}
-        onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
-        isFirebaseSyncing={isFirebaseSyncing}
-        onMarkNotificationsRead={handleMarkNotificationsRead}
-      />
+      {/* Top Header Navigation - Rendered in Staff Management Mode */}
+      {!isCustomerTab && (
+        <Navbar
+          currentRole={currentRole}
+          lang={lang}
+          isDarkMode={isDarkMode}
+          activeTab={activeTab}
+          notifications={notifications}
+          passwords={rolePasswords}
+          spaProfile={spaProfile}
+          onRoleChange={handleRequestRoleChange}
+          onLangToggle={() => setLang((prev) => (prev === 'vi' ? 'en' : 'vi'))}
+          onDarkModeToggle={() => setIsDarkMode((prev) => !prev)}
+          onTabSelect={setActiveTab}
+          onOpenQuickBooking={() => setShowQuickBookingModal(true)}
+          onOpenCheckout={() => handleOpenCheckout()}
+          onOpenFirebaseSync={() => setShowFirebaseModal(true)}
+          onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+          isFirebaseSyncing={isFirebaseSyncing}
+          onMarkNotificationsRead={handleMarkNotificationsRead}
+        />
+      )}
 
       {/* Main Layout Container */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 pb-20 md:pb-8 flex gap-6">
-        {/* Desktop Sidebar */}
-        <div className="w-64 shrink-0 hidden md:block">
-          <Sidebar
-            currentRole={currentRole}
-            activeTab={activeTab}
+      {isCustomerTab ? (
+        /* Full-Width Luxury Editorial Landing Page (Matching Image 1) */
+        <main className="w-full min-h-screen">
+          <CustomerPortalView
             lang={lang}
-            onTabSelect={setActiveTab}
-            onRequestStaffLogin={() => {
+            services={services}
+            promotions={promotions}
+            spaProfile={spaProfile}
+            newsArticles={newsArticles}
+            currentRole={currentRole}
+            onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+            onOpenStaffLogin={() => {
               setPendingTargetRole('owner');
               setIsPasswordModalOpen(true);
             }}
-            onSwitchToCustomer={() => handleRequestRoleChange('customer')}
-            onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+            onOpenBooking={(serviceId, promoCode) => {
+              setBookingInitialServiceId(serviceId);
+              setBookingInitialPromoCode(promoCode);
+              setShowQuickBookingModal(true);
+            }}
+            activeCustomerSubTab={getCustomerSubTab()}
           />
-        </div>
-
-        {/* Dynamic Main Workspace Area */}
-        <main className="flex-1 min-w-0">
-          {/* Customer Facing Portal (Intro, Promotions, Services, News) */}
-          {isCustomerTab && (
-            <CustomerPortalView
-              lang={lang}
-              services={services}
-              promotions={promotions}
-              spaProfile={spaProfile}
-              newsArticles={newsArticles}
+        </main>
+      ) : (
+        /* Internal Spa Management Workspace with Sidebar & Dashboard */
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 pb-20 md:pb-8 flex gap-6">
+          {/* Desktop Sidebar */}
+          <div className="w-64 shrink-0 hidden md:block">
+            <Sidebar
               currentRole={currentRole}
-              onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
-              onOpenBooking={(serviceId, promoCode) => {
-                setBookingInitialServiceId(serviceId);
-                setBookingInitialPromoCode(promoCode);
-                setShowQuickBookingModal(true);
+              activeTab={activeTab}
+              lang={lang}
+              onTabSelect={setActiveTab}
+              onRequestStaffLogin={() => {
+                setPendingTargetRole('owner');
+                setIsPasswordModalOpen(true);
               }}
-              activeCustomerSubTab={getCustomerSubTab()}
-            />
-          )}
-
-          {/* Internal Spa Management Tabs (Protected by RBAC) */}
-          {!isCustomerTab && activeTab === 'dashboard' && (
-            <DashboardView
-              appointments={appointments}
-              customers={customers}
-              services={services}
-              inventory={inventory}
-              staff={staff}
-              invoices={invoices}
-              currentRole={currentRole}
-              lang={lang}
-              onNavigate={setActiveTab}
-              onOpenCheckout={handleOpenCheckout}
-              onOpenQuickBooking={() => setShowQuickBookingModal(true)}
+              onSwitchToCustomer={() => handleRequestRoleChange('customer')}
               onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
-              onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
             />
-          )}
+          </div>
+
+          {/* Dynamic Main Workspace Area */}
+          <main className="flex-1 min-w-0">
+            {activeTab === 'dashboard' && (
+              <DashboardView
+                appointments={appointments}
+                customers={customers}
+                services={services}
+                inventory={inventory}
+                staff={staff}
+                invoices={invoices}
+                currentRole={currentRole}
+                lang={lang}
+                onNavigate={setActiveTab}
+                onOpenCheckout={handleOpenCheckout}
+                onOpenQuickBooking={() => setShowQuickBookingModal(true)}
+                onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+                onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+              />
+            )}
 
           {!isCustomerTab && activeTab === 'cost_calculation' && (
             <CostCalculationView
@@ -761,16 +768,19 @@ export default function App() {
           {!isCustomerTab && activeTab === 'reports' && (
             <ReportsView invoices={invoices} services={services} lang={lang} />
           )}
-        </main>
-      </div>
+          </main>
+        </div>
+      )}
 
-      {/* Mobile Bottom Navigation Bar */}
-      <BottomNav
-        currentRole={currentRole}
-        activeTab={activeTab}
-        lang={lang}
-        onTabSelect={setActiveTab}
-      />
+      {/* Mobile Bottom Navigation Bar (For internal staff management) */}
+      {!isCustomerTab && (
+        <BottomNav
+          currentRole={currentRole}
+          activeTab={activeTab}
+          lang={lang}
+          onTabSelect={setActiveTab}
+        />
+      )}
 
       {/* Role PIN / Password Protection Modal */}
       <RolePasswordModal
