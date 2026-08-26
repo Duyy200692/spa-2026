@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import {
   FIREBASE_PROJECT_ID,
+  FIRESTORE_DATABASE_ID,
   seedCleanDataToFirebase,
   clearAllCollectionsFromFirebase,
   syncDocToFirestore,
@@ -281,7 +282,7 @@ export const FirebaseSyncModal: React.FC<FirebaseSyncModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Mã dự án: <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{FIREBASE_PROJECT_ID}</span> • 12 Danh mục dữ liệu lưu trữ
+                Dự án: <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{FIREBASE_PROJECT_ID}</span> • DB ID: <span className="font-mono text-zinc-700 dark:text-zinc-300 font-semibold">{FIRESTORE_DATABASE_ID}</span>
               </p>
             </div>
           </div>
@@ -513,7 +514,7 @@ export const FirebaseSyncModal: React.FC<FirebaseSyncModalProps> = ({
                       1
                     </span>
                     <span>
-                      Truy cập <strong>Firebase Console</strong> (console.firebase.google.com) và mở dự án <strong>{FIREBASE_PROJECT_ID}</strong>.
+                      Truy cập <strong>Firebase Console</strong> tại địa chỉ <code className="bg-zinc-200 dark:bg-zinc-800 px-1 py-0.5 rounded font-mono text-zinc-900 dark:text-zinc-100">console.firebase.google.com</code> và mở dự án của bạn (Project ID: <strong>{FIREBASE_PROJECT_ID}</strong>).
                     </span>
                   </div>
 
@@ -531,7 +532,7 @@ export const FirebaseSyncModal: React.FC<FirebaseSyncModalProps> = ({
                       3
                     </span>
                     <span>
-                      Ở thanh tiêu đề Firestore Database, nếu bạn thấy đang ở <code>(default)</code> mà chưa có dữ liệu, hãy <strong>bấm vào menu dropdown Database</strong> và chọn Database ID: <code className="bg-zinc-200 dark:bg-zinc-800 px-1 py-0.5 rounded font-bold text-zinc-900 dark:text-zinc-100">ai-studio-spamasterhthngqu-ed792d51-a46c-4eb0-b9b6-eb636c943fec</code> hoặc bấm nút <strong>"Khởi Tạo 12 Danh Mục Sạch"</strong> ở trên để nạp ngay!
+                      <strong>Lưu ý quan trọng về Database:</strong> Ở góc trên bên trái của trang Firestore Database, mặc định Firebase có thể đang mở cơ sở dữ liệu <code>(default)</code>. Bạn hãy <strong>nhấp vào menu chọn Database</strong> và chuyển sang Database ID: <code className="bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-bold font-mono text-zinc-900 dark:text-zinc-100">{FIRESTORE_DATABASE_ID}</code>.
                     </span>
                   </div>
 
@@ -540,7 +541,16 @@ export const FirebaseSyncModal: React.FC<FirebaseSyncModalProps> = ({
                       4
                     </span>
                     <span>
-                      Khi mở ra, bạn sẽ thấy danh sách 12 Collections gồm: <code>customers</code>, <code>services</code>, <code>staff</code>, <code>appointments</code>, <code>inventory</code>, <code>invoices</code>, <code>promotions</code>, <code>attendance</code>, <code>spa_profile</code>, <code>news</code>, <code>notifications</code>, <code>system_settings</code>.
+                      <strong>Về Quyền Quyền Rules:</strong> Hệ thống đã tự động thiết lập và triển khai (deploy) quyền <code>allow read, write: if true;</code> trên Firestore nên ứng dụng có toàn quyền đọc và ghi dữ liệu hai chiều mà không bị chặn.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <span className="w-5 h-5 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      5
+                    </span>
+                    <span>
+                      Bấm nút <strong>"Khởi Tạo 12 Danh Mục Sạch"</strong> ở tab Thao Tác & Đồng Bộ để nạp dữ liệu vào cả 12 collections (<code>customers</code>, <code>services</code>, <code>staff</code>, <code>appointments</code>, <code>inventory</code>, <code>invoices</code>, <code>promotions</code>, <code>attendance</code>, <code>spa_profile</code>, <code>news</code>, <code>notifications</code>, <code>system_settings</code>).
                     </span>
                   </div>
                 </div>

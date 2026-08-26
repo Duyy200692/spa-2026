@@ -30,7 +30,9 @@ import {
   Filter,
   CheckCircle2,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  Menu,
+  X
 } from 'lucide-react';
 import {
   Service,
@@ -75,6 +77,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
   const [activeStoryIdx, setActiveStoryIdx] = useState<number>(1);
   const [viewDetailService, setViewDetailService] = useState<Service | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   const formatVND = (num: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
@@ -189,9 +192,29 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
     <div className="w-full bg-[#FAF7F2] dark:bg-[#121314] text-[#1F1E1D] dark:text-[#E8E6E3] font-sans antialiased transition-colors duration-300">
       
       {/* 1. TOP EDITORIAL BRAND HEADER */}
-      <header className="border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2]/90 dark:bg-[#121314]/90 sticky top-0 z-30 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between">
-          {/* Left Navigation Links */}
+      <header className="border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2]/95 dark:bg-[#121314]/95 sticky top-0 z-40 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between">
+          
+          {/* Mobile Hamburger Button */}
+          <div className="flex items-center space-x-2 lg:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl text-[#181716] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            <a
+              href={`tel:${spaProfile.phone || '0909123456'}`}
+              className="p-2 rounded-xl text-[#181716] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              title="Gọi hotline"
+            >
+              <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            </a>
+          </div>
+
+          {/* Left Navigation Links (Desktop) */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs tracking-wider uppercase font-medium text-[#4A4744] dark:text-[#A8A5A0]">
             <a href="#services-catalog" className="hover:text-black dark:hover:text-white transition-colors">Dịch Vụ & Trị Liệu</a>
             <a href="#bestseller-feature" className="hover:text-black dark:hover:text-white transition-colors">Bestseller</a>
@@ -202,24 +225,24 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </nav>
 
           {/* Center Brand Identity */}
-          <div className="text-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <span className="font-serif text-2xl sm:text-3xl tracking-tight text-[#161514] dark:text-white block font-normal">
+          <div className="text-center cursor-pointer select-none" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <span className="font-serif text-xl sm:text-3xl tracking-tight text-[#161514] dark:text-white block font-normal leading-none">
               {spaProfile.name || 'beauty'}
             </span>
-            <span className="text-[9px] tracking-[0.25em] uppercase font-light text-[#736E69] dark:text-[#8E8A85] block -mt-1">
+            <span className="text-[8px] sm:text-[9px] tracking-[0.25em] uppercase font-light text-[#736E69] dark:text-[#8E8A85] block mt-0.5">
               {spaProfile.tagline || 'Bespoke Skin & Botanical Spa'}
             </span>
           </div>
 
           {/* Right Header Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Quick Booking Button */}
             <button
               onClick={() => onOpenBooking()}
-              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[#181716] hover:bg-[#33312E] dark:bg-white dark:hover:bg-[#EAE4DA] text-white dark:text-[#181716] text-xs font-semibold tracking-wide transition-all shadow-sm active:scale-95"
+              className="inline-flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#181716] hover:bg-[#33312E] dark:bg-white dark:hover:bg-[#EAE4DA] text-white dark:text-[#181716] text-[11px] sm:text-xs font-semibold tracking-wide transition-all shadow-sm active:scale-95"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Đặt Lịch Hẹn</span>
+              <span>Đặt Lịch</span>
             </button>
 
             {/* Edit Spa Profile (For Owner/Manager when previewing) */}
@@ -230,61 +253,140 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 title="Chỉnh sửa thông tin, logo & hotline"
               >
                 <Building className="w-3.5 h-3.5" />
-                <span>Sửa Info & Logo</span>
+                <span>Sửa Info</span>
               </button>
             )}
           </div>
         </div>
+
+        {/* Mobile Slide-Down Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#161719] px-5 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+            <div className="grid grid-cols-2 gap-2 text-xs font-medium text-[#181716] dark:text-white">
+              <a
+                href="#services-catalog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373]" />
+                <span>Bảng Dịch Vụ</span>
+              </a>
+              <a
+                href="#promotions-vouchers"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+              >
+                <Tag className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373]" />
+                <span>Mã Ưu Đãi</span>
+              </a>
+              <a
+                href="#bestseller-feature"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+              >
+                <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Bestseller</span>
+              </a>
+              <a
+                href="#skincare-journal"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Cẩm Nang Da</span>
+              </a>
+            </div>
+
+            {/* Direct Quick Booking & Hotline on Mobile Menu */}
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenBooking();
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#181716] dark:bg-white text-white dark:text-[#181716] text-xs font-bold flex items-center justify-center space-x-2 shadow-sm"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Đặt Lịch Hẹn Ngay</span>
+              </button>
+
+              <a
+                href={`tel:${spaProfile.phone || '0909123456'}`}
+                className="px-3.5 py-2.5 rounded-xl border border-[#181716] dark:border-white text-[#181716] dark:text-white text-xs font-bold flex items-center space-x-1"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Gọi Spa</span>
+              </a>
+            </div>
+
+            {/* Staff Entry on Mobile Menu */}
+            {onOpenStaffLogin && (
+              <div className="pt-2 border-t border-[#EAE4DA] dark:border-[#2E3136]">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenStaffLogin();
+                  }}
+                  className="w-full text-center py-2 text-[11px] text-[#736E69] dark:text-[#8E8A85] hover:text-[#181716] dark:hover:text-white font-medium"
+                >
+                  🔐 Đăng nhập quản trị nội bộ Spa
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* 2. HERO SPLIT SECTION (Matching Image 1: "Take care of your skin. We know you are unique.") */}
       <section className="relative overflow-hidden border-b border-[#EAE4DA] dark:border-[#222428]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[460px] lg:min-h-[580px]">
           
           {/* Left Column: Editorial Headline & Actions */}
-          <div className="lg:col-span-6 p-8 sm:p-14 lg:p-18 flex flex-col justify-center bg-[#FAF7F2] dark:bg-[#121314]">
-            <div className="max-w-xl space-y-6">
+          <div className="lg:col-span-6 p-6 sm:p-12 lg:p-18 flex flex-col justify-center bg-[#FAF7F2] dark:bg-[#121314]">
+            <div className="max-w-xl space-y-5 sm:space-y-6">
               
-              <div className="space-y-3">
-                <h1 className="font-serif text-3xl sm:text-5xl lg:text-[54px] leading-[1.12] text-[#181716] dark:text-white tracking-tight font-normal">
+              <div className="space-y-2.5 sm:space-y-3">
+                <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-[52px] leading-[1.15] text-[#181716] dark:text-white tracking-tight font-normal">
                   Take care of your skin.<br />
                   <span className="italic font-serif">We know you are unique.</span>
                 </h1>
                 
-                <p className="text-xs sm:text-sm text-[#736E69] dark:text-[#9A9690] uppercase tracking-[0.2em] font-medium pt-1">
+                <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#9A9690] uppercase tracking-[0.2em] font-medium pt-0.5">
                   Chăm sóc làn da độc bản • Liệu pháp chuẩn y khoa
                 </p>
               </div>
 
-              <p className="text-sm sm:text-base text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed">
-                Take care of your complexion to make it healthy and radiant. In the range of facial care products & bespoke spa treatments you will find organic botanical serums, customized clinical therapies and deeply soothing rituals designed for your unique skin barrier.
+              <p className="text-xs sm:text-sm md:text-base text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed">
+                Khám phá hệ sinh thái trị liệu da chuyên sâu kết hợp hoạt chất sinh học thiên nhiên & máy móc tân tiến chuẩn da liễu. Mỗi liệu trình được cá nhân hóa hoàn toàn theo thể trạng làn da của bạn.
               </p>
 
-              <div className="pt-2 flex flex-wrap items-center gap-3.5">
+              <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <a
                   href="#services-catalog"
-                  className="px-6 py-3.5 rounded-full bg-[#181716] text-white hover:bg-[#33312E] dark:bg-white dark:text-[#181716] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 text-center inline-block"
+                  className="px-6 py-3 rounded-full bg-[#181716] text-white hover:bg-[#33312E] dark:bg-white dark:text-[#181716] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 text-center flex items-center justify-center space-x-2"
                 >
-                  VIEW BODY & SKIN CARE
+                  <span>XEM MENU TRỊ LIỆU</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </a>
 
                 <button
                   onClick={() => onOpenBooking()}
-                  className="px-6 py-3.5 rounded-full bg-transparent border border-[#181716] dark:border-[#EAE4DA] text-[#181716] dark:text-[#EAE4DA] hover:bg-[#181716]/5 dark:hover:bg-white/5 text-xs uppercase tracking-widest font-semibold transition-all active:scale-95"
+                  className="px-6 py-3 rounded-full bg-transparent border border-[#181716] dark:border-[#EAE4DA] text-[#181716] dark:text-[#EAE4DA] hover:bg-[#181716]/5 dark:hover:bg-white/5 text-xs uppercase tracking-widest font-semibold transition-all active:scale-95 flex items-center justify-center space-x-1.5"
                 >
-                  ĐẶT LỊCH HẸN TRẢI NGHIỆM
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>ĐẶT HẸN TRẢI NGHIỆM</span>
                 </button>
               </div>
 
               {/* Quick hotline & guarantee */}
-              <div className="pt-4 flex items-center space-x-6 text-xs text-[#736E69] dark:text-[#8E8A85]">
+              <div className="pt-3 flex flex-wrap items-center gap-4 text-xs text-[#736E69] dark:text-[#8E8A85]">
                 <div className="flex items-center space-x-1.5">
                   <Phone className="w-3.5 h-3.5 text-[#181716] dark:text-white" />
-                  <span>Hotline: <strong className="text-[#181716] dark:text-white font-medium">{spaProfile.phone || '0909 123 456'}</strong></span>
+                  <span>Hotline: <a href={`tel:${spaProfile.phone || '0909123456'}`} className="text-[#181716] dark:text-white font-semibold underline">{spaProfile.phone || '0909 123 456'}</a></span>
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>100% Mỹ phẩm chính hãng & Vô khuẩn y tế</span>
+                  <span>100% Mỹ phẩm cao cấp & Vô khuẩn</span>
                 </div>
               </div>
 
@@ -292,7 +394,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Right Column: High-End Radiant Model Photography */}
-          <div className="lg:col-span-6 relative min-h-[380px] lg:min-h-[580px] bg-[#EDE7DD] dark:bg-[#1A1B1D]">
+          <div className="lg:col-span-6 relative min-h-[280px] sm:min-h-[380px] lg:min-h-[580px] bg-[#EDE7DD] dark:bg-[#1A1B1D]">
             <img
               src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1000&q=85"
               alt="Take care of your skin - Model"
@@ -307,50 +409,50 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 3. MINIMALIST BRAND VALUES & CERTIFICATIONS BAR (Matching Image 1: Vegan, Natural, Parabens Free, Recyclable) */}
-      <section className="border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719] py-10 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719] py-8 sm:py-10 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           
           {/* 1. Vegan */}
-          <div className="text-center space-y-2.5 px-2">
-            <div className="w-10 h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
+          <div className="text-center space-y-2 px-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Heart className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium">Vegan</h3>
-            <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              Our entire collection is vegan and cruelty free. 100% không thử nghiệm động vật.
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Vegan</h3>
+            <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
+              100% thuần chay, không thử nghiệm động vật.
             </p>
           </div>
 
           {/* 2. Natural */}
-          <div className="text-center space-y-2.5 px-2">
-            <div className="w-10 h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
+          <div className="text-center space-y-2 px-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Leaf className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium">Natural</h3>
-            <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              We only use the finest natural ingredients & organic botanical extracts.
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Natural</h3>
+            <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
+              Chiết xuất thảo mộc hữu cơ chọn lọc.
             </p>
           </div>
 
           {/* 3. Parabens Free */}
-          <div className="text-center space-y-2.5 px-2">
-            <div className="w-10 h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
+          <div className="text-center space-y-2 px-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Droplets className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium">Parabens Free</h3>
-            <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              Our products do not contain harmful substances, harsh chemicals or sulfates.
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Parabens Free</h3>
+            <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
+              Không chứa chất độc hại và paraben.
             </p>
           </div>
 
           {/* 4. Recyclable */}
-          <div className="text-center space-y-2.5 px-2">
-            <div className="w-10 h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
+          <div className="text-center space-y-2 px-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <RotateCcw className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium">Recyclable</h3>
-            <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              All packaging is recyclable, sustainable and eco-conscious.
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Recyclable</h3>
+            <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
+              Bao bì tái chế thân thiện với môi trường.
             </p>
           </div>
 
@@ -358,12 +460,12 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 4. BOTANICAL SCIENCE & ACTIVE INGREDIENTS SPOTLIGHT (Matching Image 1 Top Right) */}
-      <section id="botanical-science" className="py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <section id="botanical-science" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
+        <div className="max-w-7xl mx-auto space-y-10">
           
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C5E32] dark:text-[#D4A373]">
-              Active Botanical Science • Khoa Học Hoạt Chất Thực Vật
+              Active Botanical Science • Hoạt Chất Thực Vật
             </span>
             <h2 className="font-serif text-2xl sm:text-4xl text-[#181716] dark:text-white font-normal">
               Potent Natural Actives for Radiant Skin
@@ -373,11 +475,11 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             </p>
           </div>
 
-          {/* 4 Circular Ingredient Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* 4 Circular Ingredient Cards (Horizontal scrolling on small screens for comfortable viewing) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {botanicalIngredients.map((item, idx) => (
-              <div key={idx} className="text-center space-y-3.5 group">
-                <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-[#E0D7C9] dark:border-[#2E3136] shadow-sm group-hover:scale-105 transition-transform duration-300">
+              <div key={idx} className="text-center space-y-2.5 sm:space-y-3.5 group bg-white/60 dark:bg-[#1A1C1F]/60 p-4 sm:p-0 rounded-2xl sm:rounded-none border sm:border-0 border-[#EAE4DA] dark:border-[#2E3136]">
+                <div className="w-18 h-18 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden border-2 border-[#E0D7C9] dark:border-[#2E3136] shadow-sm group-hover:scale-105 transition-transform duration-300">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -385,15 +487,15 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                     referrerPolicy="no-referrer"
                   />
                 </div>
-                <div className="space-y-1">
-                  <h4 className="font-serif text-base text-[#181716] dark:text-white font-medium">
+                <div className="space-y-0.5 sm:space-y-1">
+                  <h4 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium leading-snug">
                     {item.name}
                   </h4>
-                  <p className="text-[11px] text-[#8C5E32] dark:text-[#D4A373] font-medium">
+                  <p className="text-[10px] sm:text-[11px] text-[#8C5E32] dark:text-[#D4A373] font-medium">
                     {item.vietnameseName}
                   </p>
                 </div>
-                <p className="text-xs text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed max-w-[240px] mx-auto">
+                <p className="text-[11px] sm:text-xs text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed max-w-[240px] mx-auto">
                   {item.description}
                 </p>
               </div>
@@ -405,34 +507,34 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
       {/* 5. BESTSELLER SAGE GREEN SPLIT HERO BANNER (Matching Image 1 Center: "Smoothing Face Serum") */}
       <section id="bestseller-feature" className="border-b border-[#EAE4DA] dark:border-[#222428] bg-[#D4E4D9] dark:bg-[#1B2920] text-[#1C3525] dark:text-[#E0EFE6]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[480px]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[420px] lg:min-h-[480px]">
           
           {/* Left Column: Bestseller Copy & CTA */}
-          <div className="lg:col-span-6 p-8 sm:p-14 lg:p-16 flex flex-col justify-center">
-            <div className="max-w-md space-y-6">
+          <div className="lg:col-span-6 p-6 sm:p-12 lg:p-16 flex flex-col justify-center">
+            <div className="max-w-md space-y-4 sm:space-y-6">
               
-              <div className="space-y-2">
-                <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-[#2F533C] dark:text-[#A3CFB4]">
-                  BESTSELLER • SẢN PHẨM & DỊCH VỤ TIÊU BIỂU
+              <div className="space-y-1.5 sm:space-y-2">
+                <span className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold text-[#2F533C] dark:text-[#A3CFB4]">
+                  BESTSELLER • DỊCH VỤ TIÊU BIỂU
                 </span>
-                <h2 className="font-serif text-3xl sm:text-5xl text-[#14261B] dark:text-white leading-tight font-normal">
+                <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[#14261B] dark:text-white leading-tight font-normal">
                   Smoothing<br />Face Serum
                 </h2>
-                <p className="text-sm font-serif italic text-[#2F533C] dark:text-[#A3CFB4]">
+                <p className="text-xs sm:text-sm font-serif italic text-[#2F533C] dark:text-[#A3CFB4]">
                   Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng
                 </p>
               </div>
 
               <p className="text-xs sm:text-sm text-[#2D4536] dark:text-[#BFD6C8] font-light leading-relaxed">
-                Discover the best clinical formulations and bespoke facial rituals from our botanical laboratory. Formulated with pure cold-pressed botanicals and biomimetic peptides for instant radiance.
+                Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, thu nhỏ lỗ chân lông tức thì.
               </p>
 
               <div className="pt-2">
                 <button
                   onClick={() => onOpenBooking('srv-3')}
-                  className="px-7 py-3.5 rounded-full bg-[#14261B] text-white hover:bg-[#203D2B] dark:bg-white dark:text-[#14261B] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 inline-flex items-center space-x-2"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#14261B] text-white hover:bg-[#203D2B] dark:bg-white dark:text-[#14261B] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
                 >
-                  <span>SHOP NOW / ĐẶT TRỊ LIỆU</span>
+                  <span>ĐẶT LIỆU TRÌNH NGAY</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -441,11 +543,11 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Right Column: Editorial Product Still Life Composition */}
-          <div className="lg:col-span-6 relative min-h-[340px] lg:min-h-[480px] bg-[#C5D9CB] dark:bg-[#14211A] flex items-center justify-center p-8 overflow-hidden">
+          <div className="lg:col-span-6 relative min-h-[260px] sm:min-h-[340px] lg:min-h-[480px] bg-[#C5D9CB] dark:bg-[#14211A] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85"
               alt="Smoothing Face Serum - Botanical Still Life"
-              className="w-full h-full object-cover max-h-[420px] rounded-2xl shadow-xl border border-white/20"
+              className="w-full h-full object-cover max-h-[360px] sm:max-h-[420px] rounded-2xl shadow-xl border border-white/20"
               referrerPolicy="no-referrer"
             />
           </div>
@@ -454,8 +556,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 6. INTERACTIVE CLIENT STORIES & SKIN GLOW SHOWCASE (Matching Image 1 Left: "Best Skincare Products") */}
-      <section className="py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
-        <div className="max-w-7xl mx-auto space-y-10">
+      <section className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
           
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="font-serif text-2xl sm:text-4xl text-[#181716] dark:text-white font-normal">
@@ -466,16 +568,16 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             </p>
           </div>
 
-          {/* Horizontal Gallery of Portrait Video/Photo Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          {/* Gallery of Portrait Video/Photo Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {skinShowcaseCards.map((card, idx) => {
               const isSelected = activeStoryIdx === idx;
               return (
                 <div
                   key={card.id}
                   onClick={() => setActiveStoryIdx(idx)}
-                  className={`relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 aspect-[3/4] group ${
-                    isSelected ? 'ring-2 ring-[#181716] dark:ring-white scale-[1.02] shadow-xl' : 'opacity-85 hover:opacity-100'
+                  className={`relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 aspect-[3/4] group ${
+                    isSelected ? 'ring-2 ring-[#181716] dark:ring-white scale-[1.01] shadow-lg' : 'opacity-85 hover:opacity-100'
                   }`}
                 >
                   <img
@@ -489,20 +591,20 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
                   {/* Sound indicator badge */}
-                  <div className="absolute bottom-3 right-3 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-sm">
-                    <Volume2 className="w-3.5 h-3.5" />
+                  <div className="absolute bottom-2.5 right-2.5 p-1 rounded-full bg-black/40 text-white backdrop-blur-sm">
+                    <Volume2 className="w-3 h-3" />
                   </div>
 
                   {/* Card Title & Category */}
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-[#181716] dark:text-white">
+                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-white/85 dark:bg-black/60 backdrop-blur-sm text-[9px] sm:text-[10px] font-semibold text-[#181716] dark:text-white">
                     {card.category}
                   </div>
 
                   {/* Floating Product Tag Overlay on Active Card (Matching Image 1 Mockup) */}
                   {isSelected && (
-                    <div className="absolute bottom-3 left-3 right-10 bg-white/95 dark:bg-[#1E2024]/95 backdrop-blur-md rounded-2xl p-2.5 border border-zinc-200 dark:border-zinc-700 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] dark:bg-[#2A2D32] shrink-0 overflow-hidden">
+                    <div className="absolute bottom-2 left-2 right-8 sm:right-10 bg-white/95 dark:bg-[#1E2024]/95 backdrop-blur-md rounded-xl p-2 border border-zinc-200 dark:border-zinc-700 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      <div className="flex items-center space-x-1.5">
+                        <div className="w-7 h-7 rounded-lg bg-[#FAF7F2] dark:bg-[#2A2D32] shrink-0 overflow-hidden">
                           <img
                             src="https://images.unsplash.com/photo-1608248597359-21b7123d6a45?w=100&q=80"
                             alt="Mokosh Tonic"
@@ -510,19 +612,19 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="text-[9px] uppercase tracking-wider text-[#8C5E32] dark:text-[#D4A373] block font-bold">L'AURA SKINCARE</span>
-                          <h5 className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">{card.productName}</h5>
-                          <span className="text-[10px] font-bold text-zinc-800 dark:text-zinc-200">{formatVND(card.price)}</span>
+                          <span className="text-[8px] uppercase tracking-wider text-[#8C5E32] dark:text-[#D4A373] block font-bold">L'AURA</span>
+                          <h5 className="text-[10px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">{card.productName}</h5>
+                          <span className="text-[9px] font-bold text-zinc-800 dark:text-zinc-200">{formatVND(card.price)}</span>
                         </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onOpenBooking();
                           }}
-                          className="p-2 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:scale-105 transition-transform"
-                          title="Đặt mua hoặc hẹn liệu trình"
+                          className="p-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:scale-105 transition-transform"
+                          title="Đặt hẹn"
                         >
-                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <ShoppingBag className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
@@ -659,7 +761,10 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   >
                     <div>
                       {/* Product Image Stage */}
-                      <div className="relative aspect-square bg-[#FAF7F2] dark:bg-[#121314] overflow-hidden">
+                      <div
+                        onClick={() => setViewDetailService(service)}
+                        className="relative aspect-square bg-[#FAF7F2] dark:bg-[#121314] overflow-hidden cursor-pointer"
+                      >
                         <img
                           src={service.image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'}
                           alt={service.name}
@@ -682,14 +787,17 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                       </div>
 
                       {/* Content */}
-                      <div className="p-5 space-y-2.5">
+                      <div className="p-4 sm:p-5 space-y-2">
                         <div className="flex items-center space-x-1 text-amber-500 text-xs">
                           <Star className="w-3.5 h-3.5 fill-current" />
                           <span className="font-semibold text-zinc-800 dark:text-zinc-200">5.0</span>
                           <span className="text-[#9A9690] text-[10px]">(98 đánh giá)</span>
                         </div>
 
-                        <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium line-clamp-2 leading-snug">
+                        <h3
+                          onClick={() => setViewDetailService(service)}
+                          className="font-serif text-base text-[#181716] dark:text-white font-medium line-clamp-2 leading-snug cursor-pointer hover:text-[#8C5E32] dark:hover:text-[#D4A373] transition-colors"
+                        >
                           {service.name}
                         </h3>
 
@@ -728,34 +836,34 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
       {/* 8. BATH & BODY RELAXING RITUAL BANNER (Matching Image 1 Bottom Right) */}
       <section id="bath-and-body" className="border-b border-[#EAE4DA] dark:border-[#222428] bg-[#DBEAF0] dark:bg-[#182830] text-[#193645] dark:text-[#DFEEF5]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[440px]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[380px] lg:min-h-[440px]">
           
           {/* Left Column: Bath & Body Copy */}
-          <div className="lg:col-span-6 p-8 sm:p-14 lg:p-16 flex flex-col justify-center">
-            <div className="max-w-md space-y-6">
+          <div className="lg:col-span-6 p-6 sm:p-12 lg:p-16 flex flex-col justify-center">
+            <div className="max-w-md space-y-4 sm:space-y-6">
               
-              <div className="space-y-2">
-                <span className="text-[11px] tracking-[0.25em] uppercase font-semibold text-[#295973] dark:text-[#88C6E5]">
+              <div className="space-y-1.5 sm:space-y-2">
+                <span className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold text-[#295973] dark:text-[#88C6E5]">
                   HOLISTIC WELLNESS • DƯỠNG SINH & THƯ GIÃN
                 </span>
-                <h2 className="font-serif text-3xl sm:text-5xl text-[#102936] dark:text-white leading-tight font-normal">
+                <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[#102936] dark:text-white leading-tight font-normal">
                   Bath & Body
                 </h2>
-                <p className="text-sm font-serif italic text-[#295973] dark:text-[#88C6E5]">
+                <p className="text-xs sm:text-sm font-serif italic text-[#295973] dark:text-[#88C6E5]">
                   Liệu pháp thanh lọc thân tâm & làm sạch làn da cơ thể
                 </p>
               </div>
 
               <p className="text-xs sm:text-sm text-[#274B5E] dark:text-[#B6D6E5] font-light leading-relaxed">
-                Our bespoke spa cosmetics and hydrotherapy allow you to take care of your skin and cleanse it, as well as provide deep relaxation and a pleasant sensual experience.
+                Hệ liệu pháp gội đầu dưỡng sinh thảo mộc & thủy liệu pháp giúp thư giãn sâu vùng cổ vai gáy, giảm căng thẳng thần kinh và nuôi dưỡng làn da body mịn màng.
               </p>
 
               <div className="pt-2">
                 <button
                   onClick={() => onOpenBooking('srv-4')}
-                  className="px-7 py-3.5 rounded-full bg-[#102936] text-white hover:bg-[#1E4357] dark:bg-white dark:text-[#102936] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 inline-flex items-center space-x-2"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#102936] text-white hover:bg-[#1E4357] dark:bg-white dark:text-[#102936] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
                 >
-                  <span>KHÁM PHÁ BODY & GỘI ĐẦU DƯỠNG SINH</span>
+                  <span>GỘI ĐẦU DƯỠNG SINH & BODY</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -764,7 +872,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Right Column: Relaxing Bath Sponge & Body Therapy Still Life */}
-          <div className="lg:col-span-6 relative min-h-[300px] lg:min-h-[440px] bg-[#C8DEE6] dark:bg-[#121E24]">
+          <div className="lg:col-span-6 relative min-h-[240px] sm:min-h-[300px] lg:min-h-[440px] bg-[#C8DEE6] dark:bg-[#121E24]">
             <img
               src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=800&q=85"
               alt="Bath & Body Spa Treatment"
@@ -777,8 +885,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 9. PROMOTIONS & VOUCHERS SHOWCASE */}
-      <section id="promotions-vouchers" className="py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
-        <div className="max-w-7xl mx-auto space-y-10">
+      <section id="promotions-vouchers" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
           
           <div className="text-center max-w-xl mx-auto space-y-2">
             <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C5E32] dark:text-[#D4A373]">
@@ -793,15 +901,15 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Vouchers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {activePromotions.map((promo) => {
               const isCopied = copiedCode === promo.code;
               return (
                 <div
                   key={promo.id}
-                  className="rounded-2xl border border-[#EAE4DA] dark:border-[#2E3136] bg-[#FAF7F2] dark:bg-[#1A1C1F] p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all"
+                  className="rounded-2xl border border-[#EAE4DA] dark:border-[#2E3136] bg-[#FAF7F2] dark:bg-[#1A1C1F] p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all"
                 >
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-0.5 rounded-full bg-[#8C5E32]/10 text-[#8C5E32] dark:text-[#D4A373] text-[10px] font-bold uppercase tracking-wider">
                         {promo.discountType === 'percentage' ? `Giảm ${promo.discountValue}%` : `Giảm ${formatVND(promo.discountValue)}`}
@@ -812,7 +920,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                       </span>
                     </div>
 
-                    <h3 className="font-serif text-lg text-[#181716] dark:text-white font-medium">
+                    <h3 className="font-serif text-base sm:text-lg text-[#181716] dark:text-white font-medium">
                       {promo.title}
                     </h3>
 
@@ -839,7 +947,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                       onClick={() => onOpenBooking(undefined, promo.code)}
                       className="text-xs font-semibold text-[#181716] dark:text-white underline hover:opacity-80"
                     >
-                      Dùng Mã Ngay →
+                      Dùng Mã →
                     </button>
                   </div>
                 </div>
@@ -851,8 +959,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 10. SKINCARE JOURNAL & DERMATOLOGY GUIDES */}
-      <section id="skincare-journal" className="py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
-        <div className="max-w-7xl mx-auto space-y-10">
+      <section id="skincare-journal" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#EAE4DA] dark:border-[#222428]">
             <div>
@@ -865,7 +973,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {newsArticles.slice(0, 3).map((article) => (
               <div
                 key={article.id}
@@ -881,13 +989,13 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                       referrerPolicy="no-referrer"
                     />
                   </div>
-                  <div className="p-5 space-y-2">
+                  <div className="p-4 sm:p-5 space-y-2">
                     <div className="flex items-center space-x-2 text-[10px] text-[#736E69] uppercase font-semibold tracking-wider">
                       <span>{article.category}</span>
                       <span>•</span>
                       <span>{article.date}</span>
                     </div>
-                    <h3 className="font-serif text-base text-[#181716] dark:text-white font-medium group-hover:underline line-clamp-2">
+                    <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium group-hover:underline line-clamp-2 leading-snug">
                       {article.title}
                     </h3>
                     <p className="text-xs text-[#57534E] dark:text-[#A8A49E] font-light line-clamp-3 leading-relaxed">
@@ -896,7 +1004,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   </div>
                 </div>
 
-                <div className="p-5 pt-0 text-xs font-semibold text-[#8C5E32] dark:text-[#D4A373] flex items-center space-x-1">
+                <div className="p-4 sm:p-5 pt-0 text-xs font-semibold text-[#8C5E32] dark:text-[#D4A373] flex items-center space-x-1">
                   <span>Đọc bài viết</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -908,8 +1016,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 11. LUXURY FOOTER & SPA CONTACT INFO */}
-      <footer className="bg-[#181716] text-[#FAF7F2] pt-16 pb-12 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <footer className="bg-[#181716] text-[#FAF7F2] pt-14 pb-24 lg:pb-12 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto space-y-10 sm:space-y-12">
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
             
@@ -983,6 +1091,82 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </div>
       </footer>
 
+      {/* SERVICE DETAIL POPUP MODAL */}
+      {viewDetailService && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#18191C] rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl border border-[#EAE4DA] dark:border-[#2E3136] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
+              <span className="text-xs uppercase font-bold text-[#8C5E32] dark:text-[#D4A373] tracking-wider">
+                {viewDetailService.category}
+              </span>
+              <button
+                onClick={() => setViewDetailService(null)}
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-[#FAF7F2] dark:bg-[#121314]">
+              <img
+                src={viewDetailService.image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80'}
+                alt={viewDetailService.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-xl text-zinc-900 dark:text-white font-medium">
+                  {viewDetailService.name}
+                </h3>
+                <span className="font-serif text-lg font-bold text-[#181716] dark:text-white">
+                  {formatVND(viewDetailService.price)}
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-3 text-xs text-zinc-500">
+                <span className="flex items-center space-x-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Thời lượng: {viewDetailService.durationMinutes} phút</span>
+                </span>
+                <span>•</span>
+                <span className="flex items-center space-x-1 text-amber-500">
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <span>5.0 (98 đánh giá)</span>
+                </span>
+              </div>
+
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-light leading-relaxed pt-2">
+                {viewDetailService.description}
+              </p>
+            </div>
+
+            <div className="pt-4 flex items-center gap-2 border-t border-zinc-100 dark:border-zinc-800">
+              <a
+                href={`tel:${spaProfile.phone || '0909123456'}`}
+                className="px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold flex items-center justify-center space-x-1.5"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Tư vấn</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  const srvId = viewDetailService.id;
+                  setViewDetailService(null);
+                  onOpenBooking(srvId);
+                }}
+                className="flex-1 py-3 rounded-2xl bg-[#181716] hover:bg-[#33312E] dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-[#181716] text-xs font-bold flex items-center justify-center space-x-2 shadow-md active:scale-95"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Đặt Lịch Liệu Trình Này</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ARTICLE MODAL POPUP */}
       {selectedArticle && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -991,9 +1175,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
               <span className="text-xs uppercase font-bold text-[#8C5E32] tracking-wider">{selectedArticle.category}</span>
               <button
                 onClick={() => setSelectedArticle(null)}
-                className="text-zinc-400 hover:text-zinc-800 dark:hover:text-white text-xs font-bold px-2 py-1"
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
               >
-                Đóng ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1033,6 +1217,37 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* 12. MOBILE FLOATING ACTION BAR (STICKY BOTTOM DOCK) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 p-2.5 bg-white/95 dark:bg-[#141518]/95 backdrop-blur-lg border-t border-[#EAE4DA] dark:border-[#26282E] shadow-2xl">
+        <div className="max-w-md mx-auto flex items-center space-x-2">
+          <a
+            href={`tel:${spaProfile.phone || '0909123456'}`}
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl border border-[#EAE4DA] dark:border-[#2E3136] text-[#181716] dark:text-white shrink-0 active:scale-95"
+            title="Gọi Hotline"
+          >
+            <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-[9px] font-semibold mt-0.5">Hotline</span>
+          </a>
+
+          <a
+            href="#promotions-vouchers"
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl border border-[#EAE4DA] dark:border-[#2E3136] text-[#181716] dark:text-white shrink-0 active:scale-95"
+            title="Xem Voucher"
+          >
+            <Tag className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span className="text-[9px] font-semibold mt-0.5">Voucher</span>
+          </a>
+
+          <button
+            onClick={() => onOpenBooking()}
+            className="flex-1 py-2.5 px-4 rounded-xl bg-[#181716] dark:bg-white text-white dark:text-[#181716] font-bold text-xs flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-transform"
+          >
+            <Calendar className="w-4 h-4" />
+            <span className="tracking-wide">ĐẶT LỊCH HẸN SPA</span>
+          </button>
+        </div>
+      </div>
 
     </div>
   );

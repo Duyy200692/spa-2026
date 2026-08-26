@@ -779,6 +779,14 @@ export default function App() {
           activeTab={activeTab}
           lang={lang}
           onTabSelect={setActiveTab}
+          appointmentBadgeCount={appointments.filter(a => a.date === '2026-08-25' && a.status !== 'completed' && a.status !== 'cancelled').length}
+          lowStockCount={inventory.filter(i => i.stockSubUnits <= i.minThresholdSubUnits).length}
+          onOpenQuickBooking={() => setShowQuickBookingModal(true)}
+          onOpenCheckout={() => handleOpenCheckout()}
+          onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
+          onOpenFirebaseSync={() => setShowFirebaseModal(true)}
+          onSwitchToCustomer={() => handleRequestRoleChange('customer')}
+          onRequestRoleSwitch={handleRequestRoleChange}
         />
       )}
 

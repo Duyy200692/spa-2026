@@ -423,84 +423,215 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
 
             {/* Consumable Cosmetics Itemized Table (BOM) */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1.5">
-                  <Boxes className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
-                  <span>Bảng Định Lượng Nguyên Liệu Tiêu Hao (Lấy Trực Tiếp Từ Kho)</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center space-x-2">
+                  <div className="p-1.5 rounded-lg bg-[#5A7D57]/15 dark:bg-[#8BA888]/20 text-[#30522E] dark:text-[#A3C2A0]">
+                    <Boxes className="w-4 h-4" />
+                  </div>
+                  <span>Bảng Định Lượng Nguyên Liệu Tiêu Hao (Lấy Từ Kho)</span>
                 </h4>
-                <span className="text-xs text-[#5E665B] dark:text-[#9BA198]">
-                  Tổng tiền mỹ phẩm/ca: <strong className="text-[#5A7D57] dark:text-[#8BA888]">{formatCurrency(totalCosmeticsCost, lang)}</strong>
-                </span>
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs">
+                  <span className="text-emerald-700 dark:text-emerald-300">Tổng tiền mỹ phẩm/ca:</span>
+                  <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">{formatCurrency(totalCosmeticsCost, lang)}</strong>
+                </div>
               </div>
 
-              <div className="overflow-x-auto border border-[#E2E6DF] dark:border-[#2D312C] rounded-xl">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] font-semibold border-b border-[#E2E6DF] dark:border-[#2D312C]">
+              {/* Mobile View: High-Legibility Card List */}
+              <div className="block sm:hidden space-y-2.5">
+                {formData.costItems.length === 0 ? (
+                  <div className="p-6 text-center rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-400 text-xs">
+                    Chưa có mỹ phẩm tiêu hao nào trong bài. Vui lòng chọn nguyên liệu từ kho bên dưới để thêm vào.
+                  </div>
+                ) : (
+                  formData.costItems.map((item, idx) => {
+                    const matchedInv = inventory.find(i => i.id === item.inventoryItemId);
+                    const cleanName = matchedInv?.name || item.name.replace(/\s*\(.*?\)\s*$/, '');
+                    const packageSpec = matchedInv ? `1 ${matchedInv.packageUnit || 'Hộp'} = ${matchedInv.subUnitsPerPackage} ${matchedInv.subUnitName}` : '';
+
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 shadow-xs space-y-3"
+                      >
+                        {/* Header: Clean Item Name, Spec Badges & Delete */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1 min-w-0">
+                            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-snug break-words">
+                              {cleanName}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {packageSpec && (
+                                <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300">
+                                  {packageSpec}
+                                </span>
+                              )}
+                              <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
+                                {formatCurrency(item.costPerUnit, lang)}/{item.unit}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCostItem(idx)}
+                            className="p-1.5 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                            title="Xóa khỏi công thức"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Bottom Row: Stepper & Total Cost */}
+                        <div className="flex items-center justify-between pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80">
+                          {/* Stepper */}
+                          <div className="flex items-center space-x-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQuantity(idx, Math.max(0.1, item.quantityUsed - (item.quantityUsed > 5 ? 1 : 0.5)))}
+                              className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-bold flex items-center justify-center hover:bg-zinc-200 active:scale-95 text-xs"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              step="0.5"
+                              min="0.01"
+                              value={item.quantityUsed}
+                              onChange={e => handleUpdateItemQuantity(idx, parseFloat(e.target.value) || 0.1)}
+                              className="w-14 px-1.5 py-1 text-center rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQuantity(idx, item.quantityUsed + (item.quantityUsed >= 5 ? 1 : 0.5))}
+                              className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-bold flex items-center justify-center hover:bg-zinc-200 active:scale-95 text-xs"
+                            >
+                              +
+                            </button>
+                            <span className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold pl-0.5">
+                              {item.unit}
+                            </span>
+                          </div>
+
+                          {/* Calculated Cost */}
+                          <div className="text-right">
+                            <span className="text-[10px] text-zinc-400 block font-medium">Thành tiền cost:</span>
+                            <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400">
+                              {formatCurrency(item.totalCost, lang)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Desktop & Tablet Table View */}
+              <div className="hidden sm:block overflow-x-auto border border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                <table className="w-full text-left text-xs min-w-[560px]">
+                  <thead className="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 font-semibold border-b border-zinc-200 dark:border-zinc-800">
                     <tr>
-                      <th className="py-2.5 px-3">Mỹ Phẩm / Vật Tư (Từ Kho)</th>
-                      <th className="py-2.5 px-3 text-center">Định Mức Sử Dụng</th>
-                      <th className="py-2.5 px-3 text-right">Đơn Giá Lẻ Gốc</th>
-                      <th className="py-2.5 px-3 text-right">Thành Tiền Cost</th>
-                      <th className="py-2.5 px-3 text-center">Xóa</th>
+                      <th className="py-3 px-4 w-[45%]">Mỹ Phẩm / Vật Tư (Từ Kho)</th>
+                      <th className="py-3 px-3 text-center w-[22%]">Định Mức Sử Dụng</th>
+                      <th className="py-3 px-3 text-right w-[15%]">Đơn Giá Lẻ</th>
+                      <th className="py-3 px-4 text-right w-[18%]">Thành Tiền Cost</th>
+                      <th className="py-3 px-2 text-center w-[40px]"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2E6DF] dark:divide-[#2D312C]">
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                     {formData.costItems.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-5 text-center text-[#9BA198] text-xs">
+                        <td colSpan={5} className="py-8 text-center text-zinc-400 text-xs">
                           Chưa có mỹ phẩm tiêu hao nào trong bài. Vui lòng chọn nguyên liệu từ kho bên dưới để thêm vào.
                         </td>
                       </tr>
                     ) : (
-                      formData.costItems.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-[#F5F7F4] dark:hover:bg-[#222621] transition-colors">
-                          <td className="py-2.5 px-3 font-medium text-[#1C211B] dark:text-[#E0E2DF]">
-                            <div>{item.name}</div>
-                            <span className="text-[10px] text-[#5A7D57] dark:text-[#8BA888] font-mono">
-                              Kho: {item.inventoryItemId}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <div className="inline-flex items-center space-x-1.5">
-                              <input
-                                type="number"
-                                step="0.5"
-                                min="0.01"
-                                value={item.quantityUsed}
-                                onChange={e => handleUpdateItemQuantity(idx, parseFloat(e.target.value) || 0.1)}
-                                className="w-16 px-1.5 py-1 text-center rounded-lg border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] text-xs font-bold"
-                              />
-                              <span className="text-[#5E665B] dark:text-[#9BA198] text-[11px] font-semibold">{item.unit}</span>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3 text-right text-[#5E665B] dark:text-[#9BA198]">
-                            {formatCurrency(item.costPerUnit, lang)}
-                            <span className="text-[10px] block">/{item.unit}</span>
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-bold text-[#8A504B] dark:text-[#D98A84]">
-                            {formatCurrency(item.totalCost, lang)}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <button
-                              onClick={() => handleRemoveCostItem(idx)}
-                              className="p-1 rounded-lg text-[#9BA198] hover:text-[#965A54] dark:hover:text-[#D98A84] hover:bg-[#965A54]/10 transition-colors"
-                              title="Xóa khỏi công thức"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                      formData.costItems.map((item, idx) => {
+                        const matchedInv = inventory.find(i => i.id === item.inventoryItemId);
+                        const cleanName = matchedInv?.name || item.name.replace(/\s*\(.*?\)\s*$/, '');
+                        const packageSpec = matchedInv ? `1 ${matchedInv.packageUnit || 'Hộp'} = ${matchedInv.subUnitsPerPackage} ${matchedInv.subUnitName}` : '';
+
+                        return (
+                          <tr key={idx} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">
+                                {cleanName}
+                              </div>
+                              <div className="flex items-center space-x-2 mt-1">
+                                {packageSpec && (
+                                  <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
+                                    {packageSpec}
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-zinc-400 font-mono">
+                                  {matchedInv?.code || item.inventoryItemId}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-center">
+                              <div className="inline-flex items-center space-x-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateItemQuantity(idx, Math.max(0.1, item.quantityUsed - (item.quantityUsed > 5 ? 1 : 0.5)))}
+                                  className="w-6 h-6 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-200 text-xs"
+                                >
+                                  -
+                                </button>
+                                <input
+                                  type="number"
+                                  step="0.5"
+                                  min="0.01"
+                                  value={item.quantityUsed}
+                                  onChange={e => handleUpdateItemQuantity(idx, parseFloat(e.target.value) || 0.1)}
+                                  className="w-14 px-1.5 py-1 text-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateItemQuantity(idx, item.quantityUsed + (item.quantityUsed >= 5 ? 1 : 0.5))}
+                                  className="w-6 h-6 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-200 text-xs"
+                                >
+                                  +
+                                </button>
+                                <span className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold">{item.unit}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-right text-zinc-600 dark:text-zinc-300">
+                              <div className="font-semibold">{formatCurrency(item.costPerUnit, lang)}</div>
+                              <span className="text-[10px] text-zinc-400">/{item.unit}</span>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-amber-600 dark:text-amber-400 text-xs">
+                              {formatCurrency(item.totalCost, lang)}
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveCostItem(idx)}
+                                className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                                title="Xóa khỏi công thức"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
 
               {/* Add Cosmetic Selector Widget with Live Conversion preview */}
-              <div className="p-3.5 bg-[#F5F7F4] dark:bg-[#222621] border border-[#E2E6DF] dark:border-[#2D312C] rounded-xl space-y-2.5">
-                <div className="text-[11px] font-bold text-[#30522E] dark:text-[#A3C2A0] flex items-center space-x-1.5">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Chọn Nguyên Liệu Từ Kho Để Đưa Vào Bài Dịch Vụ:</span>
+              <div className="p-4 bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-3">
+                <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
+                  <div className="flex items-center space-x-1.5">
+                    <Plus className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Chọn Mỹ Phẩm Từ Kho Để Thêm Định Lượng:</span>
+                  </div>
+                  {selectedInvObj && (
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-normal">
+                      Đơn giá: <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(selectedInvObj.costPerSubUnit, lang)}/{selectedInvObj.subUnitName}</strong>
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
@@ -508,38 +639,41 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                     <select
                       value={selectedInventoryToAdd}
                       onChange={e => setSelectedInventoryToAdd(e.target.value)}
-                      className="w-full px-2.5 py-2 rounded-xl text-xs font-medium border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                      className="w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
                     >
                       {inventory.map(inv => (
                         <option key={inv.id} value={inv.id}>
-                          {inv.name} — [1 {inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
+                          {inv.name} — [1 {inv.packageUnit || inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="w-28 flex items-center space-x-1">
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0.1"
-                      value={quantityToAdd}
-                      onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
-                      className="w-full px-2 py-2 text-center rounded-xl text-xs font-bold border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
-                    />
-                    <span className="text-xs text-[#5E665B] dark:text-[#9BA198] font-semibold">
-                      {selectedInvObj?.subUnitName || 'đơn vị'}
-                    </span>
-                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0.1"
+                        value={quantityToAdd}
+                        onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
+                        className="w-20 px-2 py-2.5 text-center rounded-xl text-xs font-bold border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                      />
+                      <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold px-1">
+                        {selectedInvObj?.subUnitName || 'đơn vị'}
+                      </span>
+                    </div>
 
-                  <button
-                    id="btn-add-item-to-recipe"
-                    onClick={handleAddCostItem}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] transition-colors shrink-0 flex items-center justify-center space-x-1 shadow-sm"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Thêm Vào Bài (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
-                  </button>
+                    <button
+                      id="btn-add-item-to-recipe"
+                      type="button"
+                      onClick={handleAddCostItem}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4A6A47] dark:bg-[#8BA888] dark:hover:bg-[#789875] text-white dark:text-[#121412] transition-all shrink-0 flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Thêm (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -49,8 +49,9 @@ export const db: Firestore = (firebaseConfig as any).firestoreDatabaseId
   ? getFirestore(app, (firebaseConfig as any).firestoreDatabaseId)
   : getFirestore(app);
 
-export const FIREBASE_PROJECT_ID = 'spa2026-68441';
-export const RTDB_BASE_URL = 'https://spa2026-68441-default-rtdb.asia-southeast1.firebasedatabase.app';
+export const FIREBASE_PROJECT_ID = (firebaseConfig as any).projectId || 'gen-lang-client-0057677543';
+export const FIRESTORE_DATABASE_ID = (firebaseConfig as any).firestoreDatabaseId || 'ai-studio-spamasterhthngqu-ed792d51-a46c-4eb0-b9b6-eb636c943fec';
+export const RTDB_BASE_URL = `https://${FIREBASE_PROJECT_ID}-default-rtdb.asia-southeast1.firebasedatabase.app`;
 
 // Helper to remove undefined fields recursively to prevent Firestore errors
 export function sanitizeForFirestore<T>(data: T): T {

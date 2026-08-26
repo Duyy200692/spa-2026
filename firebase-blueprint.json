@@ -1,0 +1,121 @@
+{
+  "entities": {
+    "Customer": {
+      "title": "Customer",
+      "description": "Thông tin khách hàng tại Spa",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "tier": { "type": "string" },
+        "totalSpent": { "type": "number" },
+        "visitCount": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "phone"]
+    },
+    "Staff": {
+      "title": "Staff",
+      "description": "Nhân viên và kỹ thuật viên Spa",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "phone": { "type": "string" },
+        "rating": { "type": "number" },
+        "commissionRate": { "type": "number" }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Danh mục dịch vụ và bài điều trị",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "durationMinutes": { "type": "number" },
+        "costItems": { "type": "array" }
+      },
+      "required": ["id", "name", "price"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Vật tư và mỹ phẩm trong kho",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "packagePurchasePrice": { "type": "number" },
+        "subUnitsPerPackage": { "type": "number" },
+        "stockPackages": { "type": "number" },
+        "stockSubUnits": { "type": "number" },
+        "minAlertPackages": { "type": "number" }
+      },
+      "required": ["id", "name", "code"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Lịch hẹn và lịch đặt điều trị",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "staffId": { "type": "string" },
+        "startTime": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "customerName", "serviceName", "startTime"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Hóa đơn thanh toán",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "amount"]
+    }
+  },
+  "firestore": {
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Danh sách khách hàng"
+    },
+    "/staff/{staffId}": {
+      "schema": "Staff",
+      "description": "Danh sách nhân viên"
+    },
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Danh mục dịch vụ spa"
+    },
+    "/inventory/{inventoryId}": {
+      "schema": "InventoryItem",
+      "description": "Kho mỹ phẩm tiêu hao"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Lịch hẹn khách hàng"
+    },
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Hóa đơn và doanh thu"
+    }
+  }
+}
