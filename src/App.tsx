@@ -501,6 +501,16 @@ export default function App() {
     trackSync(syncDocToFirestore(COLLECTIONS.PROMOTIONS, newPromo));
   };
 
+  const handleUpdatePromotion = (updatedPromo: Promotion) => {
+    setPromotions((prev) => prev.map((p) => (p.id === updatedPromo.id ? updatedPromo : p)));
+    trackSync(syncDocToFirestore(COLLECTIONS.PROMOTIONS, updatedPromo));
+  };
+
+  const handleDeletePromotion = (promoId: string) => {
+    setPromotions((prev) => prev.filter((p) => p.id !== promoId));
+    trackSync(deleteDocFromFirestore(COLLECTIONS.PROMOTIONS, promoId));
+  };
+
   const handleBroadcastNotification = (notif: AppNotification) => {
     setNotifications((prev) => [notif, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.NOTIFICATIONS, notif));
@@ -760,6 +770,8 @@ export default function App() {
               customers={customers}
               lang={lang}
               onAddPromotion={handleAddPromotion}
+              onUpdatePromotion={handleUpdatePromotion}
+              onDeletePromotion={handleDeletePromotion}
               onBroadcastNotification={handleBroadcastNotification}
             />
           )}

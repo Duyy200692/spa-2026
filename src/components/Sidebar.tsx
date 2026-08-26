@@ -327,12 +327,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Switch back to Customer Portal for safety */}
       <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
         <button
+          id="sidebar-btn-exit-to-home"
           onClick={() => onSwitchToCustomer && onSwitchToCustomer()}
-          className="w-full py-2 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all flex items-center justify-center space-x-1.5"
-          title="Chuyển máy về màn hình Khách Hàng khi giao cho khách"
+          className="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30 text-xs font-semibold transition-all flex items-center justify-center space-x-2 shadow-sm"
+          title="Thoát quyền truy cập và quay về Trang Chủ Khách Hàng"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Về Cổng Khách Hàng</span>
+          <LogOut className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+          <span>Thoát Ra Trang Chủ</span>
         </button>
       </div>
     </aside>

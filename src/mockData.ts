@@ -103,7 +103,20 @@ export const initialSpaProfile: SpaProfile = {
     'Dụng cụ sử dụng 1 lần hoặc tiệt trùng bằng nồi hấp chuẩn bệnh viện.',
     'Cam kết hiệu quả thấy rõ ngay sau buổi trị liệu đầu tiên.',
     'Bảo hành liệu trình và hỗ trợ tư vấn chăm sóc tại nhà 24/7.'
-  ]
+  ],
+  monthlySpecial: {
+    enabled: true,
+    badge: 'DỊCH VỤ ĐẶC BIỆT THÁNG 8 • BESTSELLER',
+    title: 'Smoothing Face Serum & Tái Sinh Đa Tầng',
+    subtitle: 'Liệu pháp trẻ hóa, thu nhỏ lỗ chân lông & làm mịn màng cấu trúc da',
+    description: 'Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, phục hồi hàng rào ẩm và dưỡng sáng đều màu tự nhiên.',
+    price: 650000,
+    originalPrice: 950000,
+    image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85',
+    themeColor: 'sage',
+    buttonText: 'ĐẶT LIỆU TRÌNH ĐẶC BIỆT',
+    serviceId: 'srv-3',
+  }
 };
 
 // Cẩm nang kiến thức làm đẹp

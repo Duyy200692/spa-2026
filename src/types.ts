@@ -246,6 +246,20 @@ export interface SpaProfile {
     description: string;
   }[];
   commitments: string[];
+  // Special monthly services & layout config
+  monthlySpecial?: {
+    enabled: boolean;
+    badge: string; // e.g. "DỊCH VỤ ĐẶC BIỆT THÁNG 8"
+    title: string; // e.g. "Smoothing Face Serum & Tái Sinh Đa Tầng"
+    subtitle: string; // e.g. "Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng"
+    description: string;
+    price: number;
+    originalPrice?: number;
+    image: string;
+    themeColor: 'sage' | 'rose' | 'amber' | 'blue' | 'charcoal';
+    buttonText: string;
+    serviceId?: string;
+  };
 }
 
 export interface NewsArticle {

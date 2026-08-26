@@ -17,7 +17,11 @@ import {
   Share2,
   Eye,
   Edit3,
-  ExternalLink
+  ExternalLink,
+  Sliders,
+  Star,
+  Tag,
+  Palette
 } from 'lucide-react';
 import { SpaProfile, Language } from '../types';
 
@@ -88,9 +92,22 @@ export const SpaProfileEditModal: React.FC<SpaProfileEditModalProps> = ({
           'Cam kết hiệu quả rõ rệt ngay sau buổi đầu tiên.',
           'Bảo hành liệu trình & hỗ trợ chăm sóc 24/7.',
         ],
+    monthlySpecial: spaProfile.monthlySpecial || {
+      enabled: true,
+      badge: 'DỊCH VỤ ĐẶC BIỆT THÁNG 8 • BESTSELLER',
+      title: 'Smoothing Face Serum & Tái Sinh Đa Tầng',
+      subtitle: 'Liệu pháp trẻ hóa, thu nhỏ lỗ chân lông & làm mịn màng cấu trúc da',
+      description: 'Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, phục hồi hàng rào ẩm và dưỡng sáng đều màu tự nhiên.',
+      price: 650000,
+      originalPrice: 950000,
+      image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85',
+      themeColor: 'sage',
+      buttonText: 'ĐẶT LIỆU TRÌNH ĐẶC BIỆT',
+      serviceId: 'srv-3',
+    },
   });
 
-  const [activeTab, setActiveTab] = useState<'general' | 'contact' | 'story' | 'highlights'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'contact' | 'special_monthly' | 'story' | 'highlights'>('general');
   const [isSaving, setIsSaving] = useState(false);
   const [newCommitmentText, setNewCommitmentText] = useState('');
   const [showSaveNotice, setShowSaveNotice] = useState(false);
@@ -183,6 +200,7 @@ export const SpaProfileEditModal: React.FC<SpaProfileEditModalProps> = ({
           {[
             { id: 'general', label: 'Tên & Logo Spa', icon: Building },
             { id: 'contact', label: 'Địa Chỉ & Liên Hệ', icon: MapPin },
+            { id: 'special_monthly', label: 'Dịch Vụ Đặc Biệt Tháng & Layout', icon: Star },
             { id: 'story', label: 'Câu Chuyện & Triết Lý', icon: Heart },
             { id: 'highlights', label: 'Điểm Nổi Bật & Cam Kết', icon: ShieldCheck },
           ].map((tab) => {
@@ -426,6 +444,334 @@ export const SpaProfileEditModal: React.FC<SpaProfileEditModalProps> = ({
                     placeholder="0908688888"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
                   />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: DỊCH VỤ ĐẶC BIỆT THÁNG & CHỈNH SỬA NHANH LAYOUT */}
+          {activeTab === 'special_monthly' && (
+            <div className="space-y-6 animate-in fade-in duration-150">
+              {/* Feature Toggle */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+                    <Star className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+                      Hiển Thị Banner Dịch Vụ Đặc Biệt Của Tháng
+                    </h4>
+                    <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                      Tự động ghim khối nổi bật ở vị trí trung tâm trang chủ landing page
+                    </p>
+                  </div>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.monthlySpecial?.enabled ?? true}
+                    onChange={(e) => {
+                      const cur = formData.monthlySpecial || {
+                        enabled: true,
+                        badge: 'DỊCH VỤ ĐẶC BIỆT THÁNG • BESTSELLER',
+                        title: '',
+                        subtitle: '',
+                        description: '',
+                        price: 500000,
+                        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85',
+                        themeColor: 'sage',
+                        buttonText: 'ĐẶT LỊCH NGAY',
+                      };
+                      handleInputChange('monthlySpecial', {
+                        ...cur,
+                        enabled: e.target.checked,
+                      });
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zinc-900 dark:peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+
+              {/* Special Service Fields */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5 flex items-center space-x-1.5">
+                      <Tag className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                      <span>Nhãn Tag Đặc Biệt (Badge):</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.monthlySpecial?.badge || ''}
+                      onChange={(e) => {
+                        const cur = formData.monthlySpecial || {
+                          enabled: true,
+                          badge: '',
+                          title: '',
+                          subtitle: '',
+                          description: '',
+                          price: 0,
+                          image: '',
+                          themeColor: 'sage',
+                          buttonText: 'ĐẶT LỊCH NGAY',
+                        };
+                        handleInputChange('monthlySpecial', { ...cur, badge: e.target.value });
+                      }}
+                      placeholder="VD: DỊCH VỤ ĐẶC BIỆT THÁNG 8 • BESTSELLER"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5 flex items-center space-x-1.5">
+                      <Palette className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                      <span>Tông Màu Layout Banner:</span>
+                    </label>
+                    <select
+                      value={formData.monthlySpecial?.themeColor || 'sage'}
+                      onChange={(e) => {
+                        const cur = formData.monthlySpecial || {
+                          enabled: true,
+                          badge: '',
+                          title: '',
+                          subtitle: '',
+                          description: '',
+                          price: 0,
+                          image: '',
+                          themeColor: 'sage',
+                          buttonText: 'ĐẶT LỊCH NGAY',
+                        };
+                        handleInputChange('monthlySpecial', { ...cur, themeColor: e.target.value as any });
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    >
+                      <option value="sage">Xanh Xô Thơm Tự Nhiên (Sage Green - Mặc định)</option>
+                      <option value="rose">Hồng Cánh Hoa Dịu Ngọt (Rose Glow)</option>
+                      <option value="amber">Vàng Hoàng Gia Ấm Áp (Warm Amber)</option>
+                      <option value="blue">Xanh Khoáng Biển Thanh Lọc (Ocean Mineral)</option>
+                      <option value="charcoal">Đen Than Sang Trọng Tối Giản (Minimal Charcoal)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                    Tên Liệu Trình / Dịch Vụ Nổi Bật *:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.monthlySpecial?.title || ''}
+                    onChange={(e) => {
+                      const cur = formData.monthlySpecial || {
+                        enabled: true,
+                        badge: '',
+                        title: '',
+                        subtitle: '',
+                        description: '',
+                        price: 0,
+                        image: '',
+                        themeColor: 'sage',
+                        buttonText: 'ĐẶT LỊCH NGAY',
+                      };
+                      handleInputChange('monthlySpecial', { ...cur, title: e.target.value });
+                    }}
+                    placeholder="VD: Smoothing Face Serum & Trẻ Hóa Đa Tầng"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                    Phụ Đề / Slogan Ngắn:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.monthlySpecial?.subtitle || ''}
+                    onChange={(e) => {
+                      const cur = formData.monthlySpecial || {
+                        enabled: true,
+                        badge: '',
+                        title: '',
+                        subtitle: '',
+                        description: '',
+                        price: 0,
+                        image: '',
+                        themeColor: 'sage',
+                        buttonText: 'ĐẶT LỊCH NGAY',
+                      };
+                      handleInputChange('monthlySpecial', { ...cur, subtitle: e.target.value });
+                    }}
+                    placeholder="VD: Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng chuẩn y khoa"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                    Mô Tả Chi Tiết Quy Trình & Hiệu Quả:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formData.monthlySpecial?.description || ''}
+                    onChange={(e) => {
+                      const cur = formData.monthlySpecial || {
+                        enabled: true,
+                        badge: '',
+                        title: '',
+                        subtitle: '',
+                        description: '',
+                        price: 0,
+                        image: '',
+                        themeColor: 'sage',
+                        buttonText: 'ĐẶT LỊCH NGAY',
+                      };
+                      handleInputChange('monthlySpecial', { ...cur, description: e.target.value });
+                    }}
+                    placeholder="Mô tả công nghệ sinh học, tinh chất điều chế ép lạnh, cam kết hiệu quả cho làn da..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white leading-relaxed"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                      Giá Khuyến Mãi (VNĐ):
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.monthlySpecial?.price || 0}
+                      onChange={(e) => {
+                        const cur = formData.monthlySpecial || {
+                          enabled: true,
+                          badge: '',
+                          title: '',
+                          subtitle: '',
+                          description: '',
+                          price: 0,
+                          image: '',
+                          themeColor: 'sage',
+                          buttonText: 'ĐẶT LỊCH NGAY',
+                        };
+                        handleInputChange('monthlySpecial', { ...cur, price: Number(e.target.value) || 0 });
+                      }}
+                      placeholder="650000"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                      Giá Gốc Chưa Giảm (VNĐ):
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.monthlySpecial?.originalPrice || 0}
+                      onChange={(e) => {
+                        const cur = formData.monthlySpecial || {
+                          enabled: true,
+                          badge: '',
+                          title: '',
+                          subtitle: '',
+                          description: '',
+                          price: 0,
+                          image: '',
+                          themeColor: 'sage',
+                          buttonText: 'ĐẶT LỊCH NGAY',
+                        };
+                        handleInputChange('monthlySpecial', { ...cur, originalPrice: Number(e.target.value) || 0 });
+                      }}
+                      placeholder="950000"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
+                      Nút Kêu Gọi Hành Động (CTA):
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.monthlySpecial?.buttonText || 'ĐẶT LIỆU TRÌNH NGAY'}
+                      onChange={(e) => {
+                        const cur = formData.monthlySpecial || {
+                          enabled: true,
+                          badge: '',
+                          title: '',
+                          subtitle: '',
+                          description: '',
+                          price: 0,
+                          image: '',
+                          themeColor: 'sage',
+                          buttonText: 'ĐẶT LỊCH NGAY',
+                        };
+                        handleInputChange('monthlySpecial', { ...cur, buttonText: e.target.value });
+                      }}
+                      placeholder="ĐẶT LIỆU TRÌNH NGAY"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5 flex items-center space-x-1.5">
+                    <ImageIcon className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    <span>Link Hình Ảnh Trưng Bày (Banner Image URL):</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.monthlySpecial?.image || ''}
+                    onChange={(e) => {
+                      const cur = formData.monthlySpecial || {
+                        enabled: true,
+                        badge: '',
+                        title: '',
+                        subtitle: '',
+                        description: '',
+                        price: 0,
+                        image: '',
+                        themeColor: 'sage',
+                        buttonText: 'ĐẶT LỊCH NGAY',
+                      };
+                      handleInputChange('monthlySpecial', { ...cur, image: e.target.value });
+                    }}
+                    placeholder="https://images.unsplash.com/photo-..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white font-mono text-[11px]"
+                  />
+
+                  {/* Preset quick image selection */}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {[
+                      { name: 'Tinh Chất Serum Tự Nhiên', url: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85' },
+                      { name: 'Liệu Pháp Massage Thư Giãn', url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=85' },
+                      { name: 'Dưỡng Ẩm Thủy Liệu Pháp', url: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=800&q=85' },
+                      { name: 'Cấy Dưỡng Chất Căng Bóng', url: 'https://images.unsplash.com/photo-1512290900672-1f4864c20577?w=800&q=85' },
+                    ].map((preset, pIdx) => (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => {
+                          const cur = formData.monthlySpecial || {
+                            enabled: true,
+                            badge: '',
+                            title: '',
+                            subtitle: '',
+                            description: '',
+                            price: 0,
+                            image: '',
+                            themeColor: 'sage',
+                            buttonText: 'ĐẶT LỊCH NGAY',
+                          };
+                          handleInputChange('monthlySpecial', { ...cur, image: preset.url });
+                        }}
+                        className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-[10px] text-zinc-800 dark:text-zinc-200"
+                      >
+                        + Mẫu ảnh: {preset.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

@@ -23,7 +23,9 @@ import {
   CalendarPlus,
   ChevronRight,
   ExternalLink,
-  ShieldAlert
+  ShieldAlert,
+  LogOut,
+  Home
 } from 'lucide-react';
 import { Role, Language, TabType } from '../types';
 import { translations } from '../i18n';
@@ -496,19 +498,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 )}
               </div>
 
-              {/* View Customer Portal */}
+              {/* View Customer Portal / Exit to Home */}
               <button
+                id="bottom-nav-exit-to-home"
                 onClick={() => {
                   setIsMenuOpen(false);
                   if (onSwitchToCustomer) onSwitchToCustomer();
                 }}
-                className="w-full py-3 px-4 rounded-2xl bg-[#FAF7F2] dark:bg-[#1A1C1F] border border-[#EAE4DA] dark:border-[#2E3136] text-[#181716] dark:text-white flex items-center justify-between text-xs font-bold shadow-sm"
+                className="w-full py-3 px-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30 flex items-center justify-between text-xs font-bold shadow-sm transition-all"
               >
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-[#8C5E32] dark:text-[#D4A373]" />
-                  <span>Xem Trang Chủ Khách Hàng (Customer Portal)</span>
+                  <LogOut className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <span>Thoát Ra Trang Chủ (Customer Landing Page)</span>
                 </div>
-                <ExternalLink className="w-4 h-4 opacity-60" />
+                <Home className="w-4 h-4 opacity-70" />
               </button>
 
               {/* Role Switcher Button */}

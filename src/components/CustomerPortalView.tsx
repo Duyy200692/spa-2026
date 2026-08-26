@@ -218,10 +218,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           <nav className="hidden lg:flex items-center space-x-7 text-xs tracking-wider uppercase font-medium text-[#4A4744] dark:text-[#A8A5A0]">
             <a href="#services-catalog" className="hover:text-black dark:hover:text-white transition-colors">Dịch Vụ & Trị Liệu</a>
             <a href="#bestseller-feature" className="hover:text-black dark:hover:text-white transition-colors">Bestseller</a>
-            <a href="#botanical-science" className="hover:text-black dark:hover:text-white transition-colors">Thành Phần Thực Vật</a>
             <a href="#bath-and-body" className="hover:text-black dark:hover:text-white transition-colors">Body & Thư Giãn</a>
             <a href="#promotions-vouchers" className="hover:text-black dark:hover:text-white transition-colors">Ưu Đãi</a>
-            <a href="#skincare-journal" className="hover:text-black dark:hover:text-white transition-colors">Cẩm Nang Da Liễu</a>
           </nav>
 
           {/* Center Brand Identity */}
@@ -245,15 +243,16 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
               <span>Đặt Lịch</span>
             </button>
 
-            {/* Edit Spa Profile (For Owner/Manager when previewing) */}
+            {/* Quick Edit Layout & Monthly Service (For Owner/Manager when viewing landing page) */}
             {(currentRole === 'owner' || currentRole === 'manager') && onOpenEditSpaProfile && (
               <button
+                id="btn-quick-edit-layout"
                 onClick={onOpenEditSpaProfile}
-                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-xs font-medium hover:bg-amber-500/20 transition-all"
-                title="Chỉnh sửa thông tin, logo & hotline"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold hover:bg-amber-500/25 transition-all shadow-sm active:scale-95"
+                title="Chỉnh sửa nhanh layout, logo, banner & dịch vụ đặc biệt trong tháng"
               >
-                <Building className="w-3.5 h-3.5" />
-                <span>Sửa Info</span>
+                <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Chỉnh Sửa Layout</span>
               </button>
             )}
           </div>
@@ -262,38 +261,30 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         {/* Mobile Slide-Down Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#161719] px-5 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-xl">
-            <div className="grid grid-cols-2 gap-2 text-xs font-medium text-[#181716] dark:text-white">
+            <div className="grid grid-cols-3 gap-2 text-xs font-medium text-[#181716] dark:text-white">
               <a
                 href="#services-catalog"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373]" />
-                <span>Bảng Dịch Vụ</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373] shrink-0" />
+                <span>Bảng Giá</span>
               </a>
               <a
                 href="#promotions-vouchers"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-1.5"
               >
-                <Tag className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373]" />
-                <span>Mã Ưu Đãi</span>
+                <Tag className="w-3.5 h-3.5 text-[#8C5E32] dark:text-[#D4A373] shrink-0" />
+                <span>Ưu Đãi</span>
               </a>
               <a
                 href="#bestseller-feature"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
+                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-1.5"
               >
-                <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Bestseller</span>
-              </a>
-              <a
-                href="#skincare-journal"
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center space-x-2"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>Cẩm Nang Da</span>
+                <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Nổi Bật</span>
               </a>
             </div>
 
@@ -459,101 +450,107 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </div>
       </section>
 
-      {/* 4. BOTANICAL SCIENCE & ACTIVE INGREDIENTS SPOTLIGHT (Matching Image 1 Top Right) */}
-      <section id="botanical-science" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
-        <div className="max-w-7xl mx-auto space-y-10">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C5E32] dark:text-[#D4A373]">
-              Active Botanical Science • Hoạt Chất Thực Vật
-            </span>
-            <h2 className="font-serif text-2xl sm:text-4xl text-[#181716] dark:text-white font-normal">
-              Potent Natural Actives for Radiant Skin
-            </h2>
-            <p className="text-xs sm:text-sm text-[#736E69] dark:text-[#8E8A85] font-light">
-              Mỗi liệu trình và sản phẩm đều được chiết xuất từ các thành phần thảo mộc hữu cơ chọn lọc có chứng minh lâm sàng.
-            </p>
-          </div>
+      {/* 4. DYNAMIC BESTSELLER / MONTHLY SPECIAL SERVICE HERO BANNER */}
+      {spaProfile.monthlySpecial?.enabled !== false && (
+        <section id="bestseller-feature" className={`border-b border-[#EAE4DA] dark:border-[#222428] relative ${
+          spaProfile.monthlySpecial?.themeColor === 'rose'
+            ? 'bg-[#FCEBE6] dark:bg-[#2B1714] text-[#4A1D18] dark:text-[#FAD2C8]'
+            : spaProfile.monthlySpecial?.themeColor === 'amber'
+            ? 'bg-[#FEF3D6] dark:bg-[#2B210D] text-[#4D3608] dark:text-[#FCE6A6]'
+            : spaProfile.monthlySpecial?.themeColor === 'blue'
+            ? 'bg-[#DBEAF0] dark:bg-[#182830] text-[#193645] dark:text-[#DFEEF5]'
+            : spaProfile.monthlySpecial?.themeColor === 'charcoal'
+            ? 'bg-[#222428] text-white'
+            : 'bg-[#D4E4D9] dark:bg-[#1B2920] text-[#1C3525] dark:text-[#E0EFE6]' // default sage
+        }`}>
+          {/* Quick Edit Float Button for Owner/Manager on the section */}
+          {(currentRole === 'owner' || currentRole === 'manager') && onOpenEditSpaProfile && (
+            <button
+              onClick={onOpenEditSpaProfile}
+              className="absolute top-4 right-4 z-20 px-3 py-1.5 rounded-full bg-white/90 dark:bg-zinc-900/90 hover:bg-white text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-md backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 flex items-center space-x-1.5 active:scale-95 transition-all"
+              title="Chỉnh sửa nhanh dịch vụ đặc biệt trong tháng & hình ảnh"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Chỉnh Sửa Dịch Vụ Tháng</span>
+            </button>
+          )}
 
-          {/* 4 Circular Ingredient Cards (Horizontal scrolling on small screens for comfortable viewing) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
-            {botanicalIngredients.map((item, idx) => (
-              <div key={idx} className="text-center space-y-2.5 sm:space-y-3.5 group bg-white/60 dark:bg-[#1A1C1F]/60 p-4 sm:p-0 rounded-2xl sm:rounded-none border sm:border-0 border-[#EAE4DA] dark:border-[#2E3136]">
-                <div className="w-18 h-18 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden border-2 border-[#E0D7C9] dark:border-[#2E3136] shadow-sm group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="space-y-0.5 sm:space-y-1">
-                  <h4 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium leading-snug">
-                    {item.name}
-                  </h4>
-                  <p className="text-[10px] sm:text-[11px] text-[#8C5E32] dark:text-[#D4A373] font-medium">
-                    {item.vietnameseName}
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[420px] lg:min-h-[480px]">
+            
+            {/* Left Column: Bestseller Copy & CTA */}
+            <div className="lg:col-span-6 p-6 sm:p-12 lg:p-16 flex flex-col justify-center">
+              <div className="max-w-md space-y-4 sm:space-y-6">
+                
+                <div className="space-y-1.5 sm:space-y-2">
+                  <span className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold opacity-90 block">
+                    {spaProfile.monthlySpecial?.badge || 'BESTSELLER • DỊCH VỤ TIÊU BIỂU'}
+                  </span>
+                  <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl leading-tight font-normal">
+                    {spaProfile.monthlySpecial?.title || 'Smoothing Face Serum'}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-serif italic opacity-90">
+                    {spaProfile.monthlySpecial?.subtitle || 'Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng'}
                   </p>
                 </div>
-                <p className="text-[11px] sm:text-xs text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed max-w-[240px] mx-auto">
-                  {item.description}
+
+                <p className="text-xs sm:text-sm font-light leading-relaxed opacity-95">
+                  {spaProfile.monthlySpecial?.description ||
+                    'Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, thu nhỏ lỗ chân lông tức thì.'}
                 </p>
+
+                {/* Price Display if configured */}
+                {(spaProfile.monthlySpecial?.price || 0) > 0 && (
+                  <div className="flex items-baseline space-x-3 pt-1">
+                    <span className="text-[11px] uppercase tracking-wider opacity-80">Giá trải nghiệm:</span>
+                    <span className="font-serif text-xl sm:text-2xl font-bold">
+                      {formatVND(spaProfile.monthlySpecial?.price || 0)}
+                    </span>
+                    {(spaProfile.monthlySpecial?.originalPrice || 0) > (spaProfile.monthlySpecial?.price || 0) && (
+                      <span className="text-xs line-through opacity-60">
+                        {formatVND(spaProfile.monthlySpecial?.originalPrice || 0)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => onOpenBooking(spaProfile.monthlySpecial?.serviceId || 'srv-3')}
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
+                  >
+                    <span>{spaProfile.monthlySpecial?.buttonText || 'ĐẶT LIỆU TRÌNH NGAY'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  {(currentRole === 'owner' || currentRole === 'manager') && onOpenEditSpaProfile && (
+                    <button
+                      onClick={onOpenEditSpaProfile}
+                      className="px-4 py-3 rounded-full bg-white/70 dark:bg-black/30 hover:bg-white text-xs font-semibold transition-all border border-black/10 dark:border-white/10"
+                    >
+                      Đổi Dịch Vụ Tháng Khác
+                    </button>
+                  )}
+                </div>
+
               </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* 5. BESTSELLER SAGE GREEN SPLIT HERO BANNER (Matching Image 1 Center: "Smoothing Face Serum") */}
-      <section id="bestseller-feature" className="border-b border-[#EAE4DA] dark:border-[#222428] bg-[#D4E4D9] dark:bg-[#1B2920] text-[#1C3525] dark:text-[#E0EFE6]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[420px] lg:min-h-[480px]">
-          
-          {/* Left Column: Bestseller Copy & CTA */}
-          <div className="lg:col-span-6 p-6 sm:p-12 lg:p-16 flex flex-col justify-center">
-            <div className="max-w-md space-y-4 sm:space-y-6">
-              
-              <div className="space-y-1.5 sm:space-y-2">
-                <span className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold text-[#2F533C] dark:text-[#A3CFB4]">
-                  BESTSELLER • DỊCH VỤ TIÊU BIỂU
-                </span>
-                <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[#14261B] dark:text-white leading-tight font-normal">
-                  Smoothing<br />Face Serum
-                </h2>
-                <p className="text-xs sm:text-sm font-serif italic text-[#2F533C] dark:text-[#A3CFB4]">
-                  Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng
-                </p>
-              </div>
-
-              <p className="text-xs sm:text-sm text-[#2D4536] dark:text-[#BFD6C8] font-light leading-relaxed">
-                Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, thu nhỏ lỗ chân lông tức thì.
-              </p>
-
-              <div className="pt-2">
-                <button
-                  onClick={() => onOpenBooking('srv-3')}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#14261B] text-white hover:bg-[#203D2B] dark:bg-white dark:text-[#14261B] dark:hover:bg-[#EAE4DA] text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
-                >
-                  <span>ĐẶT LIỆU TRÌNH NGAY</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
             </div>
-          </div>
 
-          {/* Right Column: Editorial Product Still Life Composition */}
-          <div className="lg:col-span-6 relative min-h-[260px] sm:min-h-[340px] lg:min-h-[480px] bg-[#C5D9CB] dark:bg-[#14211A] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85"
-              alt="Smoothing Face Serum - Botanical Still Life"
-              className="w-full h-full object-cover max-h-[360px] sm:max-h-[420px] rounded-2xl shadow-xl border border-white/20"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+            {/* Right Column: Editorial Product Still Life Composition */}
+            <div className="lg:col-span-6 relative min-h-[260px] sm:min-h-[340px] lg:min-h-[480px] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
+              <img
+                src={spaProfile.monthlySpecial?.image || 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85'}
+                alt={spaProfile.monthlySpecial?.title || 'Monthly Special Treatment'}
+                className="w-full h-full object-cover max-h-[360px] sm:max-h-[420px] rounded-2xl shadow-xl border border-white/20"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as any).src = 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85';
+                }}
+              />
+            </div>
 
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* 6. INTERACTIVE CLIENT STORIES & SKIN GLOW SHOWCASE (Matching Image 1 Left: "Best Skincare Products") */}
       <section className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
@@ -901,54 +898,108 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Vouchers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {activePromotions.map((promo) => {
               const isCopied = copiedCode === promo.code;
               return (
                 <div
                   key={promo.id}
-                  className="rounded-2xl border border-[#EAE4DA] dark:border-[#2E3136] bg-[#FAF7F2] dark:bg-[#1A1C1F] p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all"
+                  className="rounded-3xl border border-[#EAE4DA] dark:border-[#2E3136] bg-[#FAF7F2] dark:bg-[#1A1C1F] overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition-all group"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#8C5E32]/10 text-[#8C5E32] dark:text-[#D4A373] text-[10px] font-bold uppercase tracking-wider">
-                        {promo.discountType === 'percentage' ? `Giảm ${promo.discountValue}%` : `Giảm ${formatVND(promo.discountValue)}`}
-                      </span>
-                      <span className="text-[11px] text-[#736E69] flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>HSD: {promo.endDate}</span>
-                      </span>
+                  {/* Poster Banner Image if available */}
+                  {promo.image && (
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                      <img
+                        src={promo.image}
+                        alt={promo.title}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={(e) => {
+                          (e.target as any).src = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+
+                      {/* Highlight Badge */}
+                      <div className="absolute top-3 left-3">
+                        <span className="px-2.5 py-0.5 rounded-full bg-white text-zinc-950 text-[10px] font-extrabold shadow-sm">
+                          {promo.highlightBadge || 'ƯU ĐÃI ĐẶC BIỆT'}
+                        </span>
+                      </div>
+
+                      {/* Expiry Badge */}
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-medium flex items-center space-x-1">
+                          <Clock className="w-3 h-3 text-amber-400" />
+                          <span>HSD: {promo.endDate}</span>
+                        </span>
+                      </div>
+
+                      {/* Price / Discount Overlay */}
+                      <div className="absolute bottom-3 left-3 right-3 text-white">
+                        <div className="text-base sm:text-lg font-black tracking-tight drop-shadow">
+                          {promo.promotionalPrice && promo.originalPrice ? (
+                            <div className="flex items-baseline space-x-2">
+                              <span>{formatVND(promo.promotionalPrice)}</span>
+                              <span className="text-xs text-zinc-300 line-through opacity-80">
+                                {formatVND(promo.originalPrice)}
+                              </span>
+                            </div>
+                          ) : promo.discountType === 'percentage' ? (
+                            `GIẢM ${promo.discountValue}%`
+                          ) : (
+                            `GIẢM ${formatVND(promo.discountValue)}`
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-5 sm:p-6 space-y-3 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      {!promo.image && (
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#8C5E32]/10 text-[#8C5E32] dark:text-[#D4A373] text-[10px] font-bold uppercase tracking-wider">
+                            {promo.discountType === 'percentage' ? `Giảm ${promo.discountValue}%` : `Giảm ${formatVND(promo.discountValue)}`}
+                          </span>
+                          <span className="text-[11px] text-[#736E69] flex items-center space-x-1">
+                            <Clock className="w-3 h-3" />
+                            <span>HSD: {promo.endDate}</span>
+                          </span>
+                        </div>
+                      )}
+
+                      <h3 className="font-serif text-base sm:text-lg text-[#181716] dark:text-white font-medium line-clamp-2">
+                        {promo.title}
+                      </h3>
+
+                      <p className="text-xs text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed line-clamp-2">
+                        {promo.description}
+                      </p>
                     </div>
 
-                    <h3 className="font-serif text-base sm:text-lg text-[#181716] dark:text-white font-medium">
-                      {promo.title}
-                    </h3>
+                    <div className="pt-3 flex items-center justify-between border-t border-[#EAE4DA] dark:border-[#2E3136]">
+                      <div className="flex items-center space-x-2">
+                        <code className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#25282E] border border-[#DDD5C7] dark:border-[#383C44] text-xs font-mono font-bold text-[#181716] dark:text-white">
+                          {promo.code}
+                        </code>
+                        <button
+                          onClick={() => handleCopy(promo.code)}
+                          className="p-1.5 rounded-lg hover:bg-[#EAE4DA] dark:hover:bg-[#2E3136] text-[#736E69] hover:text-[#181716] transition-colors"
+                          title="Sao chép mã"
+                        >
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
 
-                    <p className="text-xs text-[#57534E] dark:text-[#A8A49E] font-light leading-relaxed">
-                      {promo.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 flex items-center justify-between border-t border-[#EAE4DA] dark:border-[#2E3136]">
-                    <div className="flex items-center space-x-2">
-                      <code className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#25282E] border border-[#DDD5C7] dark:border-[#383C44] text-xs font-mono font-bold text-[#181716] dark:text-white">
-                        {promo.code}
-                      </code>
                       <button
-                        onClick={() => handleCopy(promo.code)}
-                        className="p-1.5 rounded-lg hover:bg-[#EAE4DA] dark:hover:bg-[#2E3136] text-[#736E69] hover:text-[#181716] transition-colors"
-                        title="Sao chép mã"
+                        onClick={() => onOpenBooking(undefined, promo.code)}
+                        className="px-3 py-1.5 rounded-full bg-[#181716] hover:bg-[#33312E] dark:bg-white dark:hover:bg-[#EAE4DA] text-white dark:text-[#181716] text-xs font-semibold tracking-wide transition-all shadow-sm active:scale-95 flex items-center space-x-1"
                       >
-                        {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>Dùng Mã</span>
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
-
-                    <button
-                      onClick={() => onOpenBooking(undefined, promo.code)}
-                      className="text-xs font-semibold text-[#181716] dark:text-white underline hover:opacity-80"
-                    >
-                      Dùng Mã →
-                    </button>
                   </div>
                 </div>
               );
@@ -958,64 +1009,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </div>
       </section>
 
-      {/* 10. SKINCARE JOURNAL & DERMATOLOGY GUIDES */}
-      <section id="skincare-journal" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
-        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#EAE4DA] dark:border-[#222428]">
-            <div>
-              <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C5E32] dark:text-[#D4A373]">
-                Dermatology & Clinical Skincare Journal
-              </span>
-              <h2 className="font-serif text-2xl sm:text-4xl text-[#181716] dark:text-white font-normal mt-1">
-                Cẩm Nang Chăm Sóc Da Chuẩn Y Khoa
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {newsArticles.slice(0, 3).map((article) => (
-              <div
-                key={article.id}
-                onClick={() => setSelectedArticle(article)}
-                className="bg-white dark:bg-[#18191C] rounded-2xl border border-[#EAE4DA] dark:border-[#26282D] overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="aspect-[16/10] bg-[#FAF7F2] dark:bg-[#121314] overflow-hidden">
-                    <img
-                      src={article.image || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80'}
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="p-4 sm:p-5 space-y-2">
-                    <div className="flex items-center space-x-2 text-[10px] text-[#736E69] uppercase font-semibold tracking-wider">
-                      <span>{article.category}</span>
-                      <span>•</span>
-                      <span>{article.date}</span>
-                    </div>
-                    <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium group-hover:underline line-clamp-2 leading-snug">
-                      {article.title}
-                    </h3>
-                    <p className="text-xs text-[#57534E] dark:text-[#A8A49E] font-light line-clamp-3 leading-relaxed">
-                      {article.summary}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-5 pt-0 text-xs font-semibold text-[#8C5E32] dark:text-[#D4A373] flex items-center space-x-1">
-                  <span>Đọc bài viết</span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* 11. LUXURY FOOTER & SPA CONTACT INFO */}
+      {/* 10. LUXURY FOOTER & SPA CONTACT INFO */}
       <footer className="bg-[#181716] text-[#FAF7F2] pt-14 pb-24 lg:pb-12 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto space-y-10 sm:space-y-12">
           
@@ -1167,58 +1161,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </div>
       )}
 
-      {/* ARTICLE MODAL POPUP */}
-      {selectedArticle && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#18191C] rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8 space-y-4 shadow-2xl border border-[#EAE4DA] dark:border-[#2E3136]">
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
-              <span className="text-xs uppercase font-bold text-[#8C5E32] tracking-wider">{selectedArticle.category}</span>
-              <button
-                onClick={() => setSelectedArticle(null)}
-                className="p-1 rounded-full text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {selectedArticle.image && (
-              <div className="aspect-[16/9] rounded-2xl overflow-hidden">
-                <img
-                  src={selectedArticle.image}
-                  alt={selectedArticle.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            <h2 className="font-serif text-2xl text-zinc-900 dark:text-white font-medium">
-              {selectedArticle.title}
-            </h2>
-
-            <div className="text-xs text-zinc-500">
-              Tác giả: <strong className="text-zinc-700 dark:text-zinc-300">{selectedArticle.author}</strong> • Ngày đăng: {selectedArticle.date}
-            </div>
-
-            <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line font-light">
-              {selectedArticle.content}
-            </div>
-
-            <div className="pt-4 flex justify-end">
-              <button
-                onClick={() => {
-                  setSelectedArticle(null);
-                  onOpenBooking();
-                }}
-                className="px-5 py-2.5 rounded-full bg-[#181716] text-white dark:bg-white dark:text-zinc-900 text-xs font-semibold tracking-wide"
-              >
-                Đặt Lịch Khám & Tư Vấn Da
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 12. MOBILE FLOATING ACTION BAR (STICKY BOTTOM DOCK) */}
+      {/* 11. MOBILE FLOATING ACTION BAR (STICKY BOTTOM DOCK) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 p-2.5 bg-white/95 dark:bg-[#141518]/95 backdrop-blur-lg border-t border-[#EAE4DA] dark:border-[#26282E] shadow-2xl">
         <div className="max-w-md mx-auto flex items-center space-x-2">
           <a

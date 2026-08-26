@@ -14,7 +14,9 @@ import {
   Database,
   CloudCheck,
   RefreshCw,
-  Building
+  Building,
+  Home,
+  LogOut
 } from 'lucide-react';
 import { Role, Language, Theme, AppNotification, TabType, SpaProfile } from '../types';
 import { translations } from '../i18n';
@@ -282,16 +284,32 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Quick Logout to Customer Portal if logged in as staff/owner */}
-            {currentRole !== 'customer' && (
-              <button
-                onClick={() => onRoleChange('customer')}
-                className="hidden lg:inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                title="Đăng xuất về chế độ Khách Hàng an toàn"
-              >
-                <span>Cổng Khách</span>
-              </button>
-            )}
+            {/* Exit to Landing Page / Home Button */}
+            <button
+              id="btn-nav-exit-to-home"
+              onClick={() => {
+                onRoleChange('customer');
+                if (window) window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+                currentRole !== 'customer'
+                  ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                  : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700'
+              }`}
+              title={currentRole !== 'customer' ? 'Thoát ra trang chủ Khách Hàng (Customer Landing Page)' : 'Trang chủ'}
+            >
+              {currentRole !== 'customer' ? (
+                <>
+                  <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                  <span>Thoát Ra Trang Chủ</span>
+                </>
+              ) : (
+                <>
+                  <Home className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
+                  <span className="hidden sm:inline">Trang Chủ</span>
+                </>
+              )}
+            </button>
 
             {/* Language Switcher */}
             <button
