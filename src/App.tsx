@@ -128,17 +128,10 @@ export default function App() {
   useEffect(() => {
     let unsubs: (() => void)[] = [];
     try {
-      // Auto seed clean initial data if needed on mount in background
-      seedCleanDataToFirebase().then(() => {
-        setLastSyncedTime(new Date());
-      }).catch((err) => {
-        console.warn('Auto-seed check note:', err);
-      });
-
       // Subscribe to Customers
       unsubs.push(
         subscribeToCollection<Customer>(COLLECTIONS.CUSTOMERS, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setCustomers(items);
             setLastSyncedTime(new Date());
           }
@@ -148,7 +141,7 @@ export default function App() {
       // Subscribe to Staff
       unsubs.push(
         subscribeToCollection<Staff>(COLLECTIONS.STAFF, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setStaff(items);
             setLastSyncedTime(new Date());
           }
@@ -158,7 +151,7 @@ export default function App() {
       // Subscribe to Services
       unsubs.push(
         subscribeToCollection<Service>(COLLECTIONS.SERVICES, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setServices(items);
             setLastSyncedTime(new Date());
           }
@@ -168,7 +161,7 @@ export default function App() {
       // Subscribe to Appointments
       unsubs.push(
         subscribeToCollection<Appointment>(COLLECTIONS.APPOINTMENTS, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setAppointments(items);
             setLastSyncedTime(new Date());
           }
@@ -178,7 +171,7 @@ export default function App() {
       // Subscribe to Inventory
       unsubs.push(
         subscribeToCollection<InventoryItem>(COLLECTIONS.INVENTORY, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setInventory(items);
             setLastSyncedTime(new Date());
           }
@@ -188,7 +181,7 @@ export default function App() {
       // Subscribe to Attendance
       unsubs.push(
         subscribeToCollection<AttendanceRecord>(COLLECTIONS.ATTENDANCE, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setAttendance(items);
             setLastSyncedTime(new Date());
           }
@@ -198,7 +191,7 @@ export default function App() {
       // Subscribe to Promotions
       unsubs.push(
         subscribeToCollection<Promotion>(COLLECTIONS.PROMOTIONS, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setPromotions(items);
             setLastSyncedTime(new Date());
           }
@@ -208,7 +201,7 @@ export default function App() {
       // Subscribe to Invoices
       unsubs.push(
         subscribeToCollection<Invoice>(COLLECTIONS.INVOICES, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setInvoices(items);
             setLastSyncedTime(new Date());
           }
@@ -218,7 +211,7 @@ export default function App() {
       // Subscribe to Notifications
       unsubs.push(
         subscribeToCollection<AppNotification>(COLLECTIONS.NOTIFICATIONS, (items) => {
-          if (items && items.length > 0) {
+          if (Array.isArray(items)) {
             setNotifications(items);
             setLastSyncedTime(new Date());
           }
@@ -425,6 +418,11 @@ export default function App() {
       prev.map((s) => (s.id === updatedService.id ? updatedService : s))
     );
     trackSync(syncDocToFirestore(COLLECTIONS.SERVICES, updatedService));
+  };
+
+  const handleDeleteService = (serviceId: string) => {
+    setServices((prev) => prev.filter((s) => s.id !== serviceId));
+    trackSync(deleteDocFromFirestore(COLLECTIONS.SERVICES, serviceId));
   };
 
   const handleClockIn = (newRecord: AttendanceRecord) => {
@@ -687,6 +685,7 @@ export default function App() {
               lang={lang}
               onAddService={handleAddService}
               onUpdateService={handleUpdateService}
+              onDeleteService={handleDeleteService}
               onSaveServiceCost={handleSaveServiceCost}
             />
           )}
@@ -854,6 +853,16 @@ export default function App() {
         isCloudConnected={isFirebaseConnected}
         isSyncing={isFirebaseSyncing}
         lastSyncedTime={lastSyncedTime}
+        onRefreshData={() => {
+          setServices([]);
+          setAppointments([]);
+          setInvoices([]);
+          setCustomers([]);
+          setInventory([]);
+          setAttendance([]);
+          setPromotions([]);
+          setNotifications([]);
+        }}
       />
 
       {/* Spa Profile, Address, Story & Logo Edit Modal */}

@@ -26,6 +26,7 @@ interface CostCalculationViewProps {
   lang: Language;
   onUpdateService?: (updatedService: Service) => void;
   onAddService?: (newService: Service) => void;
+  onDeleteService?: (serviceId: string) => void;
   onSaveServiceCost?: (savedService: Service) => void;
 }
 
@@ -35,12 +36,13 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
   lang,
   onUpdateService,
   onAddService,
+  onDeleteService,
   onSaveServiceCost,
 }) => {
   const t = translations[lang];
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>(services[0]?.id || '');
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(services.length === 0);
 
   // Active working state for currently edited service
   const currentService = services.find(s => s.id === selectedServiceId) || services[0];
@@ -56,16 +58,38 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
     otherOverheads: number;
     costItems: ServiceCostItem[];
   }>({
-    id: currentService?.id || 'srv-custom',
+    id: currentService?.id || `srv-${Date.now()}`,
     name: currentService?.name || '',
     category: currentService?.category || 'Chăm sóc & Điều trị da mặt',
-    price: currentService?.price || 450000,
+    price: currentService?.price || 350000,
     durationMinutes: currentService?.durationMinutes || 60,
     description: currentService?.description || '',
-    technicianCommission: currentService?.technicianCommission || 60000,
-    otherOverheads: currentService?.otherOverheads || 25000,
+    technicianCommission: currentService?.technicianCommission || 50000,
+    otherOverheads: currentService?.otherOverheads || 20000,
     costItems: currentService?.costItems || [],
   });
+
+  // Automatically switch to create mode if services list is empty
+  useEffect(() => {
+    if (services.length === 0) {
+      setIsCreatingNew(true);
+      const newId = `srv-${Date.now()}`;
+      setSelectedServiceId(newId);
+      setFormData({
+        id: newId,
+        name: '',
+        category: 'Chăm sóc & Điều trị da mặt',
+        price: 350000,
+        durationMinutes: 60,
+        description: '',
+        technicianCommission: 50000,
+        otherOverheads: 20000,
+        costItems: [],
+      });
+    } else if (!isCreatingNew && !services.find(s => s.id === selectedServiceId)) {
+      handleSelectService(services[0].id);
+    }
+  }, [services.length]);
 
   const [selectedInventoryToAdd, setSelectedInventoryToAdd] = useState<string>(inventory[0]?.id || '');
   const [quantityToAdd, setQuantityToAdd] = useState<number>(4);
@@ -304,56 +328,77 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
         {/* Left Column (4 Cols): Service Selector & Comparative Profit Margins */}
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-4 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-3">
-            <h2 className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] uppercase tracking-wider">
-              {t.selectServiceToInspect}
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] uppercase tracking-wider">
+                {t.selectServiceToInspect} ({services.length})
+              </h2>
+              <button
+                onClick={handleStartNewService}
+                className="text-xs font-bold text-[#5A7D57] dark:text-[#8BA888] hover:underline flex items-center space-x-1"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Thêm Mới</span>
+              </button>
+            </div>
 
             <div className="space-y-2">
-              {services.map(srv => {
-                const isSelected = !isCreatingNew && srv.id === selectedServiceId;
-                return (
-                  <div
-                    key={srv.id}
-                    id={`service-card-${srv.id}`}
-                    onClick={() => handleSelectService(srv.id)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer space-y-1.5 ${
-                      isSelected
-                        ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#8BA888]/15 dark:bg-[#8BA888]/20 ring-1 ring-[#5A7D57] dark:ring-[#8BA888]'
-                        : 'border-[#E2E6DF] dark:border-[#2D312C] hover:border-[#8BA888] bg-[#F5F7F4] dark:bg-[#222621]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] line-clamp-1">
-                        {srv.name}
-                      </span>
-                      <span className="text-xs font-extrabold text-[#5A7D57] dark:text-[#8BA888]">
-                        {formatCurrency(srv.price, lang)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-[#5E665B] dark:text-[#9BA198]">
-                      <span>Cost: {formatCurrency(srv.totalCalculatedCost, lang)}</span>
-                      <span className="font-bold text-[#30522E] dark:text-[#A3C2A0]">
-                        Lãi: {srv.profitMarginPercent}% ({formatCurrency(srv.grossProfit, lang)})
-                      </span>
-                    </div>
-
-                    {/* Progress Bar of Margin */}
-                    <div className="w-full bg-[#E2E6DF] dark:bg-[#2D312C] h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          srv.profitMarginPercent >= 65
-                            ? 'bg-[#5A7D57] dark:bg-[#8BA888]'
-                            : srv.profitMarginPercent >= 50
-                            ? 'bg-[#D4A373] dark:text-[#E6C29E]'
-                            : 'bg-[#965A54] dark:bg-[#D98A84]'
-                        }`}
-                        style={{ width: `${Math.min(100, srv.profitMarginPercent)}%` }}
-                      />
-                    </div>
+              {services.length === 0 ? (
+                <div className="p-5 text-center rounded-2xl border border-dashed border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4]/50 dark:bg-[#222621]/30 space-y-2">
+                  <div className="w-9 h-9 mx-auto rounded-full bg-[#8BA888]/20 flex items-center justify-center text-[#5A7D57] dark:text-[#8BA888]">
+                    <Sparkles className="w-4 h-4" />
                   </div>
-                );
-              })}
+                  <p className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF]">Chưa có bài dịch vụ nào</p>
+                  <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198] leading-relaxed">
+                    Điền thông tin và định mức chi phí ở bên phải để tạo bài dịch vụ đầu tiên của bạn!
+                  </p>
+                </div>
+              ) : (
+                services.map(srv => {
+                  const isSelected = !isCreatingNew && srv.id === selectedServiceId;
+                  return (
+                    <div
+                      key={srv.id}
+                      id={`service-card-${srv.id}`}
+                      onClick={() => handleSelectService(srv.id)}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer space-y-1.5 relative group ${
+                        isSelected
+                          ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#8BA888]/15 dark:bg-[#8BA888]/20 ring-1 ring-[#5A7D57] dark:ring-[#8BA888]'
+                          : 'border-[#E2E6DF] dark:border-[#2D312C] hover:border-[#8BA888] bg-[#F5F7F4] dark:bg-[#222621]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] line-clamp-1 pr-6">
+                          {srv.name}
+                        </span>
+                        <span className="text-xs font-extrabold text-[#5A7D57] dark:text-[#8BA888]">
+                          {formatCurrency(srv.price, lang)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                        <span>Cost: {formatCurrency(srv.totalCalculatedCost, lang)}</span>
+                        <span className="font-bold text-[#30522E] dark:text-[#A3C2A0]">
+                          Lãi: {srv.profitMarginPercent}% ({formatCurrency(srv.grossProfit, lang)})
+                        </span>
+                      </div>
+
+                      {/* Progress Bar of Margin */}
+                      <div className="w-full bg-[#E2E6DF] dark:border-[#2D312C] h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            srv.profitMarginPercent >= 65
+                              ? 'bg-[#5A7D57] dark:bg-[#8BA888]'
+                              : srv.profitMarginPercent >= 50
+                              ? 'bg-[#D4A373] dark:text-[#E6C29E]'
+                              : 'bg-[#965A54] dark:bg-[#D98A84]'
+                          }`}
+                          style={{ width: `${Math.min(100, srv.profitMarginPercent)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -367,7 +412,7 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                 <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
                   <Layers className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
                   <span>
-                    {isCreatingNew ? 'Thiết Lập Định Lượng Dịch Vụ Mới' : `Định Lượng Giá Cost: ${formData.name}`}
+                    {isCreatingNew ? 'Thiết Lập Bài Dịch Vụ Mới' : `Định Lượng Giá Cost: ${formData.name || 'Bài dịch vụ'}`}
                   </span>
                 </h3>
                 <span className="text-xs text-[#5E665B] dark:text-[#9BA198]">
@@ -376,6 +421,20 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
               </div>
 
               <div className="flex items-center space-x-2">
+                {!isCreatingNew && onDeleteService && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Bạn có chắc muốn xóa bài dịch vụ "${formData.name}"?`)) {
+                        onDeleteService(formData.id);
+                      }
+                    }}
+                    className="p-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 transition-colors"
+                    title="Xóa bài dịch vụ này"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
                 {saveSuccessMsg && (
                   <span className="text-xs font-semibold text-[#30522E] dark:text-[#A3C2A0] flex items-center space-x-1 animate-in fade-in">
                     <CheckCircle2 className="w-4 h-4" />
@@ -621,61 +680,70 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
               </div>
 
               {/* Add Cosmetic Selector Widget with Live Conversion preview */}
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-3">
-                <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5">
-                    <Plus className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
-                    <span>Chọn Mỹ Phẩm Từ Kho Để Thêm Định Lượng:</span>
-                  </div>
-                  {selectedInvObj && (
-                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-normal">
-                      Đơn giá: <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(selectedInvObj.costPerSubUnit, lang)}/{selectedInvObj.subUnitName}</strong>
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                  <div className="flex-1">
-                    <select
-                      value={selectedInventoryToAdd}
-                      onChange={e => setSelectedInventoryToAdd(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
-                    >
-                      {inventory.map(inv => (
-                        <option key={inv.id} value={inv.id}>
-                          {inv.name} — [1 {inv.packageUnit || inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
+              {inventory.length === 0 ? (
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-900/80 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl text-xs text-zinc-600 dark:text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="0.1"
-                        value={quantityToAdd}
-                        onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
-                        className="w-20 px-2 py-2.5 text-center rounded-xl text-xs font-bold border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
-                      />
-                      <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold px-1">
-                        {selectedInvObj?.subUnitName || 'đơn vị'}
+                    <Boxes className="w-4 h-4 text-zinc-400" />
+                    <span>Kho mỹ phẩm đang trống. Bạn vẫn có thể lưu bài dịch vụ với hoa hồng KTV & chi phí vận hành, hoặc thêm vật tư vào kho mỹ phẩm bất cứ lúc nào.</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-3">
+                  <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5">
+                      <Plus className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                      <span>Chọn Mỹ Phẩm Từ Kho Để Thêm Định Lượng:</span>
+                    </div>
+                    {selectedInvObj && (
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-normal">
+                        Đơn giá: <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(selectedInvObj.costPerSubUnit, lang)}/{selectedInvObj.subUnitName}</strong>
                       </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <div className="flex-1">
+                      <select
+                        value={selectedInventoryToAdd}
+                        onChange={e => setSelectedInventoryToAdd(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                      >
+                        {inventory.map(inv => (
+                          <option key={inv.id} value={inv.id}>
+                            {inv.name} — [1 {inv.packageUnit || inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    <button
-                      id="btn-add-item-to-recipe"
-                      type="button"
-                      onClick={handleAddCostItem}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4A6A47] dark:bg-[#8BA888] dark:hover:bg-[#789875] text-white dark:text-[#121412] transition-all shrink-0 flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Thêm (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="0.1"
+                          value={quantityToAdd}
+                          onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
+                          className="w-20 px-2 py-2.5 text-center rounded-xl text-xs font-bold border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                        />
+                        <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold px-1">
+                          {selectedInvObj?.subUnitName || 'đơn vị'}
+                        </span>
+                      </div>
+
+                      <button
+                        id="btn-add-item-to-recipe"
+                        type="button"
+                        onClick={handleAddCostItem}
+                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4A6A47] dark:bg-[#8BA888] dark:hover:bg-[#789875] text-white dark:text-[#121412] transition-all shrink-0 flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Other Cost Factors: Staff Commission + Overheads */}
