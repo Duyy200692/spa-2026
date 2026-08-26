@@ -54,6 +54,7 @@ import {
   subscribeToCollection,
   syncDocToFirestore,
   deleteDocFromFirestore,
+  clearCollectionFromFirebase,
   seedCleanDataToFirebase
 } from './firebase';
 
@@ -391,6 +392,26 @@ export default function App() {
     trackSync(syncDocToFirestore(COLLECTIONS.CUSTOMERS, updatedCustomer));
   };
 
+  const handleDeleteCustomer = (customerId: string) => {
+    setCustomers((prev) => prev.filter((c) => c.id !== customerId));
+    trackSync(deleteDocFromFirestore(COLLECTIONS.CUSTOMERS, customerId));
+  };
+
+  const handleClearAllCustomers = async () => {
+    setCustomers([]);
+    await clearCollectionFromFirebase(COLLECTIONS.CUSTOMERS);
+  };
+
+  const handleDeleteInvoice = (invoiceId: string) => {
+    setInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
+    trackSync(deleteDocFromFirestore(COLLECTIONS.INVOICES, invoiceId));
+  };
+
+  const handleClearAllInvoices = async () => {
+    setInvoices([]);
+    await clearCollectionFromFirebase(COLLECTIONS.INVOICES);
+  };
+
   const handleUpdateInventory = (updatedItem: InventoryItem) => {
     setInventory((prev) =>
       prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
@@ -601,7 +622,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#09090B] text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-200 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950">
+    <div className="min-h-screen w-full bg-zinc-50 dark:bg-[#09090B] text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-200 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 overflow-x-hidden">
       {/* Top Header Navigation - Rendered in Staff Management Mode */}
       {!isCustomerTab && (
         <Navbar
@@ -628,7 +649,7 @@ export default function App() {
       {/* Main Layout Container */}
       {isCustomerTab ? (
         /* Full-Width Luxury Editorial Landing Page (Matching Image 1) */
-        <main className="w-full min-h-screen">
+        <main className="w-full min-h-screen overflow-x-hidden pb-20 lg:pb-0">
           <CustomerPortalView
             lang={lang}
             services={services}
@@ -651,7 +672,7 @@ export default function App() {
         </main>
       ) : (
         /* Internal Spa Management Workspace with Sidebar & Dashboard */
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 pb-20 md:pb-8 flex gap-6">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-24 md:pb-8 flex gap-6 min-w-0 overflow-x-hidden">
           {/* Desktop Sidebar */}
           <div className="w-64 shrink-0 hidden md:block">
             <Sidebar
@@ -669,7 +690,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Main Workspace Area */}
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 w-full overflow-x-hidden">
             {activeTab === 'dashboard' && (
               <DashboardView
                 appointments={appointments}
@@ -719,8 +740,12 @@ export default function App() {
             <CustomersView
               customers={customers}
               lang={lang}
+              currentRole={currentRole}
               onAddCustomer={handleAddCustomer}
               onUpdateCustomer={handleUpdateCustomer}
+              onDeleteCustomer={handleDeleteCustomer}
+              onClearAllCustomers={handleClearAllCustomers}
+              onClearAllInvoices={handleClearAllInvoices}
             />
           )}
 
@@ -777,7 +802,13 @@ export default function App() {
           )}
 
           {!isCustomerTab && activeTab === 'reports' && (
-            <ReportsView invoices={invoices} services={services} lang={lang} />
+            <ReportsView
+              invoices={invoices}
+              services={services}
+              lang={lang}
+              onDeleteInvoice={handleDeleteInvoice}
+              onClearAllInvoices={handleClearAllInvoices}
+            />
           )}
           </main>
         </div>

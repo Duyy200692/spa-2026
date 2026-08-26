@@ -15,10 +15,13 @@ import {
   ArrowRight,
   RefreshCw,
   Boxes,
-  Percent
+  Percent,
+  Tag,
+  Wand2
 } from 'lucide-react';
 import { Service, InventoryItem, ServiceCostItem, Language } from '../types';
 import { translations, formatCurrency } from '../i18n';
+import { generateServiceCode, getServiceShortName, resolveServiceMeta } from '../utils/serviceUtils';
 
 interface CostCalculationViewProps {
   services: Service[];
@@ -49,6 +52,8 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
 
   const [formData, setFormData] = useState<{
     id: string;
+    code: string;
+    shortName: string;
     name: string;
     category: string;
     price: number;
@@ -59,6 +64,8 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
     costItems: ServiceCostItem[];
   }>({
     id: currentService?.id || `srv-${Date.now()}`,
+    code: currentService?.code || generateServiceCode(currentService?.category || currentService?.name || 'DV', 1),
+    shortName: currentService?.shortName || getServiceShortName(currentService?.name || '', 28),
     name: currentService?.name || '',
     category: currentService?.category || 'Chăm sóc & Điều trị da mặt',
     price: currentService?.price || 350000,
@@ -77,6 +84,8 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
       setSelectedServiceId(newId);
       setFormData({
         id: newId,
+        code: generateServiceCode('Chăm sóc & Điều trị da mặt', 1),
+        shortName: 'Chăm Sóc Tái Sinh',
         name: '',
         category: 'Chăm sóc & Điều trị da mặt',
         price: 350000,
@@ -107,6 +116,8 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
       setIsCreatingNew(false);
       setFormData({
         id: srv.id,
+        code: srv.code || generateServiceCode(srv.category || srv.name, 1),
+        shortName: srv.shortName || getServiceShortName(srv.name, 28),
         name: srv.name,
         category: srv.category,
         price: srv.price,
@@ -118,6 +129,18 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
       });
       setSaveSuccessMsg(false);
     }
+  };
+
+  // Auto generate service code helper
+  const handleAutoGenerateCode = () => {
+    const nextIdx = services.length + 1;
+    const generated = generateServiceCode(formData.name || formData.category, nextIdx);
+    const short = getServiceShortName(formData.name, 28);
+    setFormData(prev => ({
+      ...prev,
+      code: generated,
+      shortName: prev.shortName || short,
+    }));
   };
 
   // Switch to creating a new service recipe
@@ -152,8 +175,12 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
       });
     }
 
+    const defaultCode = generateServiceCode('Chăm sóc da', services.length + 1);
+
     setFormData({
       id: newId,
+      code: defaultCode,
+      shortName: 'Chăm Sóc Trẻ Hóa',
       name: 'Bài Chăm Sóc & Trẻ Hóa Tái Sinh Mới',
       category: 'Chăm sóc & Điều trị da mặt',
       price: 450000,
@@ -355,6 +382,7 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
               ) : (
                 services.map(srv => {
                   const isSelected = !isCreatingNew && srv.id === selectedServiceId;
+                  const code = srv.code || generateServiceCode(srv.category || srv.name, 1);
                   return (
                     <div
                       key={srv.id}
@@ -366,11 +394,16 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                           : 'border-[#E2E6DF] dark:border-[#2D312C] hover:border-[#8BA888] bg-[#F5F7F4] dark:bg-[#222621]'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] line-clamp-1 pr-6">
-                          {srv.name}
-                        </span>
-                        <span className="text-xs font-extrabold text-[#5A7D57] dark:text-[#8BA888]">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center space-x-1.5 min-w-0">
+                          <span className="px-1.5 py-0.5 rounded font-mono text-[10px] font-black uppercase bg-[#5A7D57]/20 text-[#30522E] dark:bg-[#8BA888]/25 dark:text-[#A3C2A0] border border-[#5A7D57]/30 shrink-0">
+                            {code}
+                          </span>
+                          <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] truncate">
+                            {srv.shortName || srv.name}
+                          </span>
+                        </div>
+                        <span className="text-xs font-extrabold text-[#5A7D57] dark:text-[#8BA888] shrink-0">
                           {formatCurrency(srv.price, lang)}
                         </span>
                       </div>
@@ -412,7 +445,7 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                 <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
                   <Layers className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
                   <span>
-                    {isCreatingNew ? 'Thiết Lập Bài Dịch Vụ Mới' : `Định Lượng Giá Cost: ${formData.name || 'Bài dịch vụ'}`}
+                    {isCreatingNew ? 'Thiết Lập Bài Dịch Vụ Mới' : `Định Lượng Giá Cost: [${formData.code}] ${formData.name || 'Bài dịch vụ'}`}
                   </span>
                 </h3>
                 <span className="text-xs text-[#5E665B] dark:text-[#9BA198]">
@@ -452,22 +485,47 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
               </div>
             </div>
 
-            {/* Price & Name Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Service Codes, Short Names & Prices */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               <div>
-                <label className="block text-xs font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                  {t.serviceName}
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+                    Mã Ký Hiệu (Mã DV)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerateCode}
+                    className="text-[11px] font-semibold text-[#5A7D57] dark:text-[#8BA888] hover:underline flex items-center space-x-0.5"
+                    title="Tự động tạo mã ký hiệu từ tên dịch vụ"
+                  >
+                    <Wand2 className="w-3 h-3" />
+                    <span>Tạo tự động</span>
+                  </button>
+                </div>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                  placeholder="VD: TM-01, MS-02..."
+                  value={formData.code}
+                  onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-mono font-bold tracking-wider uppercase border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                <label className="block text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Tên Rút Gọn (Bảng/Di động)
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: Trị Mụn Y Khoa..."
+                  value={formData.shortName}
+                  onChange={e => setFormData({ ...formData, shortName: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-semibold border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
                   {t.sellingPrice} (VNĐ)
                 </label>
                 <input
@@ -475,7 +533,55 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                   step="10000"
                   value={formData.price}
                   onChange={e => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 rounded-xl text-xs font-bold border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-black border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#5A7D57] dark:text-[#8BA888] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                />
+              </div>
+            </div>
+
+            {/* Full Name & Category */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+              <div className="sm:col-span-6">
+                <label className="block text-xs font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Tên Đầy Đủ Dịch Vụ (Hiển thị khi xem chi tiết)
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: Trị Mụn Chuyên Sâu Chuẩn Y Khoa 12 Bước"
+                  value={formData.name}
+                  onChange={e => {
+                    const newName = e.target.value;
+                    setFormData(prev => ({
+                      ...prev,
+                      name: newName,
+                      shortName: prev.shortName || getServiceShortName(newName, 28)
+                    }));
+                  }}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                />
+              </div>
+
+              <div className="sm:col-span-4">
+                <label className="block text-xs font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Danh Mục Phân Loại
+                </label>
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Thời Lượng (Phút)
+                </label>
+                <input
+                  type="number"
+                  step="5"
+                  value={formData.durationMinutes}
+                  onChange={e => setFormData({ ...formData, durationMinutes: Number(e.target.value) || 60 })}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
                 />
               </div>
             </div>

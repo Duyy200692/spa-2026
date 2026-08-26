@@ -20,6 +20,9 @@ import {
 import { Appointment, Customer, Service, Staff, Language, Role } from '../types';
 import { translations, formatCurrency } from '../i18n';
 import { exportToCSV } from '../utils/exportUtils';
+import { ServiceBadgeTag } from './ServiceBadgeTag';
+import { ServiceDetailModal } from './ServiceDetailModal';
+import { ServiceDisplayMeta, resolveServiceMeta } from '../utils/serviceUtils';
 
 interface AppointmentsViewProps {
   appointments: Appointment[];
@@ -61,6 +64,7 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
   const [staffFilter, setStaffFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingApt, setEditingApt] = useState<Appointment | null>(null);
+  const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<ServiceDisplayMeta | null>(null);
 
   // Action handlers with fallback
   const handleCheckInAction = (id: string) => {
@@ -303,19 +307,27 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                 </div>
 
                 {/* Service Details */}
-                <div className="space-y-1.5 text-xs">
-                  <div className="font-semibold text-[#1C211B] dark:text-[#E0E2DF]">
-                    💆‍♀️ {apt.serviceName}
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="text-[10px] text-[#5E665B] dark:text-[#9BA198] block mb-1 font-semibold uppercase tracking-wider">
+                      Dịch Vụ Trị Liệu:
+                    </span>
+                    <ServiceBadgeTag
+                      serviceId={apt.serviceId}
+                      serviceCode={apt.serviceCode}
+                      serviceShortName={apt.serviceShortName}
+                      serviceName={apt.serviceName}
+                      servicePrice={apt.servicePrice}
+                      serviceDuration={apt.duration}
+                      onViewDetail={setSelectedServiceForDetail}
+                    />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#5E665B] dark:text-[#9BA198]">
-                    <span>Giá dịch vụ: <strong className="text-[#5A7D57] dark:text-[#8BA888] font-bold">{formatCurrency(apt.servicePrice, lang)}</strong></span>
+
+                  <div className="flex items-center justify-between text-[11px] text-[#5E665B] dark:text-[#9BA198] pt-1">
+                    <span>KTV: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">{apt.staffName}</strong></span>
+                    <span>Phòng: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">{apt.roomBed}</strong></span>
                   </div>
-                  <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
-                    Kỹ thuật viên: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">{apt.staffName}</strong>
-                  </div>
-                  <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
-                    Phòng: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">{apt.roomBed}</strong>
-                  </div>
+
                   {apt.notes && (
                     <div className="p-2 rounded-lg bg-[#D4A373]/15 text-[#9E6B38] dark:text-[#D4A373] text-[11px]">
                       📝 {apt.notes}
@@ -511,6 +523,13 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
           </form>
         </div>
       )}
+
+      {/* Service Detail Modal Popup */}
+      <ServiceDetailModal
+        meta={selectedServiceForDetail}
+        lang={lang}
+        onClose={() => setSelectedServiceForDetail(null)}
+      />
     </div>
   );
 };

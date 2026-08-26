@@ -126,8 +126,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800">
               {spaProfile?.logo ? (
                 <img
                   src={spaProfile.logo}
@@ -139,19 +139,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }}
                 />
               ) : (
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-base sm:text-lg tracking-tight text-zinc-950 dark:text-zinc-50 truncate max-w-[200px] sm:max-w-[280px]">
+            <div className="min-w-0">
+              <div className="flex items-center space-x-1.5">
+                <span className="font-bold text-sm sm:text-base md:text-lg tracking-tight text-zinc-950 dark:text-zinc-50 truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[240px]">
                   {spaProfile?.name || t.appName}
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold tracking-wider uppercase bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shrink-0">
                   {currentRole === 'customer' ? 'PORTAL' : 'PRO'}
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block truncate max-w-[320px]">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 hidden md:block truncate max-w-[320px]">
                 {currentRole === 'customer'
                   ? (spaProfile?.address || 'Cổng Thông Tin & Khuyến Mãi Khách Hàng')
                   : (spaProfile?.tagline || t.appTagline)}
@@ -160,13 +160,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Controls: Role switcher, Quick actions, Language, Theme, Notifications */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
             {/* Edit Spa Info & Logo Button for Admin/Manager */}
             {onOpenEditSpaProfile && (currentRole === 'owner' || currentRole === 'manager') && (
               <button
                 id="btn-nav-edit-spa-profile"
                 onClick={onOpenEditSpaProfile}
-                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm"
+                className="hidden md:inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm whitespace-nowrap"
                 title="Chỉnh sửa thông tin cơ sở, địa chỉ & logo Spa"
               >
                 <Building className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
@@ -174,12 +174,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Quick Action Button */}
-            <div className="flex items-center space-x-2">
+            {/* Quick Action Button - Hidden on small mobile to avoid header clutter since BottomNav has prominent + button */}
+            <div className="hidden sm:flex items-center space-x-1.5">
               <button
                 id="btn-nav-quick-booking"
                 onClick={handleBooking}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all whitespace-nowrap"
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
                 <span>{currentRole === 'customer' ? 'Đặt Lịch Hẹn' : t.newBooking}</span>
@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="btn-nav-quick-invoice"
                   onClick={handleCheckout}
-                  className="hidden md:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all"
+                  className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all whitespace-nowrap"
                 >
                   <Receipt className="w-3.5 h-3.5" />
                   <span>{t.newInvoice}</span>
@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-role-switcher"
                 onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all ${roleLabels[currentRole].badgeColor}`}
+                className={`inline-flex items-center space-x-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${roleLabels[currentRole].badgeColor}`}
                 title={t.currentRole}
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -210,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-80 max-w-sm bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
                   <div className="px-2 py-1 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 pb-1.5 flex items-center justify-between">
                     <span>Phân Quyền & Bảo Mật Mật Khẩu:</span>
                     <span className="text-[10px] font-mono text-zinc-900 dark:text-zinc-100">PIN LOCK</span>
@@ -291,7 +291,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onRoleChange('customer');
                 if (window) window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+              className={`inline-flex items-center space-x-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm whitespace-nowrap ${
                 currentRole !== 'customer'
                   ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/30'
                   : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700'
@@ -300,12 +300,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {currentRole !== 'customer' ? (
                 <>
-                  <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                  <span>Thoát Ra Trang Chủ</span>
+                  <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span className="hidden sm:inline">Trang Chủ</span>
                 </>
               ) : (
                 <>
-                  <Home className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
+                  <Home className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300 shrink-0" />
                   <span className="hidden sm:inline">Trang Chủ</span>
                 </>
               )}
@@ -315,44 +315,44 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-lang-toggle"
               onClick={handleToggleLang}
-              className="p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-medium border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+              className="p-1.5 sm:p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-0.5 text-xs font-medium border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 shrink-0"
               title="Đổi ngôn ngữ / Switch Language"
             >
-              <Globe className="w-4 h-4" />
-              <span className="uppercase text-[11px] font-bold">{lang}</span>
+              <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="uppercase text-[10px] sm:text-[11px] font-bold">{lang}</span>
             </button>
 
             {/* Dark / Light Mode Minimalist Toggle */}
             <button
               id="btn-theme-toggle"
               onClick={handleToggleDark}
-              className="p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-all active:scale-95 shadow-sm"
+              className="p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-all active:scale-95 shadow-sm shrink-0"
               title={effectiveDarkMode ? (lang === 'vi' ? 'Chuyển sang chế độ Sáng (Light Mode)' : 'Switch to Light Mode') : (lang === 'vi' ? 'Chuyển sang chế độ Tối (Dark Mode)' : 'Switch to Dark Mode')}
               aria-label="Toggle Dark Mode"
             >
               {effectiveDarkMode ? (
-                <Sun className="w-4 h-4 text-zinc-100 transition-transform hover:rotate-45" />
+                <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-100 transition-transform hover:rotate-45" />
               ) : (
-                <Moon className="w-4 h-4 text-zinc-900 transition-transform hover:-rotate-12" />
+                <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-900 transition-transform hover:-rotate-12" />
               )}
             </button>
 
             {/* Notification Center */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 id="btn-notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-colors"
+                className="relative p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-colors"
                 title={t.notifications}
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-zinc-900 dark:bg-white ring-2 ring-white dark:ring-zinc-900" />
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-2 h-2 rounded-full bg-rose-600 ring-2 ring-white dark:ring-zinc-900" />
                 )}
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-96 max-w-sm bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-3 z-50 animate-in fade-in slide-in-from-top-2">
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-zinc-800">
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold text-xs text-zinc-950 dark:text-zinc-50">

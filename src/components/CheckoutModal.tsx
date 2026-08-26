@@ -25,6 +25,7 @@ import {
 } from '../types';
 import { translations, formatCurrency } from '../i18n';
 import { triggerPrint } from '../utils/exportUtils';
+import { generateServiceCode, getServiceShortName, resolveServiceMeta } from '../utils/serviceUtils';
 
 interface CheckoutModalProps {
   initialAppointment?: Appointment | null;
@@ -101,6 +102,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const handleFinalCheckout = () => {
+    const srvMeta = resolveServiceMeta(activeService);
     const invoice: Invoice = {
       id: `inv-rec-${Date.now()}`,
       code: `HD-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 900 + 100)}`,
@@ -114,6 +116,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       items: [
         {
           serviceId: activeService.id,
+          serviceCode: srvMeta.code,
+          serviceShortName: srvMeta.shortName,
           serviceName: activeService.name,
           quantity: 1,
           price: activeService.price,
@@ -219,9 +223,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
               <div className="border-t border-b border-[#E2E6DF] dark:border-[#2D312C] py-2 space-y-1">
                 {paymentSuccessInvoice.items.map((it, idx) => (
-                  <div key={idx} className="flex justify-between">
-                    <span className="text-[#5E665B] dark:text-[#9BA198]">{it.serviceName}</span>
-                    <span className="font-bold text-[#1C211B] dark:text-[#E0E2DF]">{formatCurrency(it.price, lang)}</span>
+                  <div key={idx} className="flex justify-between items-center text-xs">
+                    <div className="flex items-center space-x-1.5 min-w-0">
+                      {it.serviceCode && (
+                        <span className="px-1.5 py-0.5 rounded font-mono text-[10px] font-bold bg-[#8BA888]/20 text-[#30522E] dark:text-[#A3C2A0] border border-[#8BA888]/30">
+                          {it.serviceCode}
+                        </span>
+                      )}
+                      <span className="text-[#1C211B] dark:text-[#E0E2DF] font-medium truncate">
+                        {it.serviceShortName || it.serviceName}
+                      </span>
+                    </div>
+                    <span className="font-bold text-[#1C211B] dark:text-[#E0E2DF] shrink-0 ml-2">{formatCurrency(it.price, lang)}</span>
                   </div>
                 ))}
                 {paymentSuccessInvoice.discountAmount > 0 && (
@@ -297,11 +310,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onChange={e => setSelectedServiceId(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
                 >
-                  {services.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({formatCurrency(s.price, lang)})
-                    </option>
-                  ))}
+                  {services.map(s => {
+                    const meta = resolveServiceMeta(s);
+                    return (
+                      <option key={s.id} value={s.id}>
+                        [{meta.code}] {meta.shortName} — {formatCurrency(s.price, lang)}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>

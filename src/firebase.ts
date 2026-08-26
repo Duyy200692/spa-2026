@@ -172,6 +172,33 @@ export async function deleteDocFromFirestore(
   }
 }
 
+// Clear single specific collection from Firestore and RTDB
+export async function clearCollectionFromFirebase(
+  collectionName: string,
+  onProgress?: (msg: string) => void
+): Promise<void> {
+  try {
+    onProgress?.(`Đang xóa toàn bộ dữ liệu trong bảng ${collectionName}...`);
+    const colRef = collection(db, collectionName);
+    const snap = await getDocs(colRef);
+    if (snap.docs.length > 0) {
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => {
+        batch.delete(d.ref);
+      });
+      await batch.commit();
+    }
+    // Also delete the RTDB node
+    try {
+      fetch(`${RTDB_BASE_URL}/${collectionName}.json`, { method: 'DELETE' }).catch(() => {});
+    } catch (_) {}
+    onProgress?.(`Đã làm sạch bảng ${collectionName} thành công!`);
+  } catch (error) {
+    console.error(`Failed to clear collection ${collectionName}:`, error);
+    throw error;
+  }
+}
+
 // Batch Upload / Seed Clean Mock Data into Firebase (Firestore & RTDB)
 export async function seedCleanDataToFirebase(onProgress?: (msg: string) => void): Promise<void> {
   try {

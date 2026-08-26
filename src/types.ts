@@ -28,7 +28,8 @@ export interface Customer {
   email: string;
   avatar: string;
   gender: 'female' | 'male' | 'other';
-  birthDate: string;
+  birthDate: string; // YYYY-MM-DD
+  age?: number; // Tuổi cụ thể
   joinDate: string;
   tier: 'Standard' | 'Silver' | 'Gold' | 'VIP' | 'Diamond';
   totalSpent: number;
@@ -36,6 +37,7 @@ export interface Customer {
   skinType: string;
   allergies?: string;
   notes?: string;
+  isSample?: boolean;
   treatmentHistory: TreatmentSession[];
 }
 
@@ -43,6 +45,7 @@ export interface TreatmentSession {
   id: string;
   date: string;
   serviceId: string;
+  serviceCode?: string;
   serviceName: string;
   technicianName: string;
   notes: string;
@@ -62,7 +65,9 @@ export interface ServiceCostItem {
 
 export interface Service {
   id: string;
-  name: string;
+  code?: string; // Mã ký hiệu dịch vụ rút gọn (VD: TM-01, MS-02, GD-03)
+  shortName?: string; // Tên ngắn gọn dùng trong bảng & di động
+  name: string; // Tên đầy đủ chi tiết
   category: string;
   durationMinutes: number;
   price: number;
@@ -106,6 +111,8 @@ export interface Appointment {
   customerPhone: string;
   customerAvatar?: string;
   serviceId: string;
+  serviceCode?: string;
+  serviceShortName?: string;
   serviceName: string;
   servicePrice: number;
   staffId: string;
@@ -196,6 +203,8 @@ export interface Invoice {
   date: string; // ISO or YYYY-MM-DD HH:mm
   items: {
     serviceId: string;
+    serviceCode?: string;
+    serviceShortName?: string;
     serviceName: string;
     quantity: number;
     price: number;
