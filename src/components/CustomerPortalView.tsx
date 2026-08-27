@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sparkles,
   Tag,
@@ -45,6 +45,7 @@ import {
 
 interface CustomerPortalViewProps {
   lang: Language;
+  onLangChange?: (lang: Language) => void;
   services: Service[];
   promotions: Promotion[];
   spaProfile: SpaProfile;
@@ -58,6 +59,7 @@ interface CustomerPortalViewProps {
 
 export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   lang,
+  onLangChange,
   services,
   promotions,
   spaProfile,
@@ -78,6 +80,347 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   const [activeStoryIdx, setActiveStoryIdx] = useState<number>(1);
   const [viewDetailService, setViewDetailService] = useState<Service | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [showPortalLangMenu, setShowPortalLangMenu] = useState<boolean>(false);
+
+  const portalTexts = {
+    vi: {
+      servicesTab: 'Dịch Vụ & Trị Liệu',
+      bestsellerTab: 'Bestseller',
+      bodyTab: 'Body & Thư Giãn',
+      promotionsTab: 'Ưu Đãi',
+      bookNow: 'Đặt Lịch',
+      curated: 'Curated Skincare & Bespoke Rituals',
+      catalogTitle: 'Bảng Dịch Vụ Trị Liệu & Mỹ Phẩm',
+      showing: 'Hiển thị',
+      treatmentsAndProducts: 'liệu trình & sản phẩm',
+      sortBy: 'Sắp xếp:',
+      featured: 'Nổi Bật Nhất',
+      priceLowHigh: 'Giá: Thấp đến Cao',
+      priceHighLow: 'Giá: Cao đến Thấp',
+      duration: 'Thời lượng',
+      allCats: 'Tất cả',
+      priceFilter: 'Lọc mức giá',
+      allPrices: 'Mọi mức giá',
+      under400: 'Dưới 400.000 đ',
+      between400_800: '400k - 800.000 đ',
+      above800: 'Trên 800.000 đ',
+      viewDetail: 'Xem Chi Tiết Liệu Trình',
+      bookWithCode: 'Đặt Lịch & Áp Dụng Mã',
+      copied: 'Đã sao chép!',
+      copyCode: 'Sao chép mã',
+      minOrder: 'Đơn tối thiểu:',
+      validTo: 'Hạn sử dụng:',
+      costEstimator: 'Dự Toán Chi Phí Minh Bạch',
+      tryVouchers: 'Thử Áp Mã Voucher & Xem Giá Sau Giảm Trực Tuyến',
+      noExtraFee: 'Không phát sinh phụ phí tại spa',
+      step1: '1. Chọn Dịch Vụ Bạn Muốn Trải Nghiệm:',
+      step2: '2. Chọn Mã Giảm Giá Áp Dụng:',
+      paymentSummary: 'Bảng Tóm Tắt Thanh Toán Dự Kiến',
+      listPrice: 'Giá niêm yết:',
+      discountAmount: 'Số tiền giảm:',
+      finalTotal: 'Tổng thanh toán dự kiến:',
+      bookThisPrice: 'Đặt Lịch Với Mức Giá Này',
+      veganTitle: 'Vegan',
+      veganDesc: '100% thuần chay, không thử nghiệm động vật.',
+      naturalTitle: 'Natural',
+      naturalDesc: 'Chiết xuất thảo mộc hữu cơ chọn lọc.',
+      parabenTitle: 'Parabens Free',
+      parabenDesc: 'Không chứa chất độc hại và paraben.',
+      recycleTitle: 'Recyclable',
+      recycleDesc: 'Bao bì tái chế thân thiện với môi trường.',
+    },
+    en: {
+      servicesTab: 'Services & Rituals',
+      bestsellerTab: 'Bestsellers',
+      bodyTab: 'Body & Relaxation',
+      promotionsTab: 'Promotions',
+      bookNow: 'Book Now',
+      curated: 'Curated Skincare & Bespoke Rituals',
+      catalogTitle: 'Curated Skincare & Treatment Menu',
+      showing: 'Showing',
+      treatmentsAndProducts: 'treatments & products',
+      sortBy: 'Sort by:',
+      featured: 'Featured',
+      priceLowHigh: 'Price: Low to High',
+      priceHighLow: 'Price: High to Low',
+      duration: 'Duration',
+      allCats: 'All',
+      priceFilter: 'Price Filter',
+      allPrices: 'All Prices',
+      under400: 'Under 400k VND',
+      between400_800: '400k - 800k VND',
+      above800: 'Above 800k VND',
+      viewDetail: 'View Treatment Details',
+      bookWithCode: 'Book & Apply Code',
+      copied: 'Copied!',
+      copyCode: 'Copy code',
+      minOrder: 'Min order:',
+      validTo: 'Valid to:',
+      costEstimator: 'Transparent Cost Estimator',
+      tryVouchers: 'Test Voucher & View Live Discounted Price',
+      noExtraFee: 'No extra fees at spa',
+      step1: '1. Select Service You Want to Experience:',
+      step2: '2. Select Applicable Promo Code:',
+      paymentSummary: 'Estimated Payment Summary',
+      listPrice: 'List Price:',
+      discountAmount: 'Discount:',
+      finalTotal: 'Estimated Total:',
+      bookThisPrice: 'Book With This Price',
+      veganTitle: 'Vegan',
+      veganDesc: '100% vegan, cruelty-free ingredients.',
+      naturalTitle: 'Natural',
+      naturalDesc: 'Selected organic herbal extracts.',
+      parabenTitle: 'Parabens Free',
+      parabenDesc: 'Free from harmful chemicals and parabens.',
+      recycleTitle: 'Recyclable',
+      recycleDesc: 'Eco-friendly recyclable packaging.',
+    },
+    ko: {
+      servicesTab: '서비스 및 테라피',
+      bestsellerTab: '베스트셀러',
+      bodyTab: '바디 & 릴랙세이션',
+      promotionsTab: '프로모션',
+      bookNow: '예약하기',
+      curated: '큐레이티드 스킨케어 & 맞춤형 테라피',
+      catalogTitle: '스킨케어 및 시술 메뉴판',
+      showing: '표시 중',
+      treatmentsAndProducts: '개 시술 및 상품',
+      sortBy: '정렬:',
+      featured: '추천순',
+      priceLowHigh: '가격: 낮은순',
+      priceHighLow: '가격: 높은순',
+      duration: '소요 시간',
+      allCats: '전체',
+      priceFilter: '가격 필터',
+      allPrices: '모든 가격',
+      under400: '40만 VND 미만',
+      between400_800: '40만~80만 VND',
+      above800: '80만 VND 이상',
+      viewDetail: '시술 상세 보기',
+      bookWithCode: '예약 및 코드 적용',
+      copied: '복사됨!',
+      copyCode: '코드 복사',
+      minOrder: '최소 주문:',
+      validTo: '유효기간:',
+      costEstimator: '투명한 비용 견적기',
+      tryVouchers: '바우처 적용 및 실시간 할인가 확인',
+      noExtraFee: '스파 내 추가 비용 없음',
+      step1: '1. 경험하고 싶으신 서비스를 선택하세요:',
+      step2: '2. 적용할 프로모션 코드를 선택하세요:',
+      paymentSummary: '예상 결제 요약',
+      listPrice: '정가:',
+      discountAmount: '할인 금액:',
+      finalTotal: '예상 총 결제 금액:',
+      bookThisPrice: '이 가격으로 예약하기',
+      veganTitle: 'Vegan',
+      veganDesc: '100% 비건, 동물 실험을 하지 않습니다.',
+      naturalTitle: 'Natural',
+      naturalDesc: '선별된 유기농 허브 추출물.',
+      parabenTitle: 'Parabens Free',
+      parabenDesc: '유해 화학물질 및 파라벤 불검출.',
+      recycleTitle: 'Recyclable',
+      recycleDesc: '친환경 재활용 가능 패키지.',
+    },
+    zh: {
+      servicesTab: '项目与水疗',
+      bestsellerTab: '畅销热卖',
+      bodyTab: '身体护理',
+      promotionsTab: '优惠专区',
+      bookNow: '立即预约',
+      curated: '精选护肤与定制水疗',
+      catalogTitle: '护肤与水疗项目菜单',
+      showing: '显示',
+      treatmentsAndProducts: '个项目与产品',
+      sortBy: '排序:',
+      featured: '精选推荐',
+      priceLowHigh: '价格：从低到高',
+      priceHighLow: '价格：从高到低',
+      duration: '时长',
+      allCats: '全部',
+      priceFilter: '价格筛选',
+      allPrices: '全部价格',
+      under400: '40万VND以下',
+      between400_800: '40万-80万VND',
+      above800: '80万VND以上',
+      viewDetail: '查看疗程详情',
+      bookWithCode: '预约并使用优惠码',
+      copied: '已复制!',
+      copyCode: '复制优惠码',
+      minOrder: '最低消费:',
+      validTo: '有效期至:',
+      costEstimator: '透明费用测算',
+      tryVouchers: '测试优惠券并查看实时折后价',
+      noExtraFee: '店内无任何隐形消费',
+      step1: '1. 选择您想体验的服务项目:',
+      step2: '2. 选择适用的优惠码:',
+      paymentSummary: '预计支付摘要',
+      listPrice: '标牌价:',
+      discountAmount: '优惠金额:',
+      finalTotal: '预计实付总额:',
+      bookThisPrice: '以此价格预约',
+      veganTitle: 'Vegan',
+      veganDesc: '100%纯素，零动物实验。',
+      naturalTitle: 'Natural',
+      naturalDesc: '甄选有机草本植物提取物。',
+      parabenTitle: 'Parabens Free',
+      parabenDesc: '不含防腐剂及有害化学成分。',
+      recycleTitle: 'Recyclable',
+      recycleDesc: '环保可回收包装设计。',
+    }
+  };
+  const pt = portalTexts[lang] || portalTexts.vi;
+
+  const translateService = (service: Service): Service => {
+    if (lang === 'vi') return service;
+    
+    // Using keyword matching to handle dynamically added services
+    const translationsMap: Array<{ keywords: string[]; name: Record<string, string>; desc: Record<string, string>; cat: Record<string, string> }> = [
+      {
+        keywords: ['trị mụn', 'acne', 'nặn mụn'],
+        name: {
+          en: 'Medical-Grade Advanced Acne Treatment',
+          ko: '의학 메디컬 전문 여드름 케어',
+          zh: '医学级深层祛痘调理'
+        },
+        desc: {
+          en: 'Deep extraction, sterilizing blue light therapy, and herbal anti-inflammatory mask to heal acne and prevent scarring.',
+          ko: '심층 압출, 블루라이트 살균 테라피 및 천연 한방 항염 마스크로 여드름 치료 및 흉터 예방.',
+          zh: '深层清洁粉刺、蓝光杀菌消炎及草本抗炎面膜，有效祛痘防印。'
+        },
+        cat: { en: 'Acne Treatment', ko: '여드름 케어', zh: '祛痘护理' }
+      },
+      {
+        keywords: ['cấy tảo', 'tảo xoắn', 'spirulina'],
+        name: {
+          en: 'Fresh Spirulina & Collagen Regeneration',
+          ko: '콜라겐 재생 스피룰리나 테라피',
+          zh: '胶原蛋白鲜藻再生疗程'
+        },
+        desc: {
+          en: 'Infusing pure organic spirulina and marine collagen to deeply nourish, brighten skin, and restore youthful firmness.',
+          ko: '순수 유기농 스피룰리나와 해양 콜라겐을 침투시켜 피부 영양 공급, 미백 및 탄력 회복.',
+          zh: '导入纯天然有机螺旋藻与海洋胶原蛋白，深层滋养、美白焕肤并恢复年轻紧致。'
+        },
+        cat: { en: 'Facial Skincare', ko: '스킨케어', zh: '面部护理' }
+      },
+      {
+        keywords: ['massage', 'đá nóng', 'body'],
+        name: {
+          en: 'Hot Stone Full Body Aromatherapy Massage',
+          ko: '핫스톤 전신 바디 아로마 마사지',
+          zh: '热石全身精油舒压按摩'
+        },
+        desc: {
+          en: 'Relaxing Swedish massage combined with warmed basalt stones to relieve muscle tension and promote deep relaxation.',
+          ko: '따뜻한 현무암 스톤과 스웨디시 마사지를 결합하여 근육 긴장 완화 및 심신의 안정 도모.',
+          zh: '结合温热玄武岩与经典瑞典按摩手法，有效舒缓肌肉紧张，促进深度放松。'
+        },
+        cat: { en: 'Body Therapy', ko: '바디 테라피', zh: '身体舒压' }
+      },
+      {
+        keywords: ['hút chì', 'thải độc', 'vitamin c'],
+        name: {
+          en: 'Heavy Metal Detox & Vitamin C Infusion',
+          ko: '중금속 배출 및 비타민C 이온토포레시스',
+          zh: '排铅排毒与维C超导美白'
+        },
+        desc: {
+          en: 'Ultrasonic detoxification to remove trapped toxins and heavy metals, followed by Vitamin C iontophoresis for radiant glow.',
+          ko: '초음파 디톡스로 노폐물 및 중금속 배출, 비타민C 이온 도입으로 맑고 환한 피부 완성.',
+          zh: '超声波排毒清除残留重金属与毒素，配合维C超导导入，焕发明亮光彩。'
+        },
+        cat: { en: 'Facial Skincare', ko: '스킨케어', zh: '面部护理' }
+      },
+      {
+        keywords: ['gội đầu', 'dưỡng sinh'],
+        name: {
+          en: 'Herbal Scalp Wellness & Shampoo Therapy',
+          ko: '한방 허브 두피 릴랙싱 샴푸 테라피',
+          zh: '中草药养生头皮舒缓洗护'
+        },
+        desc: {
+          en: 'Traditional herbal shampoo, neck-shoulder-head massage, and acupressure to relieve stress and nourish hair roots.',
+          ko: '전통 한방 샴푸, 목·어깨·두피 마사지 및 지압으로 스트레스 해소 및 모근 영양 공급.',
+          zh: '采用传统草本本草洗发，配合颈肩头部穴位按摩，彻底舒缓压力并滋养发根。'
+        },
+        cat: { en: 'Body Therapy', ko: '바디 테라피', zh: '身体舒压' }
+      },
+      {
+        keywords: ['triệt lông', 'diode', 'laser'],
+        name: {
+          en: 'Diode Laser Ice Plus Hair Removal',
+          ko: '다이오드 레이저 아이스 플러스 제모',
+          zh: '冰点无痛半导体激光脱毛'
+        },
+        desc: {
+          en: 'Painless and effective hair removal using advanced Diode Laser Ice Plus technology.',
+          ko: '최첨단 다이오드 레이저 아이스 플러스 기술을 활용한 무통 및 효과적인 제모.',
+          zh: '采用先进的冰点半导体激光技术，无痛高效脱毛。'
+        },
+        cat: { en: 'Hair Removal', ko: '제모', zh: '脱毛' }
+      }
+    ];
+
+    const lowerName = service.name.toLowerCase();
+    const matched = translationsMap.find(t => t.keywords.some(k => lowerName.includes(k)));
+
+    if (matched) {
+      return {
+        ...service,
+        name: matched.name[lang] || service.name,
+        description: matched.desc[lang] || service.description,
+        category: matched.cat[lang] || service.category,
+      };
+    }
+    return service;
+  };
+
+  const localizedMonthlySpecial = useMemo(() => {
+    if (!spaProfile.monthlySpecial) return null;
+    if (lang === 'vi') return spaProfile.monthlySpecial;
+    if (lang === 'en') {
+      return {
+        ...spaProfile.monthlySpecial,
+        badge: 'SPECIAL TREATMENT • BESTSELLER',
+        title: 'Smoothing Face Serum & Multi-Layer Regeneration',
+        subtitle: 'Rejuvenation, pore refining & multi-layer skin structure smoothing',
+        description: 'Formulated with an exclusive biological formula combining cold-pressed plant extracts and bio-peptides to regenerate a dewy smooth skin surface and reinforce moisture barriers.',
+        buttonText: 'BOOK SPECIAL TREATMENT',
+      };
+    }
+    if (lang === 'ko') {
+      return {
+        ...spaProfile.monthlySpecial,
+        badge: '스페셜 시술 • 베스트셀러',
+        title: '스무딩 페이스 세럼 & 멀티 레이어 리제너레이션',
+        subtitle: '안티에이징, 모공 수축 및 다층 피부 구조 탄력 개선',
+        description: '독점적인 바이오 생물학적 포뮬러와 냉압착 식물성 추출물, 바이오 펩타이드를 결합하여 매끄럽고 촉촉한 피부 표면을 되찾아 주고 수분 장벽을 강화합니다.',
+        buttonText: '스페셜 시술 예약하기',
+      };
+    }
+    if (lang === 'zh') {
+      return {
+        ...spaProfile.monthlySpecial,
+        badge: '特色疗程 • 畅销热卖',
+        title: '平滑面容精华与多层再生疗程',
+        subtitle: '紧致抗衰老、收缩毛孔与多层皮肤结构重塑',
+        description: '采用独家生物配方，结合冷压植物精萃与生物多肽，帮助重现水润平滑肌肤，修复保湿屏障并自然提亮。',
+        buttonText: '立即预约特色疗程',
+      };
+    }
+    return spaProfile.monthlySpecial;
+  }, [spaProfile.monthlySpecial, lang]);
+
+  const translateCategoryName = (cat: string) => {
+    if (lang === 'vi') return cat;
+    const catMap: Record<string, Record<string, string>> = {
+      'Trị Mụn': { en: 'Acne Treatment', ko: '여드름 케어', zh: '祛痘护理' },
+      'Chăm Sóc Da': { en: 'Facial Skincare', ko: '스킨케어', zh: '面部护理' },
+      'Body & Thư Giãn': { en: 'Body Therapy', ko: '바디 테라피', zh: '身体舒压' },
+      'Mỹ Phẩm': { en: 'Cosmetics', ko: '화장품', zh: '美妆产品' },
+    };
+    return catMap[cat]?.[lang] || cat;
+  };
 
   const formatVND = (num: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
@@ -92,8 +435,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   const rawCategories = Array.from(new Set(services.map((s) => s.category)));
   const categories = ['all', ...rawCategories];
 
-  // Filter and sort services / products
-  const filteredServices = services
+  // Filter and sort services / products with localization
+  const translatedServices = services.map((s) => translateService(s));
+  const filteredServices = translatedServices
     .filter((s) => {
       const matchesCat = selectedCategory === 'all' || s.category === selectedCategory;
       const matchesSearch =
@@ -216,10 +560,10 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
           {/* Left Navigation Links (Desktop) */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs tracking-wider uppercase font-medium text-[#4A4744] dark:text-[#A8A5A0]">
-            <a href="#services-catalog" className="hover:text-black dark:hover:text-white transition-colors">Dịch Vụ & Trị Liệu</a>
-            <a href="#bestseller-feature" className="hover:text-black dark:hover:text-white transition-colors">Bestseller</a>
-            <a href="#bath-and-body" className="hover:text-black dark:hover:text-white transition-colors">Body & Thư Giãn</a>
-            <a href="#promotions-vouchers" className="hover:text-black dark:hover:text-white transition-colors">Ưu Đãi</a>
+            <a href="#services-catalog" className="hover:text-black dark:hover:text-white transition-colors">{pt.servicesTab}</a>
+            <a href="#bestseller-feature" className="hover:text-black dark:hover:text-white transition-colors">{pt.bestsellerTab}</a>
+            <a href="#bath-and-body" className="hover:text-black dark:hover:text-white transition-colors">{pt.bodyTab}</a>
+            <a href="#promotions-vouchers" className="hover:text-black dark:hover:text-white transition-colors">{pt.promotionsTab}</a>
           </nav>
 
           {/* Center Brand Identity */}
@@ -234,13 +578,58 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
           {/* Right Header Actions */}
           <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Portal Language Switcher Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowPortalLangMenu(!showPortalLangMenu)}
+                className="p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-semibold border border-zinc-200 dark:border-zinc-700/80 shadow-sm shrink-0"
+                title="Đổi ngôn ngữ / Language"
+              >
+                <span className="text-sm">🌐</span>
+                <span className="uppercase text-[10px] sm:text-[11px] font-bold">{lang}</span>
+              </button>
+
+              {showPortalLangMenu && (
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-48 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 mb-1">
+                    Chọn Ngôn Ngữ / Language
+                  </div>
+                  {[
+                    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+                    { code: 'en', label: 'English', flag: '🇬🇧' },
+                    { code: 'ko', label: '한국어', flag: '🇰🇷' },
+                    { code: 'zh', label: '中文', flag: '🇨🇳' },
+                  ].map((item) => (
+                    <button
+                      key={item.code}
+                      onClick={() => {
+                        setShowPortalLangMenu(false);
+                        if (onLangChange) onLangChange(item.code as Language);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium transition-all ${
+                        lang === item.code
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-bold shadow'
+                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
+                      }`}
+                    >
+                      <span className="flex items-center space-x-2">
+                        <span>{item.flag}</span>
+                        <span>{item.label}</span>
+                      </span>
+                      {lang === item.code && <Check className="w-3.5 h-3.5 text-current" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Quick Booking Button */}
             <button
               onClick={() => onOpenBooking()}
               className="inline-flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#181716] hover:bg-[#33312E] dark:bg-white dark:hover:bg-[#EAE4DA] text-white dark:text-[#181716] text-[11px] sm:text-xs font-semibold tracking-wide transition-all shadow-sm active:scale-95"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Đặt Lịch</span>
+              <span>{pt.bookNow}</span>
             </button>
 
             {/* Quick Edit Layout & Monthly Service (For Owner/Manager when viewing landing page) */}
@@ -408,9 +797,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Heart className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Vegan</h3>
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">{pt.veganTitle}</h3>
             <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              100% thuần chay, không thử nghiệm động vật.
+              {pt.veganDesc}
             </p>
           </div>
 
@@ -419,9 +808,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Leaf className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Natural</h3>
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">{pt.naturalTitle}</h3>
             <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              Chiết xuất thảo mộc hữu cơ chọn lọc.
+              {pt.naturalDesc}
             </p>
           </div>
 
@@ -430,9 +819,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <Droplets className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Parabens Free</h3>
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">{pt.parabenTitle}</h3>
             <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              Không chứa chất độc hại và paraben.
+              {pt.parabenDesc}
             </p>
           </div>
 
@@ -441,9 +830,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto rounded-full bg-[#FAF7F2] dark:bg-[#202226] border border-[#EAE4DA] dark:border-[#2E3136] flex items-center justify-center text-[#181716] dark:text-white">
               <RotateCcw className="w-4 h-4 stroke-[1.5]" />
             </div>
-            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">Recyclable</h3>
+            <h3 className="font-serif text-sm sm:text-base text-[#181716] dark:text-white font-medium">{pt.recycleTitle}</h3>
             <p className="text-[11px] sm:text-xs text-[#736E69] dark:text-[#8E8A85] font-light leading-relaxed max-w-[200px] mx-auto">
-              Bao bì tái chế thân thiện với môi trường.
+              {pt.recycleDesc}
             </p>
           </div>
 
@@ -451,15 +840,15 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
       </section>
 
       {/* 4. DYNAMIC BESTSELLER / MONTHLY SPECIAL SERVICE HERO BANNER */}
-      {spaProfile.monthlySpecial?.enabled !== false && (
+      {localizedMonthlySpecial?.enabled !== false && (
         <section id="bestseller-feature" className={`border-b border-[#EAE4DA] dark:border-[#222428] relative ${
-          spaProfile.monthlySpecial?.themeColor === 'rose'
+          localizedMonthlySpecial?.themeColor === 'rose'
             ? 'bg-[#FCEBE6] dark:bg-[#2B1714] text-[#4A1D18] dark:text-[#FAD2C8]'
-            : spaProfile.monthlySpecial?.themeColor === 'amber'
+            : localizedMonthlySpecial?.themeColor === 'amber'
             ? 'bg-[#FEF3D6] dark:bg-[#2B210D] text-[#4D3608] dark:text-[#FCE6A6]'
-            : spaProfile.monthlySpecial?.themeColor === 'blue'
+            : localizedMonthlySpecial?.themeColor === 'blue'
             ? 'bg-[#DBEAF0] dark:bg-[#182830] text-[#193645] dark:text-[#DFEEF5]'
-            : spaProfile.monthlySpecial?.themeColor === 'charcoal'
+            : localizedMonthlySpecial?.themeColor === 'charcoal'
             ? 'bg-[#222428] text-white'
             : 'bg-[#D4E4D9] dark:bg-[#1B2920] text-[#1C3525] dark:text-[#E0EFE6]' // default sage
         }`}>
@@ -483,31 +872,31 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 
                 <div className="space-y-1.5 sm:space-y-2">
                   <span className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-semibold opacity-90 block">
-                    {spaProfile.monthlySpecial?.badge || 'BESTSELLER • DỊCH VỤ TIÊU BIỂU'}
+                    {localizedMonthlySpecial?.badge || 'BESTSELLER • DỊCH VỤ TIÊU BIỂU'}
                   </span>
                   <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl leading-tight font-normal">
-                    {spaProfile.monthlySpecial?.title || 'Smoothing Face Serum'}
+                    {localizedMonthlySpecial?.title || 'Smoothing Face Serum'}
                   </h2>
                   <p className="text-xs sm:text-sm font-serif italic opacity-90">
-                    {spaProfile.monthlySpecial?.subtitle || 'Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng'}
+                    {localizedMonthlySpecial?.subtitle || 'Liệu pháp trẻ hóa & làm mịn màng cấu trúc da đa tầng'}
                   </p>
                 </div>
 
                 <p className="text-xs sm:text-sm font-light leading-relaxed opacity-95">
-                  {spaProfile.monthlySpecial?.description ||
+                  {localizedMonthlySpecial?.description ||
                     'Được điều chế với công thức sinh học độc quyền kết hợp tinh chất thực vật ép lạnh và peptides sinh học giúp tái sinh bề mặt da căng mướt, thu nhỏ lỗ chân lông tức thì.'}
                 </p>
 
                 {/* Price Display if configured */}
-                {(spaProfile.monthlySpecial?.price || 0) > 0 && (
+                {(localizedMonthlySpecial?.price || 0) > 0 && (
                   <div className="flex items-baseline space-x-3 pt-1">
                     <span className="text-[11px] uppercase tracking-wider opacity-80">Giá trải nghiệm:</span>
                     <span className="font-serif text-xl sm:text-2xl font-bold">
-                      {formatVND(spaProfile.monthlySpecial?.price || 0)}
+                      {formatVND(localizedMonthlySpecial?.price || 0)}
                     </span>
-                    {(spaProfile.monthlySpecial?.originalPrice || 0) > (spaProfile.monthlySpecial?.price || 0) && (
+                    {(localizedMonthlySpecial?.originalPrice || 0) > (localizedMonthlySpecial?.price || 0) && (
                       <span className="text-xs line-through opacity-60">
-                        {formatVND(spaProfile.monthlySpecial?.originalPrice || 0)}
+                        {formatVND(localizedMonthlySpecial?.originalPrice || 0)}
                       </span>
                     )}
                   </div>
@@ -515,10 +904,10 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
                 <div className="pt-2 flex flex-wrap items-center gap-3">
                   <button
-                    onClick={() => onOpenBooking(spaProfile.monthlySpecial?.serviceId || 'srv-3')}
+                    onClick={() => onOpenBooking(localizedMonthlySpecial?.serviceId || 'srv-3')}
                     className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 text-xs uppercase tracking-widest font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center space-x-2"
                   >
-                    <span>{spaProfile.monthlySpecial?.buttonText || 'ĐẶT LIỆU TRÌNH NGAY'}</span>
+                    <span>{localizedMonthlySpecial?.buttonText || 'ĐẶT LIỆU TRÌNH NGAY'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
 
@@ -538,8 +927,8 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             {/* Right Column: Editorial Product Still Life Composition */}
             <div className="lg:col-span-6 relative min-h-[260px] sm:min-h-[340px] lg:min-h-[480px] flex items-center justify-center p-6 sm:p-8 overflow-hidden">
               <img
-                src={spaProfile.monthlySpecial?.image || 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85'}
-                alt={spaProfile.monthlySpecial?.title || 'Monthly Special Treatment'}
+                src={localizedMonthlySpecial?.image || 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=85'}
+                alt={localizedMonthlySpecial?.title || 'Monthly Special Treatment'}
                 className="w-full h-full object-cover max-h-[360px] sm:max-h-[420px] rounded-2xl shadow-xl border border-white/20"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
@@ -552,88 +941,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </section>
       )}
 
-      {/* 6. INTERACTIVE CLIENT STORIES & SKIN GLOW SHOWCASE (Matching Image 1 Left: "Best Skincare Products") */}
-      <section className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-white dark:bg-[#161719]">
-        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
-          
-          <div className="text-center max-w-xl mx-auto space-y-2">
-            <h2 className="font-serif text-2xl sm:text-4xl text-[#181716] dark:text-white font-normal">
-              Best Skincare Products & Glowing Results
-            </h2>
-            <p className="text-xs sm:text-sm text-[#736E69] dark:text-[#8E8A85] font-light">
-              Hình ảnh thực tế từ khách hàng trải nghiệm quy trình trị liệu và chăm sóc da tại spa.
-            </p>
-          </div>
 
-          {/* Gallery of Portrait Video/Photo Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
-            {skinShowcaseCards.map((card, idx) => {
-              const isSelected = activeStoryIdx === idx;
-              return (
-                <div
-                  key={card.id}
-                  onClick={() => setActiveStoryIdx(idx)}
-                  className={`relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 aspect-[3/4] group ${
-                    isSelected ? 'ring-2 ring-[#181716] dark:ring-white scale-[1.01] shadow-lg' : 'opacity-85 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-
-                  {/* Soft bottom vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-
-                  {/* Sound indicator badge */}
-                  <div className="absolute bottom-2.5 right-2.5 p-1 rounded-full bg-black/40 text-white backdrop-blur-sm">
-                    <Volume2 className="w-3 h-3" />
-                  </div>
-
-                  {/* Card Title & Category */}
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-white/85 dark:bg-black/60 backdrop-blur-sm text-[9px] sm:text-[10px] font-semibold text-[#181716] dark:text-white">
-                    {card.category}
-                  </div>
-
-                  {/* Floating Product Tag Overlay on Active Card (Matching Image 1 Mockup) */}
-                  {isSelected && (
-                    <div className="absolute bottom-2 left-2 right-8 sm:right-10 bg-white/95 dark:bg-[#1E2024]/95 backdrop-blur-md rounded-xl p-2 border border-zinc-200 dark:border-zinc-700 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      <div className="flex items-center space-x-1.5">
-                        <div className="w-7 h-7 rounded-lg bg-[#FAF7F2] dark:bg-[#2A2D32] shrink-0 overflow-hidden">
-                          <img
-                            src="https://images.unsplash.com/photo-1608248597359-21b7123d6a45?w=100&q=80"
-                            alt="Mokosh Tonic"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="text-[8px] uppercase tracking-wider text-[#8C5E32] dark:text-[#D4A373] block font-bold">L'AURA</span>
-                          <h5 className="text-[10px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">{card.productName}</h5>
-                          <span className="text-[9px] font-bold text-zinc-800 dark:text-zinc-200">{formatVND(card.price)}</span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenBooking();
-                          }}
-                          className="p-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:scale-105 transition-transform"
-                          title="Đặt hẹn"
-                        >
-                          <ShoppingBag className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-      </section>
 
       {/* 7. CURATED PRODUCT & TREATMENT CATALOG (Matching Image 1 Right Grid & Filter Sidebar) */}
       <section id="services-catalog" className="py-16 px-4 sm:px-8 border-b border-[#EAE4DA] dark:border-[#222428] bg-[#FAF7F2] dark:bg-[#121314]">
@@ -686,7 +994,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                         : 'bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] text-[#57534E] dark:text-[#A8A49E] hover:border-[#181716]'
                     }`}
                   >
-                    <span>{cat === 'all' ? 'Tất Cả Danh Mục' : cat}</span>
+                    <span>{cat === 'all' ? pt.allCatsOption : translateCategoryName(cat as string)}</span>
                     <span className="text-[10px] opacity-70">({count})</span>
                   </button>
                 );
@@ -702,7 +1010,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm dịch vụ, tinh chất, phục hồi..."
+                  placeholder={pt.searchPlaceholder}
                   className="w-full pl-9 pr-4 py-2 rounded-full bg-white dark:bg-[#1E2024] border border-[#EAE4DA] dark:border-[#2E3136] text-xs text-[#181716] dark:text-white placeholder-[#9A9690] focus:outline-none focus:border-[#181716]"
                 />
               </div>
@@ -732,7 +1040,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             </div>
           </div>
 
-          {/* Product & Service Grid (Matching Image 1 Product Cards) */}
+          {/* Product & Service Grid (Clean Text & Details without images) */}
           {filteredServices.length === 0 ? (
             <div className="text-center py-16 bg-white dark:bg-[#161719] rounded-3xl border border-[#EAE4DA] dark:border-[#222428] space-y-3">
               <Sparkles className="w-8 h-8 text-[#8C5E32] mx-auto" />
@@ -754,37 +1062,22 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 return (
                   <div
                     key={service.id}
-                    className="bg-white dark:bg-[#18191C] rounded-2xl border border-[#EAE4DA] dark:border-[#26282D] overflow-hidden flex flex-col justify-between group hover:shadow-lg hover:border-[#D4C8B8] dark:hover:border-[#3E4249] transition-all duration-300"
+                    className="bg-white dark:bg-[#18191C] rounded-2xl border border-[#EAE4DA] dark:border-[#26282D] p-5 flex flex-col justify-between group hover:shadow-lg hover:border-[#D4C8B8] dark:hover:border-[#3E4249] transition-all duration-300"
                   >
-                    <div>
-                      {/* Product Image Stage */}
-                      <div
-                        onClick={() => setViewDetailService(service)}
-                        className="relative aspect-square bg-[#FAF7F2] dark:bg-[#121314] overflow-hidden cursor-pointer"
-                      >
-                        <img
-                          src={service.image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'}
-                          alt={service.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          referrerPolicy="no-referrer"
-                        />
-
-                        {/* Top Badges */}
-                        <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
-                          <span className="px-2.5 py-0.5 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-sm text-[10px] font-semibold text-[#181716] dark:text-white uppercase tracking-wider">
-                            {service.category}
-                          </span>
-                        </div>
-
-                        {/* Duration Pill */}
-                        <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium flex items-center space-x-1">
+                    <div className="space-y-3">
+                      {/* Top Badges & Duration */}
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] dark:bg-[#23262B] text-[10px] font-semibold text-[#8C5E32] dark:text-[#D4A373] uppercase tracking-wider">
+                          {service.category}
+                        </span>
+                        <div className="flex items-center space-x-1 text-[#736E69] dark:text-[#9A9690] text-[11px] font-medium">
                           <Clock className="w-3 h-3" />
                           <span>{service.durationMinutes} phút</span>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-4 sm:p-5 space-y-2">
+                      {/* Title & Rating */}
+                      <div className="space-y-1">
                         <div className="flex items-center space-x-1 text-amber-500 text-xs">
                           <Star className="w-3.5 h-3.5 fill-current" />
                           <span className="font-semibold text-zinc-800 dark:text-zinc-200">5.0</span>
@@ -793,19 +1086,19 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
                         <h3
                           onClick={() => setViewDetailService(service)}
-                          className="font-serif text-base text-[#181716] dark:text-white font-medium line-clamp-2 leading-snug cursor-pointer hover:text-[#8C5E32] dark:hover:text-[#D4A373] transition-colors"
+                          className="font-serif text-lg text-[#181716] dark:text-white font-medium line-clamp-2 leading-snug cursor-pointer hover:text-[#8C5E32] dark:hover:text-[#D4A373] transition-colors"
                         >
                           {service.name}
                         </h3>
-
-                        <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light line-clamp-2 leading-relaxed">
-                          {service.description}
-                        </p>
                       </div>
+
+                      <p className="text-xs text-[#736E69] dark:text-[#8E8A85] font-light line-clamp-3 leading-relaxed">
+                        {service.description}
+                      </p>
                     </div>
 
                     {/* Bottom Price & Action Footer */}
-                    <div className="p-5 pt-0 flex items-center justify-between border-t border-[#F5EFEB] dark:border-[#222428] mt-2">
+                    <div className="pt-4 mt-4 flex items-center justify-between border-t border-[#F5EFEB] dark:border-[#222428]">
                       <div>
                         <span className="text-[10px] text-[#9A9690] block">Giá trọn gói</span>
                         <span className="font-serif text-base sm:text-lg font-bold text-[#181716] dark:text-white">

@@ -139,46 +139,46 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
   return (
     <div className="space-y-12 pb-16">
       {/* 1. HERO SPOTLIGHT BANNER */}
-      <div className="relative overflow-hidden rounded-3xl bg-zinc-950 text-white dark:bg-[#141619] border border-zinc-800 shadow-2xl p-6 sm:p-10">
+      <div className="relative overflow-hidden rounded-3xl bg-[#FAF7F2] text-[#181716] dark:bg-[#141619] dark:text-white border border-[#EAE4DA] dark:border-zinc-800 shadow-2xl p-6 sm:p-10">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column Text & Countdown */}
           <div className="lg:col-span-7 space-y-5">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-zinc-900/90 border border-zinc-700 text-xs font-semibold text-zinc-200">
-              <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white dark:bg-zinc-900/90 border border-[#EAE4DA] dark:border-zinc-700 text-xs font-semibold text-[#8C5E32] dark:text-zinc-200">
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span>Đại Tiệc Ưu Đãi Thẩm Mỹ Chuẩn Y Khoa • Mùa Hè 2026</span>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight text-white">
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight text-[#181716] dark:text-white">
                 Chăm Sóc Toàn Diện <br className="hidden sm:inline" />
-                <span className="text-zinc-300">Nhận Ngay Ưu Đãi Đến 35%</span>
+                <span className="text-[#8C5E32] dark:text-zinc-300">Nhận Ngay Ưu Đãi Đến 35%</span>
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#736E69] dark:text-zinc-400 max-w-xl leading-relaxed">
                 Tận hưởng không gian thư giãn tĩnh tại, mỹ phẩm dược sinh học cao cấp và kỹ thuật trị liệu chuyên sâu từ đội ngũ chuyên gia tại {spaProfile.name || 'L’AURA Spa'}.
               </p>
             </div>
 
             {/* Live Flash Deal Countdown Pill Box */}
-            <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center space-x-2 text-zinc-300 font-medium">
-                <Clock className="w-4 h-4 text-amber-400" />
+            <div className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-[#EAE4DA] dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
+              <div className="flex items-center space-x-2 text-[#736E69] dark:text-zinc-300 font-medium">
+                <Clock className="w-4 h-4 text-amber-500" />
                 <span>Ưu đãi áp dụng có hạn:</span>
               </div>
               <div className="flex items-center space-x-1.5 font-mono font-bold text-xs">
-                <div className="px-2 py-1 bg-zinc-800 rounded-lg text-white border border-zinc-700">
-                  {String(timeLeft.days).padStart(2, '0')} <span className="text-[10px] text-zinc-400 font-sans">ngày</span>
+                <div className="px-2 py-1 bg-[#FAF7F2] dark:bg-zinc-800 rounded-lg text-[#181716] dark:text-white border border-[#EAE4DA] dark:border-zinc-700">
+                  {String(timeLeft.days).padStart(2, '0')} <span className="text-[10px] text-[#736E69] dark:text-zinc-400 font-sans">ngày</span>
                 </div>
-                <span className="text-zinc-600">:</span>
-                <div className="px-2 py-1 bg-zinc-800 rounded-lg text-white border border-zinc-700">
-                  {String(timeLeft.hours).padStart(2, '0')} <span className="text-[10px] text-zinc-400 font-sans">giờ</span>
+                <span className="text-zinc-400">:</span>
+                <div className="px-2 py-1 bg-[#FAF7F2] dark:bg-zinc-800 rounded-lg text-[#181716] dark:text-white border border-[#EAE4DA] dark:border-zinc-700">
+                  {String(timeLeft.hours).padStart(2, '0')} <span className="text-[10px] text-[#736E69] dark:text-zinc-400 font-sans">giờ</span>
                 </div>
-                <span className="text-zinc-600">:</span>
-                <div className="px-2 py-1 bg-zinc-800 rounded-lg text-white border border-zinc-700">
-                  {String(timeLeft.minutes).padStart(2, '0')} <span className="text-[10px] text-zinc-400 font-sans">phút</span>
+                <span className="text-zinc-400">:</span>
+                <div className="px-2 py-1 bg-[#FAF7F2] dark:bg-zinc-800 rounded-lg text-[#181716] dark:text-white border border-[#EAE4DA] dark:border-zinc-700">
+                  {String(timeLeft.minutes).padStart(2, '0')} <span className="text-[10px] text-[#736E69] dark:text-zinc-400 font-sans">phút</span>
                 </div>
-                <span className="text-zinc-600">:</span>
-                <div className="px-2 py-1 bg-zinc-800 rounded-lg text-amber-300 border border-zinc-700">
-                  {String(timeLeft.seconds).padStart(2, '0')} <span className="text-[10px] text-zinc-400 font-sans">giây</span>
+                <span className="text-zinc-400">:</span>
+                <div className="px-2 py-1 bg-[#FAF7F2] dark:bg-zinc-800 rounded-lg text-amber-600 dark:text-amber-300 border border-[#EAE4DA] dark:border-zinc-700">
+                  {String(timeLeft.seconds).padStart(2, '0')} <span className="text-[10px] text-[#736E69] dark:text-zinc-400 font-sans">giây</span>
                 </div>
               </div>
             </div>
@@ -187,24 +187,24 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 onClick={() => onOpenBooking(undefined, featuredPromo?.code)}
-                className="px-6 py-3 rounded-2xl bg-white text-zinc-950 hover:bg-zinc-100 font-extrabold text-xs transition-all shadow-lg active:scale-95 flex items-center space-x-2"
+                className="px-6 py-3 rounded-2xl bg-[#181716] text-white hover:bg-[#33312E] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 font-extrabold text-xs transition-all shadow-lg active:scale-95 flex items-center space-x-2"
               >
-                <Calendar className="w-4 h-4 text-zinc-950" />
+                <Calendar className="w-4 h-4 text-current" />
                 <span>Đặt Lịch Nhận Ưu Đãi Ngay</span>
               </button>
               {featuredPromo && (
                 <button
                   onClick={() => handleCopyCode(featuredPromo.code)}
-                  className="px-4 py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono text-xs font-bold transition-all flex items-center space-x-2 active:scale-95"
+                  className="px-4 py-3 rounded-2xl bg-white dark:bg-zinc-900 hover:bg-[#FAF7F2] dark:hover:bg-zinc-800 text-[#181716] dark:text-zinc-200 border border-[#EAE4DA] dark:border-zinc-700 font-mono text-xs font-bold transition-all flex items-center space-x-2 active:scale-95 shadow-sm"
                 >
                   {copiedCode === featuredPromo.code ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400" />
+                      <Check className="w-4 h-4 text-emerald-500" />
                       <span>Đã Copy: {featuredPromo.code}</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4 text-zinc-400" />
+                      <Copy className="w-4 h-4 text-[#736E69]" />
                       <span>Mã: {featuredPromo.code}</span>
                     </>
                   )}
@@ -452,18 +452,18 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
       </div>
 
       {/* 4. INTERACTIVE VOUCHER CALCULATOR (TÍNH TIỀN KHUYẾN MÃI DỰ KIẾN) */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-zinc-900 text-white dark:bg-[#141619] border border-zinc-800 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+      <div className="p-6 sm:p-8 rounded-3xl bg-[#FAF7F2] text-[#181716] dark:bg-[#141619] dark:text-white border border-[#EAE4DA] dark:border-zinc-800 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE4DA] dark:border-zinc-800 pb-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center space-x-1.5 text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">
-              <Calculator className="w-4 h-4 text-white" />
+            <div className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#736E69] dark:text-zinc-400 uppercase tracking-wider font-mono">
+              <Calculator className="w-4 h-4 text-[#8C5E32] dark:text-white" />
               <span>Dự Toán Chi Phí Minh Bạch</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">
+            <h3 className="text-lg sm:text-xl font-bold text-[#181716] dark:text-white">
               Thử Áp Mã Voucher & Xem Giá Sau Giảm Trực Tuyến
             </h3>
           </div>
-          <span className="text-xs text-zinc-400 font-light">
+          <span className="text-xs text-[#736E69] dark:text-zinc-400 font-light">
             Không phát sinh phụ phí tại spa
           </span>
         </div>
@@ -472,13 +472,13 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
           {/* Controls: Select Service + Select Code */}
           <div className="lg:col-span-7 space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">
+              <label className="text-xs font-semibold text-[#57534E] dark:text-zinc-300">
                 1. Chọn Dịch Vụ Bạn Muốn Trải Nghiệm:
               </label>
               <select
                 value={calcServiceId}
                 onChange={(e) => setCalcServiceId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-[#EAE4DA] dark:border-zinc-700 text-xs text-[#181716] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8C5E32]"
               >
                 {services.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -489,7 +489,7 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">
+              <label className="text-xs font-semibold text-[#57534E] dark:text-zinc-300">
                 2. Chọn Mã Giảm Giá Áp Dụng:
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -502,11 +502,11 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
                       onClick={() => setCalcPromoCode(p.code)}
                       className={`p-2 rounded-xl text-left border transition-all ${
                         isSelected
-                          ? 'bg-white text-zinc-950 border-white font-bold shadow'
-                          : 'bg-zinc-800/80 text-zinc-300 border-zinc-700 hover:bg-zinc-800'
+                          ? 'bg-[#181716] text-white border-[#181716] dark:bg-white dark:text-zinc-950 font-bold shadow'
+                          : 'bg-white dark:bg-zinc-800/80 text-[#57534E] dark:text-zinc-300 border-[#EAE4DA] dark:border-zinc-700 hover:border-[#181716]'
                       }`}
                     >
-                      <div className="text-xs font-mono">{p.code}</div>
+                      <div className="text-xs font-mono font-bold">{p.code}</div>
                       <div className="text-[10px] opacity-80 truncate">
                         {p.discountType === 'percentage' ? `Giảm ${p.discountValue}%` : `-${formatVND(p.discountValue)}`}
                       </div>
@@ -518,33 +518,33 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
           </div>
 
           {/* Result Calculation Box */}
-          <div className="lg:col-span-5 p-5 rounded-2xl bg-zinc-800/90 border border-zinc-700 space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
+          <div className="lg:col-span-5 p-5 rounded-2xl bg-white dark:bg-zinc-800/90 border border-[#EAE4DA] dark:border-zinc-700 space-y-4 shadow-sm">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#736E69] dark:text-zinc-400 font-mono">
               Bảng Tóm Tắt Thanh Toán Dự Kiến
             </h4>
 
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between text-zinc-300">
+              <div className="flex justify-between text-[#57534E] dark:text-zinc-300">
                 <span>Giá niêm yết:</span>
                 <span className="font-mono font-semibold">{formatVND(selectedServiceForCalc?.price || 0)}</span>
               </div>
-              <div className="flex justify-between text-emerald-400">
+              <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                 <span>Số tiền giảm:</span>
                 <span className="font-mono font-bold">
                   {calcDiscountAmount > 0 ? `-${formatVND(calcDiscountAmount)}` : '0 đ'}
                 </span>
               </div>
-              <div className="pt-2 border-t border-zinc-700 flex justify-between items-baseline">
-                <span className="text-xs font-bold text-white">Tổng thanh toán dự kiến:</span>
-                <span className="text-lg font-extrabold text-white font-mono">
+              <div className="pt-2 border-t border-[#EAE4DA] dark:border-zinc-700 flex justify-between items-baseline">
+                <span className="text-xs font-bold text-[#181716] dark:text-white">Tổng thanh toán dự kiến:</span>
+                <span className="text-lg font-extrabold text-[#181716] dark:text-white font-mono">
                   {formatVND(calcFinalPrice)}
                 </span>
               </div>
             </div>
 
             {!isPromoEligible && selectedPromoForCalc && (
-              <div className="p-2.5 rounded-lg bg-amber-950/60 border border-amber-800 text-[11px] text-amber-200 flex items-start space-x-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-200 flex items-start space-x-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <span>
                   Mã <strong>{calcPromoCode}</strong> yêu cầu đơn tối thiểu {formatVND(selectedPromoForCalc.minOrderValue)}.
                 </span>
@@ -553,9 +553,9 @@ export const PromotionsLandingPage: React.FC<PromotionsLandingPageProps> = ({
 
             <button
               onClick={() => onOpenBooking(calcServiceId, calcPromoCode)}
-              className="w-full py-2.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs transition-all shadow flex items-center justify-center space-x-1.5"
+              className="w-full py-2.5 rounded-xl bg-[#181716] hover:bg-[#33312E] text-white dark:bg-white dark:text-zinc-950 font-bold text-xs transition-all shadow flex items-center justify-center space-x-1.5"
             >
-              <Calendar className="w-4 h-4 text-zinc-950" />
+              <Calendar className="w-4 h-4 text-current" />
               <span>Đặt Lịch Với Mức Giá Này</span>
             </button>
           </div>

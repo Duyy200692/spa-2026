@@ -73,6 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const t = translations[lang];
 
   const effectiveDarkMode = isDarkMode ?? (theme === 'dark');
@@ -311,16 +312,51 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Language Switcher */}
-            <button
-              id="btn-lang-toggle"
-              onClick={handleToggleLang}
-              className="p-1.5 sm:p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-0.5 text-xs font-medium border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 shrink-0"
-              title="Đổi ngôn ngữ / Switch Language"
-            >
-              <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="uppercase text-[10px] sm:text-[11px] font-bold">{lang}</span>
-            </button>
+            {/* Language Switcher Dropdown */}
+            <div className="relative">
+              <button
+                id="btn-lang-toggle"
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-semibold border border-zinc-200 dark:border-zinc-700/80 shadow-sm shrink-0"
+                title="Đổi ngôn ngữ / Language"
+              >
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8C5E32] dark:text-[#D4A373]" />
+                <span className="uppercase text-[10px] sm:text-[11px] font-bold">{lang}</span>
+              </button>
+
+              {showLangMenu && (
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-48 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 mb-1">
+                    Chọn Ngôn Ngữ / Language
+                  </div>
+                  {[
+                    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+                    { code: 'en', label: 'English', flag: '🇬🇧' },
+                    { code: 'ko', label: '한국어', flag: '🇰🇷' },
+                    { code: 'zh', label: '中文', flag: '🇨🇳' },
+                  ].map((item) => (
+                    <button
+                      key={item.code}
+                      onClick={() => {
+                        setShowLangMenu(false);
+                        if (onLangChange) onLangChange(item.code as Language);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium transition-all ${
+                        lang === item.code
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-bold shadow'
+                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
+                      }`}
+                    >
+                      <span className="flex items-center space-x-2">
+                        <span>{item.flag}</span>
+                        <span>{item.label}</span>
+                      </span>
+                      {lang === item.code && <CheckCircle className="w-3.5 h-3.5 text-current" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Dark / Light Mode Minimalist Toggle */}
             <button

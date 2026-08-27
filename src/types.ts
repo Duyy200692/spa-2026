@@ -17,7 +17,7 @@ export type TabType =
   | 'customer_services'
   | 'customer_news';
 
-export type Language = 'vi' | 'en';
+export type Language = 'vi' | 'en' | 'ko' | 'zh';
 
 export type Theme = 'light' | 'dark';
 

@@ -17,7 +17,8 @@ import {
   Boxes,
   Percent,
   Tag,
-  Wand2
+  Wand2,
+  Search
 } from 'lucide-react';
 import { Service, InventoryItem, ServiceCostItem, Language } from '../types';
 import { translations, formatCurrency } from '../i18n';
@@ -102,8 +103,16 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
 
   const [selectedInventoryToAdd, setSelectedInventoryToAdd] = useState<string>(inventory[0]?.id || '');
   const [quantityToAdd, setQuantityToAdd] = useState<number>(4);
+  const [inventorySearchQuery, setInventorySearchQuery] = useState<string>('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState(false);
+
+  // Filtered inventory list based on quick search query
+  const filteredInventoryForAdd = inventory.filter(inv =>
+    inv.name.toLowerCase().includes(inventorySearchQuery.toLowerCase()) ||
+    (inv.brand && inv.brand.toLowerCase().includes(inventorySearchQuery.toLowerCase())) ||
+    (inv.category && inv.category.toLowerCase().includes(inventorySearchQuery.toLowerCase()))
+  );
 
   // Selected item object for quick live preview
   const selectedInvObj = inventory.find(i => i.id === selectedInventoryToAdd) || inventory[0];
@@ -807,45 +816,63 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                    <div className="flex-1">
-                      <select
-                        value={selectedInventoryToAdd}
-                        onChange={e => setSelectedInventoryToAdd(e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
-                      >
-                        {inventory.map(inv => (
-                          <option key={inv.id} value={inv.id}>
-                            {inv.name} — [1 {inv.packageUnit || inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
-                          </option>
-                        ))}
-                      </select>
+                  <div className="space-y-2">
+                    {/* Quick Search Input */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                      <input
+                        type="text"
+                        placeholder="🔍 Tìm kiếm nhanh mỹ phẩm/vật tư (nhập tên, thương hiệu...)..."
+                        value={inventorySearchQuery}
+                        onChange={e => setInventorySearchQuery(e.target.value)}
+                        className="w-full pl-8 pr-3 py-2 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                      />
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-1">
-                        <input
-                          type="number"
-                          step="0.5"
-                          min="0.1"
-                          value={quantityToAdd}
-                          onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
-                          className="w-20 px-2 py-2.5 text-center rounded-xl text-xs font-bold border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
-                        />
-                        <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold px-1">
-                          {selectedInvObj?.subUnitName || 'đơn vị'}
-                        </span>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                      <div className="flex-1">
+                        <select
+                          value={selectedInventoryToAdd}
+                          onChange={e => setSelectedInventoryToAdd(e.target.value)}
+                          className="w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                        >
+                          {filteredInventoryForAdd.length === 0 ? (
+                            <option value="" disabled>Không tìm thấy mỹ phẩm phù hợp...</option>
+                          ) : (
+                            filteredInventoryForAdd.map(inv => (
+                              <option key={inv.id} value={inv.id}>
+                                {inv.name} — [1 {inv.packageUnit || inv.packageType} = {inv.subUnitsPerPackage} {inv.subUnitName} ➔ {formatCurrency(inv.costPerSubUnit, lang)}/{inv.subUnitName}]
+                              </option>
+                            ))
+                          )}
+                        </select>
                       </div>
 
-                      <button
-                        id="btn-add-item-to-recipe"
-                        type="button"
-                        onClick={handleAddCostItem}
-                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4A6A47] dark:bg-[#8BA888] dark:hover:bg-[#789875] text-white dark:text-[#121412] transition-all shrink-0 flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1">
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0.1"
+                            value={quantityToAdd}
+                            onChange={e => setQuantityToAdd(parseFloat(e.target.value) || 1)}
+                            className="w-20 px-2 py-2.5 text-center rounded-xl text-xs font-bold border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                          />
+                          <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold px-1">
+                            {selectedInvObj?.subUnitName || 'đơn vị'}
+                          </span>
+                        </div>
+
+                        <button
+                          id="btn-add-item-to-recipe"
+                          type="button"
+                          onClick={handleAddCostItem}
+                          className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4A6A47] dark:bg-[#8BA888] dark:hover:bg-[#789875] text-white dark:text-[#121412] transition-all shrink-0 flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Thêm (+{formatCurrency((selectedInvObj?.costPerSubUnit || 0) * quantityToAdd, lang)})</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -14,10 +14,26 @@ import {
   Package,
   CalendarPlus,
   Receipt,
-  Building
+  Building,
+  BarChart2,
+  Zap,
+  Target
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 import { Appointment, Customer, Service, Staff, InventoryItem, Language, Role, TabType, Invoice } from '../types';
 import { translations, formatCurrency } from '../i18n';
+import { getTrendingServices, getSeasonalFutureTrends, getFunnelMetrics } from '../utils/analyticsUtils';
 
 interface DashboardViewProps {
   appointments: Appointment[];
@@ -65,6 +81,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | 'year'>('7d');
   const t = translations[lang];
 
+  const trendingServices = getTrendingServices();
+  const seasonalTrend = getSeasonalFutureTrends();
+  const funnelData = getFunnelMetrics();
+
   const handleNav = (tab: TabType) => {
     if (onNavigate) onNavigate(tab);
     if (onNavigateTab) onNavigateTab(tab);
@@ -107,18 +127,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     item => item.stockSubUnits <= item.minThresholdSubUnits
   );
 
-  // Revenue chart data points
-  const chartData = [
-    { day: 'T2 (19/8)', rev: 5200000, profit: 3600000 },
-    { day: 'T3 (20/8)', rev: 6800000, profit: 4700000 },
-    { day: 'T4 (21/8)', rev: 4900000, profit: 3400000 },
-    { day: 'T5 (22/8)', rev: 8100000, profit: 5600000 },
-    { day: 'T6 (23/8)', rev: 9400000, profit: 6500000 },
-    { day: 'T7 (24/8)', rev: 14500000, profit: 10100000 },
-    { day: 'CN (25/8)', rev: 12200000, profit: 8500000 },
+  // Recharts Revenue Data
+  const revenueChartData = [
+    { day: 'T2', doanhThu: 5200000, loiNhuan: 3600000 },
+    { day: 'T3', doanhThu: 6800000, loiNhuan: 4700000 },
+    { day: 'T4', doanhThu: 4900000, loiNhuan: 3400000 },
+    { day: 'T5', doanhThu: 8100000, loiNhuan: 5600000 },
+    { day: 'T6', doanhThu: 9400000, loiNhuan: 6500000 },
+    { day: 'T7', doanhThu: 14500000, loiNhuan: 10100000 },
+    { day: 'CN', doanhThu: 12200000, loiNhuan: 8500000 },
   ];
-
-  const maxChartVal = 16000000;
 
   const statusBadge = (status: Appointment['status']) => {
     switch (status) {
@@ -148,8 +166,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#E2E6DF] text-[#5E665B] dark:bg-[#222621] dark:text-[#9BA198]">
-            {t.statusCancelled}
+          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+            {status}
           </span>
         );
     }
@@ -318,16 +336,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Main Grid: Revenue & Profit Chart + Today's Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Revenue & Profit Analysis Chart */}
+        {/* Left 2 Cols: Revenue & Profit Analysis Recharts */}
         <div className="lg:col-span-2 bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
                 <TrendingUp className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
-                <span>{t.revenueTrends}</span>
+                <span>{t.revenueTrends} (Biểu đồ Recharts)</span>
               </h3>
               <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
-                {lang === 'vi' ? 'Đối chiếu Doanh Thu và Lợi Nhuận Gộp theo thời gian' : 'Revenue vs Gross Profit breakdown'}
+                {lang === 'vi' ? 'Đối chiếu Doanh Thu và Lợi Nhuận Gộp theo ngày trong tuần' : 'Revenue vs Gross Profit breakdown'}
               </p>
             </div>
 
@@ -348,60 +366,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Visual SVG & Bar Hybrid Chart */}
-          <div className="pt-4">
-            <div className="flex items-center justify-between text-xs text-[#5E665B] dark:text-[#9BA198] mb-2">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1.5">
-                  <div className="w-3 h-3 rounded-md bg-[#5A7D57] dark:bg-[#8BA888]" />
-                  <span>{lang === 'vi' ? 'Doanh Thu' : 'Revenue'}</span>
-                </div>
-                <div className="flex items-center space-x-1.5">
-                  <div className="w-3 h-3 rounded-md bg-[#B88352] dark:bg-[#D4A373]" />
-                  <span>{lang === 'vi' ? 'Lợi Nhuận Gộp' : 'Gross Profit'}</span>
-                </div>
-              </div>
-              <span>Đơn vị: Triệu VNĐ</span>
-            </div>
+          {/* Recharts Bar Chart Container */}
+          <div className="pt-2 h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E6DF" opacity={0.4} />
+                <XAxis dataKey="day" stroke="#5E665B" fontSize={11} />
+                <YAxis stroke="#5E665B" fontSize={11} tickFormatter={(val) => `${val / 1000000}M`} />
+                <Tooltip
+                  formatter={(value: any) => formatCurrency(Number(value), lang)}
+                  contentStyle={{
+                    backgroundColor: '#1A1C19',
+                    borderRadius: '12px',
+                    color: '#E0E2DF',
+                    border: '1px solid #2D312C',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar dataKey="doanhThu" name="Doanh Thu" fill="#5A7D57" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="loiNhuan" name="Lợi Nhuận" fill="#D4A373" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-            <div className="grid grid-cols-7 gap-2 sm:gap-4 h-48 items-end pt-4 pb-2 border-b border-[#E2E6DF] dark:border-[#2D312C]">
-              {chartData.map((d, idx) => {
-                const revHeightPercent = Math.round((d.rev / maxChartVal) * 100);
-                const profitHeightPercent = Math.round((d.profit / maxChartVal) * 100);
-                return (
-                  <div key={idx} className="flex flex-col items-center h-full justify-end group">
-                    <div className="w-full flex items-end justify-center space-x-1 h-full">
-                      {/* Revenue Bar */}
-                      <div
-                        style={{ height: `${revHeightPercent}%` }}
-                        className="w-3.5 sm:w-5 bg-gradient-to-t from-[#5A7D57] to-[#8BA888] rounded-t-md transition-all group-hover:brightness-110 relative"
-                      >
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A1C19] text-[#E0E2DF] text-[10px] py-0.5 px-1.5 rounded pointer-events-none whitespace-nowrap z-20 shadow-md">
-                          {(d.rev / 1000000).toFixed(1)}M
-                        </div>
-                      </div>
-                      {/* Profit Bar */}
-                      <div
-                        style={{ height: `${profitHeightPercent}%` }}
-                        className="w-3.5 sm:w-5 bg-gradient-to-t from-[#B88352] to-[#D4A373] rounded-t-md transition-all group-hover:brightness-110 relative"
-                      >
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A1C19] text-[#E0E2DF] text-[10px] py-0.5 px-1.5 rounded pointer-events-none whitespace-nowrap z-20 shadow-md">
-                          Lãi: {(d.profit / 1000000).toFixed(1)}M
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-medium text-[#5E665B] dark:text-[#9BA198] mt-2 truncate max-w-full">
-                      {d.day.split(' ')[0]}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between text-xs text-[#5E665B] dark:text-[#9BA198] pt-3">
-              <span>Tổng doanh thu tuần: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">61.100.000đ</strong></span>
-              <span>Lợi nhuận ròng ước tính: <strong className="text-[#4D6E4A] dark:text-[#8BA888]">42.400.000đ (69.4%)</strong></span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-[#5E665B] dark:text-[#9BA198] pt-2 border-t border-[#E2E6DF] dark:border-[#2D312C]">
+            <span>Tổng tuần: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">61.100.000đ</strong></span>
+            <span>Lợi nhuận ròng: <strong className="text-[#4D6E4A] dark:text-[#8BA888]">42.400.000đ (69.4%)</strong></span>
           </div>
         </div>
 
@@ -557,6 +547,79 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Analytics & AI Future Trends Section (Requested by User) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Conversion Funnel Analytics */}
+        <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+              <Target className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+              <span>Phễu Chuyển Đổi Khách Hàng (Funnel Analytics)</span>
+            </h3>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#5A7D57]/15 text-[#5A7D57] dark:text-[#8BA888] font-semibold">
+              Live Tracked
+            </span>
+          </div>
+          <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+            Theo dõi hành vi từ lúc khách tìm kiếm dịch vụ cho đến khi hoàn tất thanh toán hóa đơn tại Spa.
+          </p>
+
+          <div className="space-y-3 pt-2">
+            {funnelData.map((step, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-medium text-[#1C211B] dark:text-[#E0E2DF]">
+                  <span>{step.step}</span>
+                  <span className="font-bold text-[#5A7D57] dark:text-[#8BA888]">{step.count} ({step.rate})</span>
+                </div>
+                <div className="w-full bg-[#E2E6DF] dark:bg-[#2D312C] h-2.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-[#5A7D57] to-[#8BA888] h-full rounded-full transition-all duration-500"
+                    style={{ width: step.rate }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* AI Seasonality & Future Trends Advisory */}
+        <div className="bg-gradient-to-br from-[#5A7D57]/10 via-[#8BA888]/5 to-transparent dark:from-[#222621] dark:to-[#1A1C19] rounded-2xl p-5 border border-[#5A7D57]/30 dark:border-[#8BA888]/30 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-[#B88352] dark:text-[#D4A373]" />
+              <span>Dự Báo Xu Hướng & AI Gợi Ý (Future Trends)</span>
+            </h3>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#B88352]/20 text-[#9E6B38] dark:text-[#D4A373] font-semibold">
+              {seasonalTrend.seasonName}
+            </span>
+          </div>
+
+          <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+            {seasonalTrend.highlightReason}
+          </p>
+
+          <div className="space-y-2 pt-1">
+            <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] block">
+              🚀 Các gói dịch vụ nên đẩy mạnh tuần tới:
+            </span>
+            {seasonalTrend.suggestedBoosts.map((boost, idx) => (
+              <div key={idx} className="p-2.5 rounded-xl bg-white/80 dark:bg-[#1A1C19]/80 border border-[#E2E6DF] dark:border-[#2D312C] flex items-center justify-between text-xs">
+                <span className="font-semibold text-[#1C211B] dark:text-[#E0E2DF]">{boost.title}</span>
+                <span className="text-[11px] text-[#5A7D57] dark:text-[#8BA888] font-medium">{boost.reason}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#5A7D57]/15 dark:bg-[#8BA888]/15 border border-[#5A7D57]/30 text-xs text-[#385936] dark:text-[#A3C2A0] flex items-start space-x-2">
+            <Zap className="w-4 h-4 shrink-0 mt-0.5 text-[#B88352] dark:text-[#D4A373]" />
+            <div>
+              <strong className="block font-semibold mb-0.5">Lời khuyên chiến lược từ AI Gemini:</strong>
+              {seasonalTrend.aiAdvisorTip}
+            </div>
+          </div>
         </div>
       </div>
     </div>

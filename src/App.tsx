@@ -63,9 +63,8 @@ export default function App() {
   const [lang, setLang] = useState<Language>('vi');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('spa_theme');
-      if (saved) return saved === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      localStorage.setItem('spa_theme', 'light');
+      document.documentElement.classList.remove('dark');
     }
     return false;
   });
@@ -652,6 +651,7 @@ export default function App() {
         <main className="w-full min-h-screen overflow-x-hidden pb-20 lg:pb-0">
           <CustomerPortalView
             lang={lang}
+            onLangChange={setLang}
             services={services}
             promotions={promotions}
             spaProfile={spaProfile}
