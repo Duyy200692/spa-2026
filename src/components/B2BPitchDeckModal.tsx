@@ -22,6 +22,7 @@ import {
   Clock,
   Briefcase
 } from 'lucide-react';
+import { getStoredB2BConfig } from '../data/b2bConfigData';
 
 export type B2BPartnerCategory = 'hotel' | 'sports' | 'spa_outsourcing';
 
@@ -281,46 +282,46 @@ export const B2BPitchDeckModal: React.FC<B2BPitchDeckModalProps> = ({
     ],
 
     // -------------------------------------------------------------
-    // CATEGORY 2: SPORTS RECOVERY & BRAND ACTIVATION (THỂ THAO - PICKLEBALL, GOLF, TENNIS)
+    // CATEGORY 2: SPORTS BEAUTY & SKIN RECOVERY (CHĂM SÓC DA & PHỤC HỒI CLB THỂ THAO)
     // -------------------------------------------------------------
     sports: [
       {
         id: 1,
-        badge: 'ĐỊNH VỊ CHIẾN LƯỢC • B2B BRAND ACTIVATION',
-        title: 'Khách Hàng Cao Cấp Của Bạn Đang Ở Trên Sân Thể Thao!',
-        subtitle: 'Giải pháp Tổ Chức Giải Đấu Trọn Gói & Dựng VIP Sports Lounge cho Thương hiệu, Ngân hàng, Enterprise & Spa.',
+        badge: 'ĐỐI TÁC SẮC ĐẸP • SPORTS BEAUTY & RECOVERY',
+        title: 'Tệp Khách Hàng Thể Thao Đang Cần Giải Pháp Cứu Hộ Làn Da & Cơ Bắp!',
+        subtitle: 'Cơ hội vàng cho Spa liên kết với các CLB Pickleball, Sân Golf, Tennis & Pilates cao cấp.',
         content: (
           <div className="space-y-6">
-            {/* High Impact Red/Gold Banner matched with screenshot layout */}
+            {/* High Impact Red/Gold Banner */}
             <div className="p-6 bg-gradient-to-r from-red-950 via-amber-950 to-zinc-950 text-white rounded-3xl space-y-3 border border-amber-700/60 shadow-xl relative overflow-hidden">
               <span className="text-[10px] tracking-widest font-bold uppercase text-amber-300 bg-amber-900/60 px-3 py-1 rounded-full inline-block border border-amber-600/40">
-                CHUYỂN ĐỔI KHÁCH HÀNG VIP (HNWI)
+                CƠ HỘI BÙNG NỔ THỂ THAO & LÀM ĐẸP
               </span>
               <h4 className="text-2xl sm:text-3xl font-black leading-tight text-white">
-                Không ai đổi thương hiệu chỉ vì một bài quảng cáo số đơn thuần.
+                "Khách chơi thể thao sẵn sàng chi trả lớn — nhưng họ sợ sạm da & đau mỏi cơ sau tập."
               </h4>
               <p className="text-xs text-amber-100/90 leading-relaxed max-w-2xl">
-                Khách hàng VIP chuyển đổi khi thương hiệu của bạn xuất hiện trực tiếp tại nơi họ gắn bó mỗi tuần — trên sân Pickleball, Golf & Tennis. Chúng tôi cung cấp giải pháp <strong>Tổ chức Giải đấu Branded Cup trọn gói</strong> kết hợp <strong>VIP Recovery Lounge</strong> giúp bạn thu hút & giữ chân tệp khách hàng trả giá cao.
+                Người chơi ngoài trời đối mặt với tia UV gay gắt gây sạm nám, cháy nắng và căng cơ vai gáy, khuỷu tay. Spa của bạn đóng vai trò là <strong>Đối tác Chăm sóc Sắc đẹp & Phục hồi độc quyền</strong> cho Hội viên CLB thể thao, mang lại nguồn khách VIP ổn định và lợi nhuận cao.
               </p>
             </div>
 
             {/* High Impact Stat Callouts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
               <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-xs">
-                <span className="text-2xl sm:text-3xl font-black text-red-600 block">396,6 Tỷ Đ</span>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">Doanh thu thiết bị thể thao</span>
+                <span className="text-2xl sm:text-3xl font-black text-red-600 block">+689%</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">Nhu cầu Nhả nắng & Giãn cơ</span>
               </div>
               <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-xs">
                 <span className="text-2xl sm:text-3xl font-black text-amber-600 block">1,4 Triệu</span>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">Người chơi Pickleball/Golf</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">Người chơi Pickleball & Golf</span>
               </div>
               <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-xs">
                 <span className="text-2xl sm:text-3xl font-black text-emerald-600 block">85% HNWI</span>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">Là chủ DN & Quản lý cao cấp</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">Thu nhập cao & Sẵn sàng chi</span>
               </div>
               <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-xs">
-                <span className="text-2xl sm:text-3xl font-black text-blue-600 block">5x LTV</span>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">Giá trị trọn đời khách VIP</span>
+                <span className="text-2xl sm:text-3xl font-black text-blue-600 block">20 - 30%</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">Hoa hồng chia sẻ cho Chủ Sân</span>
               </div>
             </div>
           </div>
@@ -328,33 +329,33 @@ export const B2BPitchDeckModal: React.FC<B2BPitchDeckModalProps> = ({
       },
       {
         id: 2,
-        badge: 'CHÂN DUNG KHÁCH HÀNG • HIGH-VALUE CUSTOMERS',
-        title: '3 Điều Đúng Với Tệp Khách Hàng Thể Thao Cao Cấp Tại Sân Tập',
-        subtitle: 'Dữ liệu hành vi của nhóm người chơi Pickleball, Golf & Tennis có chi tiêu cao.',
+        badge: 'NỖI ĐAU KHÁCH HÀNG • PAIN POINTS & INSIGHTS',
+        title: '3 Nhu Cầu Làm Đẹp & Phục Hồi Cấp Thiết Của Người Chơi Thể Thao',
+        subtitle: 'Hiểu rõ tâm lý để đóng gói đúng bài liệu trình mà khách hàng tìm kiếm mỗi tuần.',
         content: (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">01 • ĐÃ QUEN CHỈ TIÊU CAO</span>
-                <h5 className="font-extrabold text-base text-amber-950">Đầu Tư Lớn Cho Bản Thân</h5>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">01 • CHÁY NẮNG & SẠM NÁM TIA UV</span>
+                <h5 className="font-extrabold text-base text-amber-950">Tổn Thương Da Tầng Sâu</h5>
                 <p className="text-xs text-amber-900/80 leading-relaxed">
-                  Họ sở hữu cây vợt 5 - 15 triệu, trang phục có gu, sẵn sàng chi trả cho sức khỏe, sự thư giãn & trải nghiệm đẳng cấp.
+                  Sau 2 tiếng chơi ngoài trời, da bị đỏ rát, mất nước nghiêm trọng và tăng sắc tố Melanin. Cần điện di lạnh Cryo làm dịu và phục hồi tức thì.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">02 • TẦN SUẤT ĐỊNH KỲ</span>
-                <h5 className="font-extrabold text-base text-amber-950">Chi Tiêu Thường Xuyên</h5>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">02 • CĂNG CƠ & ĐAU KHỚP TAY/GỐI</span>
+                <h5 className="font-extrabold text-base text-amber-950">Mỏi Cơ Do Vận Động Mạnh</h5>
                 <p className="text-xs text-amber-900/80 leading-relaxed">
-                  Có mặt 2-4 buổi mỗi tuần trên sân. Tiền thuê sân, HLV & gói chăm sóc da/cơ là khoản ngân sách cố định hàng tháng.
+                  Vận động cường độ cao gây căng cơ vai gáy, khuỷu tay vợt Pickleball/Tennis, đau mỏi thắt lưng sau các cú xoay người Swing Golf.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">03 • CHÚ TRỌNG HÌNH ẢNH</span>
-                <h5 className="font-extrabold text-base text-amber-950">Giữ Làn Da & Vóc Dáng</h5>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">03 • GIỮ GÌN DIỆN MẠO TỰ TIN</span>
+                <h5 className="font-extrabold text-base text-amber-950">Duy Trì Vẻ Đẹp Sang Trọng</h5>
                 <p className="text-xs text-amber-900/80 leading-relaxed">
-                  Tránh sạm nắng, phục hồi cơ tức thì sau trận đấu để giữ diện mạo tự tin khi gặp đối tác & xuất hiện trên mạng xã hội.
+                  Khách thể thao cao cấp là chủ doanh nghiệp, quản lý, người nổi tiếng... luôn muốn làn da căng bóng, khỏe khoắn khi gặp gỡ đối tác.
                 </p>
               </div>
             </div>
@@ -363,33 +364,53 @@ export const B2BPitchDeckModal: React.FC<B2BPitchDeckModalProps> = ({
       },
       {
         id: 3,
-        badge: 'GIẢI PHÁP TRIỂN KHAI • 3-IN-1 ACTIVATION',
-        title: 'Hệ Sinh Thái Activation Giải Đấu Mang Tên Thương Hiệu Của Bạn',
-        subtitle: 'Trọn gói từ khâu tổ chức giải đến không gian trải nghiệm chăm sóc VIP tại sân.',
+        badge: 'MENU DỊCH VỤ • SPECIALIZED SPORTS MENU',
+        title: 'Hệ Sinh Thái Gói Liệu Trình Chuyên Biệt Cho VĐV & Người Tập',
+        subtitle: 'Đóng gói bài bản, hiệu quả thấy ngay sau 45-60 phút trải nghiệm.',
         content: (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-2 shadow-xs">
-                <span className="w-7 h-7 rounded-full bg-amber-800 text-amber-200 flex items-center justify-center text-xs font-bold">1</span>
-                <h5 className="font-bold text-sm text-zinc-900">Tổ Chức Branded Cup Trọn Gói</h5>
+                <div className="flex items-center justify-between">
+                  <span className="w-7 h-7 rounded-full bg-red-100 text-red-800 flex items-center justify-center text-xs font-bold">1</span>
+                  <span className="text-[11px] font-bold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full">45 Phút • Cryo Calming</span>
+                </div>
+                <h5 className="font-bold text-sm text-zinc-900">After-Sun Cryo Calming (Nhả Nắng Cấp Tốc)</h5>
                 <p className="text-xs text-zinc-600 leading-relaxed">
-                  Thiết kế concept giải đấu mang tên thương hiệu (Ngân hàng, Spa, Enterprise), cổng đăng ký VĐV, trọng tài, bốc thăm & media đưa tin.
+                  Điện di lạnh tế bào gốc Nha đam & Hyaluronic Acid đa tầng, hạ nhiệt da tức thì, ức chế đốm nâu sắc tố và giảm đỏ rát cháy nắng sau trận đấu.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-2 shadow-xs">
-                <span className="w-7 h-7 rounded-full bg-emerald-800 text-emerald-200 flex items-center justify-center text-xs font-bold">2</span>
-                <h5 className="font-bold text-sm text-zinc-900">Dựng VIP Recovery Spa Lounge</h5>
+                <div className="flex items-center justify-between">
+                  <span className="w-7 h-7 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold">2</span>
+                  <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">60-75 Phút • Deep Tissue</span>
+                </div>
+                <h5 className="font-bold text-sm text-zinc-900">Deep-Tissue Sports Muscle Recovery (Giãn Cơ Chuyên Sâu)</h5>
                 <p className="text-xs text-zinc-600 leading-relaxed">
-                  Quầy chăm sóc trực tiếp tại sân: Trị liệu căng cơ tay/khớp gối cho VĐV, điện di HA nhả nắng tức thì & bấm huyệt thư giãn.
+                  Kỹ thuật ấn huyệt thể thao kết hợp tinh dầu thảo mộc giải phóng axit lactic tồn đọng, giải tỏa căng cứng khớp gối, cổ chân và khuỷu tay.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-2 shadow-xs">
-                <span className="w-7 h-7 rounded-full bg-blue-800 text-blue-200 flex items-center justify-center text-xs font-bold">3</span>
-                <h5 className="font-bold text-sm text-zinc-900">Thu Thập Data & Chuyển Đổi VIP</h5>
+                <div className="flex items-center justify-between">
+                  <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold">3</span>
+                  <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full">90 Phút • Post-Game Detox</span>
+                </div>
+                <h5 className="font-bold text-sm text-zinc-900">Golf & Tennis Post-Game Detox (Thải Độc Toàn Thân)</h5>
                 <p className="text-xs text-zinc-600 leading-relaxed">
-                  Tặng Thẻ Đặc Quyền Spa/Service VIP đồng thương hiệu, thu thập thông tin khách hàng tiềm năng tự nhiên 100%.
+                  Xông hơi đá muối khoáng, ngâm chân thảo dược núi cao và massage bấm huyệt toàn thân giúp phục hồi 100% sinh lực và năng lượng tươi mới.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-2 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold">4</span>
+                  <span className="text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full">60 Phút • Active Glow</span>
+                </div>
+                <h5 className="font-bold text-sm text-zinc-900">Active Glow Sun-Defense Ritual (Bảo Vệ & Căng Bóng)</h5>
+                <p className="text-xs text-zinc-600 leading-relaxed">
+                  Gói chăm sóc cung cấp hàng rào bảo vệ da, ngăn ngừa mất nước biểu bì và giữ cho làn da luôn bóng khỏe tự nhiên dù hoạt động ngoài trời.
                 </p>
               </div>
             </div>
@@ -398,27 +419,27 @@ export const B2BPitchDeckModal: React.FC<B2BPitchDeckModalProps> = ({
       },
       {
         id: 4,
-        badge: 'MÔ HÌNH HỢP TÁC • GÓI DỰ TOÁN B2B',
-        title: 'Các Gói Hợp Tác Tổ Chức Giải Đấu & Brand Activation',
+        badge: 'MÔ HÌNH HỢP TÁC • 3 HƯỚNG TRIỂN KHAI THỰC CHIẾN',
+        title: '3 Mô Hình Hợp Tác Giữa Spa & Các Sân Thể Thao / Phòng Tập',
         content: (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-3 shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full">GÓI SILVER ACTIVATION</span>
-                <h5 className="font-extrabold text-base text-zinc-900">Tài Trợ Booth Phục Hồi</h5>
-                <p className="text-xs text-zinc-600">Đặt quầy Recovery Booth tại các giải đấu có sẵn của CLB đối tác. Phục hồi căng cơ & phát voucher cho 100-200 VĐV.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">OPTION 1: LIÊN KẾT ĐỒNG THƯƠNG HIỆU</span>
+                <h5 className="font-extrabold text-base text-zinc-900">Thẻ Đặc Quyền & Voucher</h5>
+                <p className="text-xs text-zinc-600">Đặt Standee / Gift Card tại quầy lễ tân CLB. Hội viên nhận ưu đãi 20%, Chủ sân nhận 25% hoa hồng trên mỗi lượt khách.</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-amber-950 text-white space-y-3 shadow-md border border-amber-600 relative">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-950 bg-amber-400 px-2.5 py-1 rounded-full font-bold">GÓI GOLD BRANDED CUP ★</span>
-                <h5 className="font-extrabold text-base text-amber-300">Giải Đấu Branded Trọn Gói</h5>
-                <p className="text-xs text-amber-100/90">Tổ chức giải đấu mang tên thương hiệu đối tác (32-64 VĐV), truyền thông báo chí & trọn gói VIP Recovery Lounge.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-950 bg-amber-400 px-2.5 py-1 rounded-full font-bold">OPTION 2: POP-UP SKIN LOUNGE ★</span>
+                <h5 className="font-extrabold text-base text-amber-300">Góc Trải Nghiệm Tại Sân</h5>
+                <p className="text-xs text-amber-100/90">Dựng booth trải nghiệm tại Clubhouse cuối tuần: Soi da, bôi kem chống nắng bảo vệ & massage nhanh 10 phút để thu hút khách về Spa.</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-3 shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-100 px-2.5 py-1 rounded-full">GÓI DIAMOND ENTERPRISE</span>
-                <h5 className="font-extrabold text-base text-zinc-900">Chuỗi Giải Đấu Liên Tỉnh</h5>
-                <p className="text-xs text-zinc-600">Đồng hành tổ chức chuỗi giải đấu cho Tập đoàn / Ngân hàng trên toàn quốc, phát hành Thẻ VIP Member dùng trọn đời.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-100 px-2.5 py-1 rounded-full">OPTION 3: TÀI TRỢ SẮC ĐẸP GIẢI ĐẤU</span>
+                <h5 className="font-extrabold text-base text-zinc-900">Nhà Tài Trợ Độc Quyền</h5>
+                <p className="text-xs text-zinc-600">Tài trợ voucher liệu trình cao cấp cho các giải đấu của CLB đối tác, tăng nhận diện thương hiệu với toàn bộ người tham gia.</p>
               </div>
             </div>
 
@@ -427,7 +448,7 @@ export const B2BPitchDeckModal: React.FC<B2BPitchDeckModalProps> = ({
                 onClick={() => onRegisterPartner('sports')}
                 className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-extrabold text-sm shadow-lg transition-all"
               >
-                Nhận Proposal Tổ Chức Giải & Activation →
+                Đăng Ký Nhận Proposal Hợp Tác CLB Thể Thao →
               </button>
             </div>
           </div>

@@ -12,6 +12,7 @@ export type TabType =
   | 'timekeeping'
   | 'promotions'
   | 'reports'
+  | 'b2b_management'
   | 'customer_portal'
   | 'customer_intro'
   | 'customer_promotions'

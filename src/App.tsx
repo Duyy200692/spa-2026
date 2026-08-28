@@ -45,6 +45,7 @@ import { StaffView } from './components/StaffView';
 import { PromotionsView } from './components/PromotionsView';
 import { ReportsView } from './components/ReportsView';
 import { CustomerPortalView } from './components/CustomerPortalView';
+import { B2BManagementView } from './components/B2BManagementView';
 import { RolePasswordModal } from './components/RolePasswordModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import { QuickBookingModal } from './components/QuickBookingModal';
@@ -818,6 +819,13 @@ export default function App() {
               lang={lang}
               onDeleteInvoice={handleDeleteInvoice}
               onClearAllInvoices={handleClearAllInvoices}
+            />
+          )}
+
+          {!isCustomerTab && activeTab === 'b2b_management' && (
+            <B2BManagementView
+              currentRole={currentRole}
+              lang={lang}
             />
           )}
           </main>

@@ -16,7 +16,8 @@ import {
   Lock,
   LogOut,
   Building,
-  Target
+  Target,
+  Handshake
 } from 'lucide-react';
 import { Role, Language, TabType } from '../types';
 import { translations } from '../i18n';
@@ -186,6 +187,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: TrendingUp,
       roles: ['owner', 'manager'],
     },
+    {
+      id: 'b2b_management',
+      label: lang === 'vi' ? 'Quản Lý Nội Dung B2B' : 'B2B Content Config',
+      icon: Handshake,
+      roles: ['owner', 'manager'],
+    },
   ];
 
   const visibleTabs = allowedTabs.filter((tab) => tab.roles.includes(currentRole));
@@ -194,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ['dashboard', 'analytics', 'appointments', 'customers', 'cost_calculation', 'inventory'].includes(t.id)
   );
   const hrTabs = visibleTabs.filter((t) =>
-    ['staff', 'timekeeping', 'promotions', 'reports'].includes(t.id)
+    ['staff', 'timekeeping', 'promotions', 'reports', 'b2b_management'].includes(t.id)
   );
 
   const roleRoleDetails: Record<Role, { title: string; desc: string; badgeClass: string }> = {

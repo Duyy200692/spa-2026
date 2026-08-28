@@ -43,6 +43,7 @@ import {
   Role
 } from '../types';
 import { B2BPitchDeckModal, B2BPartnerCategory } from './B2BPitchDeckModal';
+import { getStoredB2BConfig } from '../data/b2bConfigData';
 
 interface CustomerPortalViewProps {
   lang: Language;
@@ -94,6 +95,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   // B2B Pitch Deck Slide Viewer Modal State
   const [showPitchDeckModal, setShowPitchDeckModal] = useState<boolean>(false);
   const [pitchDeckCategory, setPitchDeckCategory] = useState<B2BPartnerCategory>('hotel');
+
+  // Dynamic B2B Content configuration
+  const b2bConfig = useMemo(() => getStoredB2BConfig(), [showPitchDeckModal, showB2BModal]);
 
   const portalTexts = {
     vi: {
@@ -1199,10 +1203,10 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 B2B PARTNERSHIPS & NETWORK
               </span>
               <h2 className="text-2xl sm:text-4xl font-bold text-[#181716]">
-                Giới Thiệu & Hợp Tác Doanh Nghiệp
+                {b2bConfig.sectionTitle}
               </h2>
               <p className="text-xs sm:text-sm text-[#736E69] font-normal mt-1">
-                Giải pháp đóng gói bài liệu trình Spa, phục hồi thể thao & điều động nhân sự chuyển giao cho các đối tác
+                {b2bConfig.sectionSubtitle}
               </p>
             </div>
 
@@ -1229,21 +1233,21 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                     <Building className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
-                    DỊCH VỤ LƯU TRÚ & HOTEL
+                    {b2bConfig.cards.hotel.badge}
                   </span>
                   <h3 className="text-xl font-bold leading-snug">
-                    In-Room Spa Rituals Cho Khách Du Lịch
+                    {b2bConfig.cards.hotel.title}
                   </h3>
                 </div>
 
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-[#57534E] leading-relaxed">
-                    Kết hợp với Khách sạn, Homestay, Resort mang đến trải nghiệm Spa thư giãn tận phòng cho du khách. Đóng gói bài trị liệu chuẩn 5 sao, cung cấp QR menu đặt lịch trực tiếp & chia sẻ hoa hồng tự động.
+                    {b2bConfig.cards.hotel.description}
                   </p>
 
                   <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-[11px] text-emerald-900 font-medium space-y-1">
-                    <span className="font-bold block">✓ Quyền lợi đối tác:</span>
-                    <p>Tăng 15 - 25% doanh thu phụ trợ / phòng mà không tốn chi phí vận hành hay tuyển dụng nhân sự.</p>
+                    <span className="font-bold block">{b2bConfig.cards.hotel.benefitTitle}</span>
+                    <p>{b2bConfig.cards.hotel.benefitText}</p>
                   </div>
                 </div>
               </div>
@@ -1257,7 +1261,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   className="w-full py-2.5 rounded-full bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Xem Slide Đề Án & Phân Tích →</span>
+                  <span>{b2bConfig.cards.hotel.primaryButtonLabel}</span>
                 </button>
 
                 <button
@@ -1267,7 +1271,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   }}
                   className="w-full py-2 rounded-full border border-emerald-800 text-emerald-800 hover:bg-emerald-50 text-[11px] font-bold transition-all text-center"
                 >
-                  Đăng Ký Hợp Tác Lưu Trú
+                  {b2bConfig.cards.hotel.secondaryButtonLabel}
                 </button>
               </div>
             </div>
@@ -1280,21 +1284,21 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                     <Award className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
-                    DỊCH VỤ TỔ CHỨC GIẢI & BRAND ACTIVATION
+                    {b2bConfig.cards.sports.badge}
                   </span>
                   <h3 className="text-xl font-bold leading-snug">
-                    Giải Đấu Mang Tên Thương Hiệu & VIP Recovery Lounge
+                    {b2bConfig.cards.sports.title}
                   </h3>
                 </div>
 
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-[#57534E] leading-relaxed">
-                    Tổ chức giải đấu Pickleball, Golf, Tennis trọn gói cho Doanh nghiệp, Ngân hàng & Thương hiệu (Concept, trọng tài, cổng đăng ký, media). Kết hợp dựng VIP Recovery & Beauty Lounge tại sân giúp tiếp cận tệp khách hàng trả giá cao.
+                    {b2bConfig.cards.sports.description}
                   </p>
 
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 font-medium space-y-1">
-                    <span className="font-bold block">✓ Chiến lược chuyển đổi VIP:</span>
-                    <p>Khách hàng của bạn đang ở trên sân thể thao — Biến giải đấu thành kênh thu hút & giữ chân khách hàng giá trị cao (HNWI).</p>
+                    <span className="font-bold block">{b2bConfig.cards.sports.benefitTitle}</span>
+                    <p>{b2bConfig.cards.sports.benefitText}</p>
                   </div>
                 </div>
               </div>
@@ -1308,7 +1312,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   className="w-full py-2.5 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Xem Slide Đề Án & Giải Pháp B2B →</span>
+                  <span>{b2bConfig.cards.sports.primaryButtonLabel}</span>
                 </button>
 
                 <button
@@ -1318,7 +1322,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   }}
                   className="w-full py-2 rounded-full border border-amber-800 text-amber-900 hover:bg-amber-50 text-[11px] font-bold transition-all text-center"
                 >
-                  Đăng Ký Tổ Chức Giải & Activation
+                  {b2bConfig.cards.sports.secondaryButtonLabel}
                 </button>
               </div>
             </div>
@@ -1331,21 +1335,21 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                     <UserCheck className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
-                    B2B SPA OUTSOURCING
+                    {b2bConfig.cards.spa_outsourcing.badge}
                   </span>
                   <h3 className="text-xl font-bold leading-snug">
-                    Chuyển Giao SOP & Cung Ứng Nhân Sự
+                    {b2bConfig.cards.spa_outsourcing.title}
                   </h3>
                 </div>
 
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-[#57534E] leading-relaxed">
-                    Bán sỉ quy trình bài liệu trình đóng gói sẵn & chuyển giao KTV bài bản cho các Spa đối tác khi thiếu người vào giờ cao điểm hoặc muốn mở rộng thêm menu dịch vụ chuyên sâu.
+                    {b2bConfig.cards.spa_outsourcing.description}
                   </p>
 
                   <div className="p-3 rounded-xl bg-zinc-100 border border-zinc-200 text-[11px] text-zinc-900 font-medium space-y-1">
-                    <span className="font-bold block">✓ Giải pháp mở rộng:</span>
-                    <p>Tối ưu hóa nguồn lực nhân sự dư thừa, gia tăng dòng tiền từ mảng đào tạo & nhượng quyền SOP.</p>
+                    <span className="font-bold block">{b2bConfig.cards.spa_outsourcing.benefitTitle}</span>
+                    <p>{b2bConfig.cards.spa_outsourcing.benefitText}</p>
                   </div>
                 </div>
               </div>
@@ -1359,7 +1363,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   className="w-full py-2.5 rounded-full bg-zinc-900 hover:bg-black text-amber-300 text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Xem Slide Đề Án & Phân Tích →</span>
+                  <span>{b2bConfig.cards.spa_outsourcing.primaryButtonLabel}</span>
                 </button>
 
                 <button
@@ -1369,7 +1373,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   }}
                   className="w-full py-2 rounded-full border border-zinc-900 text-zinc-900 hover:bg-zinc-100 text-[11px] font-bold transition-all text-center"
                 >
-                  Nhận Hồ Sơ Năng Lực
+                  {b2bConfig.cards.spa_outsourcing.secondaryButtonLabel}
                 </button>
               </div>
             </div>
