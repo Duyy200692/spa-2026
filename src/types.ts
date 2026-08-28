@@ -174,6 +174,18 @@ export interface Staff {
   completedServicesCount: number;
   monthlyCommission: number;
   pinCode?: string; // Mã PIN cá nhân 4-6 số do Admin cấp để đăng nhập Cổng Nhân Viên
+  // Phân ca làm việc & Ngày nghỉ (Off) hằng tuần
+  defaultShift?: 'morning' | 'afternoon' | 'full_day' | 'flexible'; // Ca làm việc chính
+  workingHours?: string; // Khung giờ làm việc (VD: "08:30 - 17:30", "13:00 - 22:00")
+  weeklyOffDays?: string[]; // Ngày nghỉ định kỳ hằng tuần (VD: ['Thứ 2', 'Chủ Nhật'] hoặc ['t2', 'cn'])
+  workScheduleNote?: string; // Ghi chú sắp xếp lịch trực
+  weeklySchedule?: {
+    [dayKey: string]: { // 't2' | 't3' | 't4' | 't5' | 't6' | 't7' | 'cn'
+      shift: 'morning' | 'afternoon' | 'full_day' | 'off' | 'flexible';
+      hours?: string;
+      notes?: string;
+    };
+  };
 }
 
 export interface AttendanceRecord {

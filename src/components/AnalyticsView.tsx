@@ -67,11 +67,22 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   const [channelFilter, setChannelFilter] = useState<'all' | 'web' | 'zalo' | 'walkin'>('all');
   const [selectedFunnelStep, setSelectedFunnelStep] = useState<number | null>(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+  const [timelineTab, setTimelineTab] = useState<'thisWeek' | 'nextMonth' | 'twoMonthsOut'>('thisWeek');
 
   const t = translations[lang];
   const trendingServices = getTrendingServices();
   const seasonalTrend = getSeasonalFutureTrends();
   const funnelData = getFunnelMetrics();
+
+  const currentTimelineData = seasonalTrend.timelines
+    ? seasonalTrend.timelines[timelineTab]
+    : {
+        label: 'Gợi Ý Tuần Tới',
+        badge: 'Tăng trưởng +38%',
+        highlightReason: seasonalTrend.highlightReason,
+        suggestedBoosts: seasonalTrend.suggestedBoosts,
+        aiAdvisorTip: seasonalTrend.aiAdvisorTip,
+      };
 
   // Multi-channel funnel breakdown
   const channelBreakdownData = [
@@ -124,7 +135,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 Phân Tích Phễu Khách Hàng & AI Trend Forecast
               </h1>
               <p className="text-xs text-zinc-500 font-medium">
-                Theo dõi chuyên sâu tỷ lệ chuyển đổi phễu, tối ưu chi phí cơ hội & nhận dự báo xu hướng mùa vụ từ AI Gemini
+                Theo dõi chuyên sâu tỷ lệ chuyển đổi phễu, tối ưu chi phí cơ hội & nhận dự báo xu hướng mùa vụ từ Trợ Lý AI
               </p>
             </div>
           </div>
@@ -151,7 +162,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
           {/* Refresh AI */}
           <button
-            onClick={() => handleTriggerQuickAction('Chạy lại mô hình phân tích AI Gemini')}
+            onClick={() => handleTriggerQuickAction('Chạy lại mô hình phân tích AI')}
             className="px-3.5 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 flex items-center space-x-1.5 shadow-xs transition-all active:scale-95"
             title="Cập nhật lại dữ liệu"
           >
@@ -466,7 +477,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-zinc-900 flex items-center space-x-2">
-                <span>Dự Báo Xu Hướng Mùa Vụ & Gợi Ý AI Gemini (Future Trends)</span>
+                <span>Dự Báo Xu Hướng Mùa Vụ & Gợi Ý AI (Future Trends)</span>
               </h2>
               <p className="text-xs text-zinc-600 font-medium">
                 Mô hình học máy dự báo nhu cầu dịch vụ theo thời tiết, mùa lễ hội & dữ liệu khách hàng thực tế
@@ -479,27 +490,77 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           </span>
         </div>
 
+        {/* Timeline Tabs Switcher */}
+        <div className="p-3 bg-white/90 rounded-xl border border-emerald-100 space-y-2">
+          <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-950">
+            <Clock className="w-4 h-4 text-emerald-700" />
+            <span>Chọn Dòng Thời Gian Dự Báo:</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setTimelineTab('thisWeek')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                timelineTab === 'thisWeek'
+                  ? 'bg-emerald-800 text-white shadow-xs'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+              }`}
+            >
+              <span>⚡ Tuần Này & Tuần Tới</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimelineTab('nextMonth')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                timelineTab === 'nextMonth'
+                  ? 'bg-emerald-800 text-white shadow-xs'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+              }`}
+            >
+              <span>📅 Tháng Tới (30 Ngày)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimelineTab('twoMonthsOut')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                timelineTab === 'twoMonthsOut'
+                  ? 'bg-emerald-800 text-white shadow-xs'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+              }`}
+            >
+              <span>🎯 2 Tháng Tới (60 Ngày)</span>
+            </button>
+          </div>
+        </div>
+
         {/* Highlight Banner */}
         <div className="p-4 rounded-xl bg-white/90 border border-emerald-100 shadow-2xs space-y-2">
-          <div className="flex items-center space-x-2 text-xs font-bold text-emerald-900">
-            <AlertCircle className="w-4 h-4 text-emerald-700" />
-            <span>Đặc Điểm Xu Hướng Hiện Tại:</span>
+          <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 text-emerald-700" />
+              <span>Đặc Điểm Xu Hướng {currentTimelineData.label}:</span>
+            </div>
+            {currentTimelineData.badge && (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px]">
+                {currentTimelineData.badge}
+              </span>
+            )}
           </div>
           <p className="text-xs text-zinc-700 leading-relaxed font-normal">
-            {seasonalTrend.highlightReason}
+            {currentTimelineData.highlightReason}
           </p>
         </div>
 
         {/* Suggested Boost Packages & AI Tip */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Column 1: Top Recommended Packages */}
+          {/* Column 1: Top Recommended Packages for selected timeline */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center space-x-1.5">
-              <span>🚀 Các gói dịch vụ nên đẩy mạnh tuần tới:</span>
+              <span>🚀 Các gói dịch vụ nên đẩy mạnh ({currentTimelineData.label}):</span>
             </h3>
             <div className="space-y-2">
-              {seasonalTrend.suggestedBoosts.map((boost, idx) => (
+              {currentTimelineData.suggestedBoosts.map((boost: any, idx: number) => (
                 <div
                   key={idx}
                   className="p-3.5 rounded-xl bg-white border border-emerald-100 shadow-2xs flex items-center justify-between hover:border-emerald-300 transition-all"
@@ -508,32 +569,32 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                     <span className="text-xs font-bold text-zinc-900 block">{boost.title}</span>
                     <span className="text-[11px] text-zinc-500 font-medium">{boost.reason}</span>
                   </div>
-                  <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                    Nhu cầu +35%
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 shrink-0 ml-2">
+                    {boost.surge || 'Nhu cầu +35%'}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Column 2: AI Gemini Advisor Strategy */}
+          {/* Column 2: AI Advisor Strategy */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center space-x-1.5">
-              <span>💡 Lời khuyên chiến lược từ AI Gemini:</span>
+              <span>💡 Lời khuyên chiến lược từ Trợ Lý AI:</span>
             </h3>
 
             <div className="p-4 rounded-xl bg-emerald-900 text-white space-y-3 shadow-md border border-emerald-800">
               <div className="flex items-start space-x-2">
                 <Zap className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-emerald-50 leading-relaxed font-medium">
-                  {seasonalTrend.aiAdvisorTip}
+                  {currentTimelineData.aiAdvisorTip}
                 </p>
               </div>
 
               <div className="pt-2 border-t border-emerald-800/80 flex items-center justify-between text-[11px] text-emerald-200">
-                <span>Độ tin cậy mô hình dự báo: <strong>94.2%</strong></span>
+                <span>Độ tin cậy mô hình: <strong>94.2%</strong></span>
                 <button
-                  onClick={() => handleTriggerQuickAction('Tự động áp dụng khuyến nghị chiến lược của AI Gemini vào Menu Dịch Vụ')}
+                  onClick={() => handleTriggerQuickAction(`Tự động áp dụng khuyến nghị chiến lược [${currentTimelineData.label}] vào Menu Dịch Vụ`)}
                   className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-xs transition-all active:scale-95"
                 >
                   Áp Dụng Chiến Lược

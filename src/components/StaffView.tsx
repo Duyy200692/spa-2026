@@ -59,10 +59,82 @@ import {
   RefreshCw,
   Ban,
   UserCheck2,
+  Sun,
+  Moon,
+  Palmtree,
+  CalendarRange,
+  Sliders,
+  AlertTriangle,
 } from 'lucide-react';
 import { Staff, AttendanceRecord, Language, Role, KTVTourLog, Appointment, Service } from '../types';
 import { translations, formatCurrency } from '../i18n';
 import { exportToCSV } from '../utils/exportUtils';
+
+export const WEEK_DAYS = [
+  { key: 't2', vi: 'Thứ 2', en: 'Monday', short: 'T2', dayIndex: 1 },
+  { key: 't3', vi: 'Thứ 3', en: 'Tuesday', short: 'T3', dayIndex: 2 },
+  { key: 't4', vi: 'Thứ 4', en: 'Wednesday', short: 'T4', dayIndex: 3 },
+  { key: 't5', vi: 'Thứ 5', en: 'Thursday', short: 'T5', dayIndex: 4 },
+  { key: 't6', vi: 'Thứ 6', en: 'Friday', short: 'T6', dayIndex: 5 },
+  { key: 't7', vi: 'Thứ 7', en: 'Saturday', short: 'T7', dayIndex: 6 },
+  { key: 'cn', vi: 'Chủ Nhật', en: 'Sunday', short: 'CN', dayIndex: 0 },
+];
+
+export const SHIFT_DEFINITIONS = [
+  { key: 'morning', label: 'Ca Sáng', defaultHours: '08:30 - 17:30', icon: '🌅', desc: 'Ca sáng chuẩn y khoa' },
+  { key: 'afternoon', label: 'Ca Chiều / Tối', defaultHours: '13:00 - 22:00', icon: '🌆', desc: 'Ca chiều & tối cao điểm' },
+  { key: 'full_day', label: 'Cả Ngày (Full)', defaultHours: '08:30 - 21:30', icon: '🌟', desc: 'Ca toàn thời gian / Trực quản lý' },
+  { key: 'flexible', label: 'Linh Hoạt', defaultHours: 'Theo lịch hẹn', icon: '⚡', desc: 'Làm theo khách book & tour' },
+  { key: 'off', label: 'Nghỉ OFF', defaultHours: 'Nghỉ ca', icon: '🏖️', desc: 'Ngày nghỉ định kỳ hàng tuần' },
+];
+
+export const getTodayDayKey = (): string => {
+  const dayIdx = new Date().getDay(); // 0 is Sunday
+  const found = WEEK_DAYS.find(d => d.dayIndex === dayIdx);
+  return found ? found.key : 'cn';
+};
+
+export const getStaffShiftForDay = (
+  staffMember: Staff,
+  dayKey: string
+): {
+  shift: 'morning' | 'afternoon' | 'full_day' | 'off' | 'flexible';
+  hours: string;
+  isOff: boolean;
+  notes?: string;
+} => {
+  // Check if explicit schedule exists for this day in weeklySchedule
+  if (staffMember.weeklySchedule && staffMember.weeklySchedule[dayKey]) {
+    const daySched = staffMember.weeklySchedule[dayKey];
+    const isOff = daySched.shift === 'off';
+    const hours = daySched.hours || (
+      daySched.shift === 'morning' ? '08:30 - 17:30' :
+      daySched.shift === 'afternoon' ? '13:00 - 22:00' :
+      daySched.shift === 'full_day' ? '08:30 - 21:30' :
+      daySched.shift === 'off' ? 'Nghỉ OFF' : 'Theo lịch book'
+    );
+    return { shift: daySched.shift, hours, isOff, notes: daySched.notes };
+  }
+
+  // Check if day is in weeklyOffDays
+  const dayObj = WEEK_DAYS.find(d => d.key === dayKey);
+  const isOffDay = (staffMember.weeklyOffDays || []).some(off => {
+    const offLower = off.toLowerCase().trim();
+    return offLower === dayKey || (dayObj && (offLower === dayObj.vi.toLowerCase() || offLower === dayObj.en.toLowerCase() || offLower.includes(dayObj.short.toLowerCase())));
+  });
+
+  if (isOffDay) {
+    return { shift: 'off', hours: 'Nghỉ OFF', isOff: true };
+  }
+
+  const defShift = staffMember.defaultShift || 'morning';
+  const hours = staffMember.workingHours || (
+    defShift === 'morning' ? '08:30 - 17:30' :
+    defShift === 'afternoon' ? '13:00 - 22:00' :
+    defShift === 'full_day' ? '08:30 - 21:30' : 'Theo lịch book'
+  );
+  return { shift: defShift, hours, isOff: false };
+};
 
 interface StaffViewProps {
   staff: Staff[];
@@ -144,19 +216,24 @@ export const StaffView: React.FC<StaffViewProps> = ({
   onToggleStaffStatus,
 }) => {
   const t = translations[lang];
+  const isManagerOrOwner = currentRole === 'owner' || currentRole === 'manager';
   const [activeSubTab, setActiveSubTab] = useState<'directory' | 'timekeeping' | 'tours' | 'resigned' | 'self_portal'>(
     currentRole === 'technician' ? 'self_portal' : currentRole === 'receptionist' ? 'tours' : (initialSubTab as any) || 'tours'
   );
 
   React.useEffect(() => {
-    if (currentRole === 'technician') {
+    if (!isManagerOrOwner && (activeSubTab === 'directory' || activeSubTab === 'resigned')) {
+      setActiveSubTab(currentRole === 'technician' ? 'self_portal' : 'tours');
+    } else if (currentRole === 'technician' && !initialSubTab) {
       setActiveSubTab('self_portal');
-    } else if (currentRole === 'receptionist' && (initialSubTab === 'directory' || initialSubTab === 'resigned')) {
-      setActiveSubTab('tours');
     } else if (initialSubTab) {
-      setActiveSubTab(initialSubTab);
+      if (!isManagerOrOwner && (initialSubTab === 'directory' || initialSubTab === 'resigned')) {
+        setActiveSubTab('timekeeping');
+      } else {
+        setActiveSubTab(initialSubTab);
+      }
     }
-  }, [initialSubTab, currentRole]);
+  }, [initialSubTab, currentRole, isManagerOrOwner]);
 
   // Active & Resigned staff lists
   const activeStaffList = staff.filter(s => s.status !== 'resigned');
@@ -331,10 +408,55 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('all');
   const [seniorityFilter, setSeniorityFilter] = useState<string>('all'); // all, over_1yr, over_2yr, probation
 
-  // Timekeeping State
+  // Timekeeping & Shift Roster State
+  const [timekeepingMode, setTimekeepingMode] = useState<'matrix' | 'clock_in'>('matrix');
+  const [matrixDayFilter, setMatrixDayFilter] = useState<'all' | 'today' | 't2' | 't3' | 't4' | 't5' | 't6' | 't7' | 'cn'>('all');
+  const [matrixSearchTerm, setMatrixSearchTerm] = useState<string>('');
   const [selectedStaffId, setSelectedStaffId] = useState<string>(activeStaffList[0]?.id || '');
   const [selectedShift, setSelectedShift] = useState<'morning' | 'afternoon' | 'full_day'>('morning');
   const [timeNote, setTimeNote] = useState<string>('');
+
+  // Shift & Day-Off Registration Modal State
+  const [showShiftModal, setShowShiftModal] = useState<boolean>(false);
+  const [targetShiftStaff, setTargetShiftStaff] = useState<Staff | null>(null);
+  const [shiftForm, setShiftForm] = useState<{
+    staffId: string;
+    defaultShift: 'morning' | 'afternoon' | 'full_day' | 'flexible';
+    workingHours: string;
+    weeklyOffDays: string[];
+    workScheduleNote: string;
+    weeklySchedule: {
+      [dayKey: string]: {
+        shift: 'morning' | 'afternoon' | 'full_day' | 'off' | 'flexible';
+        hours?: string;
+        notes?: string;
+      };
+    };
+  }>({
+    staffId: '',
+    defaultShift: 'morning',
+    workingHours: '08:30 - 17:30',
+    weeklyOffDays: ['Thứ 2'],
+    workScheduleNote: '',
+    weeklySchedule: {},
+  });
+
+  // Fast inline cell edit popover in Matrix
+  const [activeCellPopover, setActiveCellPopover] = useState<{ staffId: string; dayKey: string } | null>(null);
+
+  // Self portal shift change request modal
+  const [showSelfShiftRequestModal, setShowSelfShiftRequestModal] = useState<boolean>(false);
+  const [selfShiftForm, setSelfShiftForm] = useState<{
+    defaultShift: 'morning' | 'afternoon' | 'full_day' | 'flexible';
+    workingHours: string;
+    weeklyOffDays: string[];
+    note: string;
+  }>({
+    defaultShift: 'morning',
+    workingHours: '08:30 - 17:30',
+    weeklyOffDays: ['Thứ 2'],
+    note: '',
+  });
 
   // Modals State
   const [showAddStaffModal, setShowAddStaffModal] = useState<boolean>(false);
@@ -362,6 +484,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
     startDate: new Date().toISOString().slice(0, 10),
     seniorityBonusAmount: 0,
     notes: '',
+    defaultShift: 'morning' as 'morning' | 'afternoon' | 'full_day' | 'flexible',
+    workingHours: '08:30 - 17:30',
+    weeklyOffDays: ['Thứ 2'] as string[],
+    workScheduleNote: '',
   });
 
   const handleSaveSelfPassword = (e: React.FormEvent) => {
@@ -557,6 +683,170 @@ export const StaffView: React.FC<StaffViewProps> = ({
     exportToCSV('Bang_Cham_Cong_Nhan_Vien_Spa', rows);
   };
 
+  const handleExportWeeklyScheduleCSV = () => {
+    const rows = activeStaffList.map(st => {
+      const sT2 = getStaffShiftForDay(st, 't2');
+      const sT3 = getStaffShiftForDay(st, 't3');
+      const sT4 = getStaffShiftForDay(st, 't4');
+      const sT5 = getStaffShiftForDay(st, 't5');
+      const sT6 = getStaffShiftForDay(st, 't6');
+      const sT7 = getStaffShiftForDay(st, 't7');
+      const sCN = getStaffShiftForDay(st, 'cn');
+      return {
+        'Mã Nhân Viên': st.id,
+        'Họ và Tên': st.name,
+        'Chức Danh': st.positionTitle,
+        'Ca Mặc Định': st.defaultShift === 'morning' ? 'Ca Sáng' : st.defaultShift === 'afternoon' ? 'Ca Chiều' : st.defaultShift === 'full_day' ? 'Cả Ngày' : 'Linh Hoạt',
+        'Khung Giờ': st.workingHours || '08:30 - 17:30',
+        'Ngày Off Hàng Tuần': (st.weeklyOffDays || []).join(', ') || 'Không cố định',
+        'Thứ 2': sT2.isOff ? 'NGHỈ OFF' : `${sT2.shift === 'morning' ? 'Sáng' : sT2.shift === 'afternoon' ? 'Chiều' : sT2.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT2.hours})`,
+        'Thứ 3': sT3.isOff ? 'NGHỈ OFF' : `${sT3.shift === 'morning' ? 'Sáng' : sT3.shift === 'afternoon' ? 'Chiều' : sT3.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT3.hours})`,
+        'Thứ 4': sT4.isOff ? 'NGHỈ OFF' : `${sT4.shift === 'morning' ? 'Sáng' : sT4.shift === 'afternoon' ? 'Chiều' : sT4.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT4.hours})`,
+        'Thứ 5': sT5.isOff ? 'NGHỈ OFF' : `${sT5.shift === 'morning' ? 'Sáng' : sT5.shift === 'afternoon' ? 'Chiều' : sT5.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT5.hours})`,
+        'Thứ 6': sT6.isOff ? 'NGHỈ OFF' : `${sT6.shift === 'morning' ? 'Sáng' : sT6.shift === 'afternoon' ? 'Chiều' : sT6.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT6.hours})`,
+        'Thứ 7': sT7.isOff ? 'NGHỈ OFF' : `${sT7.shift === 'morning' ? 'Sáng' : sT7.shift === 'afternoon' ? 'Chiều' : sT7.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sT7.hours})`,
+        'Chủ Nhật': sCN.isOff ? 'NGHỈ OFF' : `${sCN.shift === 'morning' ? 'Sáng' : sCN.shift === 'afternoon' ? 'Chiều' : sCN.shift === 'full_day' ? 'Cả ngày' : 'Linh hoạt'} (${sCN.hours})`,
+        'Ghi Chú': st.workScheduleNote || '',
+      };
+    });
+    exportToCSV('Lich_Phan_Ca_Va_Ngay_Off_Tuan_Spa', rows);
+  };
+
+  // Inline Fast Shift Change in Matrix
+  const handleQuickSetShiftForDay = (
+    staffMember: Staff,
+    dayKey: string,
+    newShift: 'morning' | 'afternoon' | 'full_day' | 'off' | 'flexible'
+  ) => {
+    const currentSched = staffMember.weeklySchedule || {};
+    const dayObj = WEEK_DAYS.find(d => d.key === dayKey);
+    const dayNameVi = dayObj ? dayObj.vi : dayKey;
+
+    let updatedWeeklyOffDays = [...(staffMember.weeklyOffDays || [])];
+    if (newShift === 'off') {
+      if (!updatedWeeklyOffDays.includes(dayNameVi) && !updatedWeeklyOffDays.includes(dayKey)) {
+        updatedWeeklyOffDays.push(dayNameVi);
+      }
+    } else {
+      updatedWeeklyOffDays = updatedWeeklyOffDays.filter(d => d !== dayNameVi && d !== dayKey);
+    }
+
+    const hours =
+      newShift === 'morning' ? '08:30 - 17:30' :
+      newShift === 'afternoon' ? '13:00 - 22:00' :
+      newShift === 'full_day' ? '08:30 - 21:30' :
+      newShift === 'off' ? 'Nghỉ OFF' : 'Theo lịch book';
+
+    const updatedStaff: Staff = {
+      ...staffMember,
+      weeklyOffDays: updatedWeeklyOffDays,
+      weeklySchedule: {
+        ...currentSched,
+        [dayKey]: {
+          shift: newShift,
+          hours: hours,
+          notes: newShift === 'off' ? 'Nghỉ off định kỳ' : `Ca ${newShift}`,
+        },
+      },
+    };
+
+    if (onUpdateStaff) {
+      onUpdateStaff(updatedStaff);
+    }
+    setActiveCellPopover(null);
+  };
+
+  // Open Shift & Day-Off Registration Modal
+  const handleOpenShiftModal = (staffMember: Staff) => {
+    setTargetShiftStaff(staffMember);
+    const defShift = staffMember.defaultShift || 'morning';
+    const hours = staffMember.workingHours || (
+      defShift === 'morning' ? '08:30 - 17:30' :
+      defShift === 'afternoon' ? '13:00 - 22:00' :
+      defShift === 'full_day' ? '08:30 - 21:30' : '08:30 - 17:30'
+    );
+
+    const baseSched: any = {};
+    WEEK_DAYS.forEach(d => {
+      const shiftInfo = getStaffShiftForDay(staffMember, d.key);
+      baseSched[d.key] = {
+        shift: shiftInfo.shift,
+        hours: shiftInfo.hours,
+        notes: shiftInfo.notes || '',
+      };
+    });
+
+    setShiftForm({
+      staffId: staffMember.id,
+      defaultShift: defShift,
+      workingHours: hours,
+      weeklyOffDays: staffMember.weeklyOffDays && staffMember.weeklyOffDays.length > 0 ? staffMember.weeklyOffDays : ['Thứ 2'],
+      workScheduleNote: staffMember.workScheduleNote || '',
+      weeklySchedule: staffMember.weeklySchedule || baseSched,
+    });
+    setShowShiftModal(true);
+  };
+
+  const handleToggleWeeklyOffDay = (dayName: string) => {
+    const current = shiftForm.weeklyOffDays || [];
+    const exists = current.includes(dayName);
+    const next = exists ? current.filter(d => d !== dayName) : [...current, dayName];
+
+    const dayObj = WEEK_DAYS.find(d => d.vi === dayName || d.key === dayName);
+    const dayKey = dayObj ? dayObj.key : dayName.toLowerCase();
+
+    const nextSched = { ...shiftForm.weeklySchedule };
+    if (!exists) {
+      nextSched[dayKey] = { shift: 'off', hours: 'Nghỉ OFF', notes: 'Nghỉ off định kỳ' };
+    } else {
+      const def = shiftForm.defaultShift;
+      const hrs = shiftForm.workingHours;
+      nextSched[dayKey] = { shift: def, hours: hrs, notes: '' };
+    }
+
+    setShiftForm({
+      ...shiftForm,
+      weeklyOffDays: next,
+      weeklySchedule: nextSched,
+    });
+  };
+
+  const handleSaveShiftSchedule = (e: React.FormEvent) => {
+    e.preventDefault();
+    const staffMember = staff.find(s => s.id === shiftForm.staffId) || targetShiftStaff;
+    if (!staffMember || !onUpdateStaff) return;
+
+    const updatedStaff: Staff = {
+      ...staffMember,
+      defaultShift: shiftForm.defaultShift,
+      workingHours: shiftForm.workingHours,
+      weeklyOffDays: shiftForm.weeklyOffDays,
+      workScheduleNote: shiftForm.workScheduleNote,
+      weeklySchedule: shiftForm.weeklySchedule,
+    };
+
+    onUpdateStaff(updatedStaff);
+    setShowShiftModal(false);
+    setTargetShiftStaff(null);
+  };
+
+  const handleSelfSaveShiftRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loggedStaff || !onUpdateStaff) return;
+
+    const updatedStaff: Staff = {
+      ...loggedStaff,
+      defaultShift: selfShiftForm.defaultShift,
+      workingHours: selfShiftForm.workingHours,
+      weeklyOffDays: selfShiftForm.weeklyOffDays,
+      workScheduleNote: selfShiftForm.note ? `[Nhân viên tự đăng ký]: ${selfShiftForm.note}` : loggedStaff.workScheduleNote,
+    };
+
+    onUpdateStaff(updatedStaff);
+    setLoggedStaff(updatedStaff);
+    setShowSelfShiftRequestModal(false);
+  };
+
   const handleExportStaffCSV = () => {
     const rows = staff.map(st => {
       const tenure = calculateTenure(st.startDate, st.endDate);
@@ -567,6 +857,9 @@ export const StaffView: React.FC<StaffViewProps> = ({
         'Email': st.email,
         'Chức Danh': st.positionTitle,
         'Vai Trò Hệ Thống': st.role,
+        'Ca Làm Việc': st.defaultShift === 'morning' ? 'Ca Sáng' : st.defaultShift === 'afternoon' ? 'Ca Chiều' : st.defaultShift === 'full_day' ? 'Cả Ngày' : 'Linh Hoạt',
+        'Giờ Làm': st.workingHours || '08:30 - 17:30',
+        'Ngày Nghỉ Tuần': (st.weeklyOffDays || []).join(', ') || 'Không cố định',
         'Trạng Thái': st.status === 'resigned' ? 'Đã nghỉ việc (Lưu trữ)' : 'Đang làm việc',
         'Ngày Bắt Đầu Làm': st.startDate || 'Chưa rõ',
         'Ngày Nghỉ Việc': st.endDate || 'Đang làm',
@@ -606,6 +899,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
       notes: newStaffForm.notes,
       completedServicesCount: 0,
       monthlyCommission: 0,
+      defaultShift: newStaffForm.defaultShift,
+      workingHours: newStaffForm.workingHours,
+      weeklyOffDays: newStaffForm.weeklyOffDays,
+      workScheduleNote: newStaffForm.workScheduleNote,
     };
 
     onAddStaff(created);
@@ -626,6 +923,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
       startDate: new Date().toISOString().slice(0, 10),
       seniorityBonusAmount: 0,
       notes: '',
+      defaultShift: 'morning',
+      workingHours: '08:30 - 17:30',
+      weeklyOffDays: ['Thứ 2'],
+      workScheduleNote: '',
     });
   };
 
@@ -856,30 +1157,34 @@ export const StaffView: React.FC<StaffViewProps> = ({
           <h1 className="text-lg sm:text-xl font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
             <UserCog className="w-5 h-5 text-[#5A7D57] dark:text-[#8BA888]" />
             <span>
-              {currentRole === 'receptionist'
+              {currentRole === 'technician'
+                ? 'Cổng Kỹ Thuật Viên & Lịch Ca Trực'
+                : currentRole === 'receptionist'
                 ? 'Đội Ngũ Kỹ Thuật Viên & Sắp Xếp Tour Làm Việc'
                 : 'Quản Lý Nhân Sự, Thâm Niên & Chấm Công'}
             </span>
           </h1>
           <p className="text-xs text-[#5E665B] dark:text-[#9BA198] mt-0.5">
-            {currentRole === 'receptionist'
+            {currentRole === 'technician'
+              ? 'Theo dõi lịch trực cá nhân, đăng ký ngày nghỉ (off), xem ca tour và tự chấm công thời gian thực'
+              : currentRole === 'receptionist'
               ? 'Theo dõi ca làm việc, trạng thái rảnh/bận và số lượt đã làm để Lễ tân điều phối tour công bằng'
               : 'Theo dõi ngày bắt đầu làm việc, xét thưởng thâm niên, chỉnh sửa hồ sơ & lưu trữ nhân sự đã nghỉ việc'}
           </p>
         </div>
 
-        <div className="flex items-center flex-wrap gap-2">
-          <button
-            id="btn-export-staff-csv"
-            onClick={handleExportStaffCSV}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#F0F3EF] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] hover:bg-[#E5EAE3] dark:hover:bg-[#2A2F29] transition-colors border border-[#E2E6DF] dark:border-[#2D312C]"
-            title="Xuất danh sách nhân sự và thâm niên ra file Excel CSV"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
-            <span>Xuất Hồ Sơ & Thâm Niên</span>
-          </button>
+        {isManagerOrOwner && (
+          <div className="flex items-center flex-wrap gap-2">
+            <button
+              id="btn-export-staff-csv"
+              onClick={handleExportStaffCSV}
+              className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#F0F3EF] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] hover:bg-[#E5EAE3] dark:hover:bg-[#2A2F29] transition-colors border border-[#E2E6DF] dark:border-[#2D312C]"
+              title="Xuất danh sách nhân sự và thâm niên ra file Excel CSV"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+              <span>Xuất Hồ Sơ & Thâm Niên</span>
+            </button>
 
-          {currentRole !== 'receptionist' && (
             <button
               id="btn-add-staff-modal"
               onClick={() => setShowAddStaffModal(true)}
@@ -888,8 +1193,8 @@ export const StaffView: React.FC<StaffViewProps> = ({
               <Plus className="w-4 h-4" />
               <span>{t.addStaff}</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Role notice banner for Receptionist */}
@@ -904,8 +1209,8 @@ export const StaffView: React.FC<StaffViewProps> = ({
         </div>
       )}
 
-      {/* Overview Statistics Ribbon (Admin/Manager) */}
-      {currentRole !== 'receptionist' && (
+      {/* Overview Statistics Ribbon (Admin/Manager Only) */}
+      {isManagerOrOwner && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white dark:bg-[#1A1C19] p-3.5 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm">
             <div className="flex items-center justify-between">
@@ -978,15 +1283,15 @@ export const StaffView: React.FC<StaffViewProps> = ({
           onClick={() => setActiveSubTab('timekeeping')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeSubTab === 'timekeeping'
-              ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm'
+              ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm ring-2 ring-[#5A7D57]/30'
               : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F0F3EF] dark:hover:bg-[#222621]'
           }`}
         >
-          <Clock className="w-3.5 h-3.5" />
-          <span>{t.timekeeping} & Điểm Danh</span>
+          <CalendarRange className="w-3.5 h-3.5" />
+          <span>📅 Phân Ca &amp; Chấm Công, Ngày Off ({activeStaffList.length})</span>
         </button>
 
-        {currentRole !== 'receptionist' && (
+        {isManagerOrOwner && (
           <>
             <button
               id="tab-staff-active-directory"
@@ -1277,6 +1582,122 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Personal Shift & Weekly Off-Day Schedule Card */}
+              {(() => {
+                const todayKey = getTodayDayKey();
+                const myTodayShift = getStaffShiftForDay(loggedStaff, todayKey);
+                const shiftLabel =
+                  loggedStaff.defaultShift === 'morning' ? 'Ca Sáng' :
+                  loggedStaff.defaultShift === 'afternoon' ? 'Ca Chiều / Tối' :
+                  loggedStaff.defaultShift === 'full_day' ? 'Cả Ngày (Full)' : 'Linh Hoạt';
+
+                return (
+                  <div className="bg-white dark:bg-[#1A1C19] border border-[#E2E6DF] dark:border-[#2D312C] rounded-3xl p-5 shadow-sm space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#E2E6DF] dark:border-[#2D312C] pb-3 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 rounded-xl bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 text-[#5A7D57] dark:text-[#8BA888] flex items-center justify-center font-bold">
+                          <CalendarRange className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+                            <span>Lịch Phân Ca &amp; Ngày Nghỉ (Off) Của Tôi</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#8BA888]/20 text-[#2C492A] dark:text-[#A3C2A0]">
+                              {shiftLabel}
+                            </span>
+                          </h3>
+                          <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                            Giờ làm chuẩn: <strong>{loggedStaff.workingHours || '08:30 - 17:30'}</strong> • Ngày nghỉ cố định: <strong>{(loggedStaff.weeklyOffDays || []).join(', ') || 'Không cố định'}</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setSelfShiftForm({
+                            defaultShift: loggedStaff.defaultShift || 'morning',
+                            workingHours: loggedStaff.workingHours || '08:30 - 17:30',
+                            weeklyOffDays: loggedStaff.weeklyOffDays || ['Thứ 2'],
+                            note: '',
+                          });
+                          setShowSelfShiftRequestModal(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F0F3EF] dark:bg-[#222621] hover:bg-[#E2E6DF] dark:hover:bg-[#2D312C] text-[#1C211B] dark:text-[#E0E2DF] border border-[#E2E6DF] dark:border-[#2D312C] transition-all flex items-center space-x-1.5 self-start sm:self-auto"
+                      >
+                        <Sliders className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                        <span>Đăng Ký Đổi Ca / Báo Nghỉ Off</span>
+                      </button>
+                    </div>
+
+                    {/* 7-Day Schedule Strip */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                      {WEEK_DAYS.map(d => {
+                        const dayShift = getStaffShiftForDay(loggedStaff, d.key);
+                        const isToday = d.key === todayKey;
+
+                        return (
+                          <div
+                            key={d.key}
+                            className={`p-3 rounded-2xl border text-center transition-all ${
+                              isToday
+                                ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#5A7D57]/10 dark:bg-[#8BA888]/15 ring-2 ring-[#5A7D57]/20'
+                                : dayShift.isOff
+                                ? 'border-amber-200/70 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20'
+                                : 'border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                              <span className={isToday ? 'text-[#5A7D57] dark:text-[#8BA888]' : 'text-[#1C211B] dark:text-[#E0E2DF]'}>
+                                {d.vi}
+                              </span>
+                              {isToday && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#5A7D57] text-white dark:bg-[#8BA888] dark:text-[#121412] font-semibold">
+                                  Hôm nay
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="my-1.5">
+                              {dayShift.isOff ? (
+                                <span className="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                                  🏖️ NGHỈ OFF
+                                </span>
+                              ) : dayShift.shift === 'morning' ? (
+                                <span className="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                                  🌅 Ca Sáng
+                                </span>
+                              ) : dayShift.shift === 'afternoon' ? (
+                                <span className="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
+                                  🌆 Ca Chiều
+                                </span>
+                              ) : dayShift.shift === 'full_day' ? (
+                                <span className="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                                  🌟 Cả Ngày
+                                </span>
+                              ) : (
+                                <span className="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+                                  ⚡ Linh Hoạt
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198] font-mono">
+                              {dayShift.hours}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {loggedStaff.workScheduleNote && (
+                      <div className="text-xs text-[#5E665B] dark:text-[#9BA198] bg-[#F5F7F4] dark:bg-[#222621] p-2.5 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] flex items-center space-x-1.5">
+                        <Info className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888] shrink-0" />
+                        <span><strong>Ghi chú ca làm việc:</strong> {loggedStaff.workScheduleNote}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Real-Time Check-In Card & Financial Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1823,165 +2244,759 @@ export const StaffView: React.FC<StaffViewProps> = ({
         </div>
       )}
 
-      {/* VIEW 1: Timekeeping Clock-in Terminal */}
+      {/* VIEW 1: Timekeeping, Shift Roster & Day Off Management */}
       {activeSubTab === 'timekeeping' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Clock In Panel */}
-          <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
-              <LogIn className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
-              <span>Chấm Công Trực Tiếp (GPS/Vân Tay)</span>
-            </h2>
+        <div className="space-y-5">
+          {/* Top Sub-mode Navigation Header */}
+          <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-4 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 w-full md:w-auto">
+              <button
+                id="btn-timekeeping-mode-matrix"
+                onClick={() => setTimekeepingMode('matrix')}
+                className={`flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                  timekeepingMode === 'matrix'
+                    ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm'
+                    : 'bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#E2E6DF] dark:hover:bg-[#2D312C]'
+                }`}
+              >
+                <CalendarRange className="w-3.5 h-3.5" />
+                <span>📅 Lịch Phân Ca &amp; Ngày Nghỉ (Off) 7 Ngày ({activeStaffList.length} Nhân Sự)</span>
+              </button>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                  Chọn nhân viên chấm công:
-                </label>
-                <select
-                  value={selectedStaffId}
-                  onChange={e => setSelectedStaffId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+              <button
+                id="btn-timekeeping-mode-clockin"
+                onClick={() => setTimekeepingMode('clock_in')}
+                className={`flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                  timekeepingMode === 'clock_in'
+                    ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm'
+                    : 'bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#E2E6DF] dark:hover:bg-[#2D312C]'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>⏱️ Máy Chấm Công &amp; Điểm Danh Hôm Nay ({attendance.length} lượt)</span>
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
+              {isManagerOrOwner ? (
+                <>
+                  <button
+                    id="btn-quick-open-shift-modal"
+                    onClick={() => {
+                      const target = activeStaffList[0];
+                      if (target) handleOpenShiftModal(target);
+                    }}
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm transition-all"
+                  >
+                    <Sliders className="w-3.5 h-3.5" />
+                    <span>Đăng Ký / Sửa Ca &amp; Ngày Off</span>
+                  </button>
+
+                  <button
+                    id="btn-export-shift-roster-csv"
+                    onClick={handleExportWeeklyScheduleCSV}
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F0F3EF] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] hover:bg-[#E2E6DF] dark:hover:bg-[#2D312C] transition-all border border-[#E2E6DF] dark:border-[#2D312C]"
+                    title="Xuất bảng phân ca và ngày off 7 ngày ra file Excel"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Xuất Lịch Ca (CSV)</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  id="btn-quick-self-request"
+                  onClick={() => {
+                    const target = loggedStaff || activeStaffList[0];
+                    if (target) handleOpenSelfRequestModal(target);
+                  }}
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm transition-all"
                 >
-                  {activeStaffList.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.positionTitle})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Đăng Ký Đổi Ca / Nghỉ Off Cá Nhân</span>
+                </button>
+              )}
+            </div>
+          </div>
 
-              <div>
-                <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                  {t.shift}:
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {[
-                    { key: 'morning', label: t.morningShift },
-                    { key: 'afternoon', label: t.afternoonShift },
-                    { key: 'full_day', label: t.fullDayShift },
-                  ].map(s => (
-                    <label
-                      key={s.key}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
-                        selectedShift === s.key
-                          ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#8BA888]/15 dark:bg-[#8BA888]/20 font-semibold text-[#2C492A] dark:text-[#A3C2A0]'
-                          : 'border-[#E2E6DF] dark:border-[#2D312C] text-[#5E665B] dark:text-[#9BA198]'
+          {/* MODE 1: WEEKLY SHIFT ROSTER & DAY-OFF MATRIX */}
+          {timekeepingMode === 'matrix' && (
+            <div className="space-y-4">
+              {/* Daily Shift Summary Metrics for Today */}
+              {(() => {
+                const todayKey = getTodayDayKey();
+                const todayDayObj = WEEK_DAYS.find(d => d.key === todayKey);
+                const countMorning = activeStaffList.filter(s => getStaffShiftForDay(s, todayKey).shift === 'morning').length;
+                const countAfternoon = activeStaffList.filter(s => getStaffShiftForDay(s, todayKey).shift === 'afternoon').length;
+                const countFullDay = activeStaffList.filter(s => getStaffShiftForDay(s, todayKey).shift === 'full_day').length;
+                const countOffToday = activeStaffList.filter(s => getStaffShiftForDay(s, todayKey).isOff).length;
+                const countFlexible = activeStaffList.filter(s => getStaffShiftForDay(s, todayKey).shift === 'flexible').length;
+
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div className="bg-white dark:bg-[#1A1C19] p-3 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm">
+                      <div className="flex items-center justify-between text-xs text-[#5E665B] dark:text-[#9BA198]">
+                        <span className="font-medium">Tổng Nhân Sự</span>
+                        <Users className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+                      </div>
+                      <div className="text-xl font-bold text-[#1C211B] dark:text-[#E0E2DF] mt-1">
+                        {activeStaffList.length}
+                      </div>
+                      <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198]">
+                        Hôm nay ({todayDayObj?.vi || 'Hôm nay'})
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1A1C19] p-3 rounded-2xl border border-amber-200/60 dark:border-amber-900/40 shadow-sm bg-gradient-to-br from-amber-50/30 to-white dark:from-amber-950/10 dark:to-[#1A1C19]">
+                      <div className="flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
+                        <span className="font-medium">🌅 Ca Sáng (08:30-17:30)</span>
+                        <Sun className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                        {countMorning} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">KTV/NV</span>
+                      </div>
+                      <div className="text-[10px] text-amber-700/80">Trực ca sáng chuẩn</div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1A1C19] p-3 rounded-2xl border border-indigo-200/60 dark:border-indigo-900/40 shadow-sm bg-gradient-to-br from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-[#1A1C19]">
+                      <div className="flex items-center justify-between text-xs text-indigo-800 dark:text-indigo-300">
+                        <span className="font-medium">🌆 Ca Chiều (13:00-22:00)</span>
+                        <Moon className="w-4 h-4 text-indigo-500" />
+                      </div>
+                      <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                        {countAfternoon} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">KTV/NV</span>
+                      </div>
+                      <div className="text-[10px] text-indigo-700/80">Cao điểm buổi tối</div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1A1C19] p-3 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/40 shadow-sm bg-gradient-to-br from-emerald-50/30 to-white dark:from-emerald-950/10 dark:to-[#1A1C19]">
+                      <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300">
+                        <span className="font-medium">🌟 Cả Ngày / Linh Hoạt</span>
+                        <Sparkles className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                        {countFullDay + countFlexible} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">KTV/NV</span>
+                      </div>
+                      <div className="text-[10px] text-emerald-700/80">Trực toàn ca / Theo book</div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#1A1C19] p-3 rounded-2xl border border-rose-200/60 dark:border-rose-900/40 shadow-sm bg-gradient-to-br from-rose-50/30 to-white dark:from-rose-950/10 dark:to-[#1A1C19]">
+                      <div className="flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+                        <span className="font-medium">🏖️ Nghỉ OFF Hôm Nay</span>
+                        <Palmtree className="w-4 h-4 text-rose-500" />
+                      </div>
+                      <div className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1">
+                        {countOffToday} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">KTV/NV</span>
+                      </div>
+                      <div className="text-[10px] text-rose-700/80">Ngày nghỉ tuần định kỳ</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Search and Day Tabs Filter */}
+              <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-4 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-3">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+                  <div className="relative flex-1 w-full">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#5E665B] dark:text-[#9BA198]" />
+                    <input
+                      type="text"
+                      placeholder="Tìm nhân viên trong bảng phân ca (tên, số điện thoại, chức danh)..."
+                      value={matrixSearchTerm}
+                      onChange={e => setMatrixSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57]"
+                    />
+                  </div>
+
+                  {/* Day Filter Pills */}
+                  <div className="flex items-center space-x-1 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+                    <button
+                      onClick={() => setMatrixDayFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                        matrixDayFilter === 'all'
+                          ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-xs'
+                          : 'bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#E2E6DF]'
                       }`}
                     >
-                      <span className="text-[11px]">{s.label}</span>
-                      <input
-                        type="radio"
-                        name="shift"
-                        checked={selectedShift === s.key}
-                        onChange={() => setSelectedShift(s.key as any)}
-                        className="accent-[#5A7D57] dark:accent-[#8BA888]"
-                      />
-                    </label>
-                  ))}
+                      Tất Cả 7 Ngày
+                    </button>
+
+                    <button
+                      onClick={() => setMatrixDayFilter('today')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center space-x-1 ${
+                        matrixDayFilter === 'today'
+                          ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-xs ring-2 ring-[#5A7D57]/30'
+                          : 'bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#E2E6DF]'
+                      }`}
+                    >
+                      <span>⭐ Hôm Nay</span>
+                    </button>
+
+                    {WEEK_DAYS.map(d => (
+                      <button
+                        key={d.key}
+                        onClick={() => setMatrixDayFilter(d.key as any)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                          matrixDayFilter === d.key
+                            ? 'bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] font-bold shadow-xs'
+                            : 'bg-[#F0F3EF] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#E2E6DF]'
+                        }`}
+                      >
+                        {d.vi}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198] flex items-center justify-between border-t border-[#E2E6DF]/60 dark:border-[#2D312C]/60 pt-2">
+                  <div className="flex items-center space-x-2">
+                    <Info className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>
+                      💡 <strong>Mẹo thao tác nhanh:</strong> Nhấp trực tiếp vào bất kỳ ô ca làm việc nào để chuyển ca (Sáng, Chiều, Cả ngày, Nghỉ OFF) tức thì!
+                    </span>
+                  </div>
+                  <div className="hidden sm:flex items-center space-x-3 text-[10px]">
+                    <span className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                      <span>Ca Sáng (08:30-17:30)</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                      <span>Ca Chiều (13:00-22:00)</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span>Cả Ngày (08:30-21:30)</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                      <span>Nghỉ OFF</span>
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                  Ghi chú (Lý do muộn nếu có):
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Kẹt xe, đã báo trước..."
-                  value={timeNote}
-                  onChange={e => setTimeNote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
-                />
+              {/* 7-DAY INTERACTIVE SCHEDULE & OFF-DAY MATRIX TABLE */}
+              {(() => {
+                const todayKey = getTodayDayKey();
+                const visibleDays =
+                  matrixDayFilter === 'all' ? WEEK_DAYS :
+                  matrixDayFilter === 'today' ? WEEK_DAYS.filter(d => d.key === todayKey) :
+                  WEEK_DAYS.filter(d => d.key === matrixDayFilter);
+
+                const filteredList = activeStaffList.filter(st => {
+                  const matchSearch =
+                    st.name.toLowerCase().includes(matrixSearchTerm.toLowerCase()) ||
+                    st.positionTitle.toLowerCase().includes(matrixSearchTerm.toLowerCase()) ||
+                    st.phone.includes(matrixSearchTerm);
+                  return matchSearch;
+                });
+
+                return (
+                  <div className="bg-white dark:bg-[#1A1C19] rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left border-collapse">
+                        <thead className="text-[11px] uppercase bg-[#F5F7F4] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] border-b border-[#E2E6DF] dark:border-[#2D312C]">
+                          <tr>
+                            <th className="px-4 py-3.5 font-bold min-w-[240px] sticky left-0 bg-[#F5F7F4] dark:bg-[#222621] z-10 border-r border-[#E2E6DF] dark:border-[#2D312C]">
+                              Nhân Viên &amp; Ca Mặc Định
+                            </th>
+                            {visibleDays.map(d => {
+                              const isToday = d.key === todayKey;
+                              return (
+                                <th
+                                  key={d.key}
+                                  className={`px-3 py-3.5 font-bold text-center min-w-[130px] border-r border-[#E2E6DF] dark:border-[#2D312C] ${
+                                    isToday
+                                      ? 'bg-[#5A7D57]/15 dark:bg-[#8BA888]/20 text-[#2C492A] dark:text-[#A3C2A0]'
+                                      : ''
+                                  }`}
+                                >
+                                  <div className="font-bold flex items-center justify-center space-x-1">
+                                    <span>{d.vi}</span>
+                                    {isToday && (
+                                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#5A7D57] text-white dark:bg-[#8BA888] dark:text-[#121412] font-semibold">
+                                        Hôm nay
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] lowercase font-normal opacity-80">
+                                    {d.en}
+                                  </div>
+                                </th>
+                              );
+                            })}
+                            <th className="px-3 py-3.5 font-bold text-center min-w-[110px]">
+                              Thao Tác
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody className="divide-y divide-[#E2E6DF] dark:divide-[#2D312C]">
+                          {filteredList.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={visibleDays.length + 2}
+                                className="px-4 py-12 text-center text-[#5E665B] dark:text-[#9BA198]"
+                              >
+                                Không tìm thấy nhân viên nào phù hợp với bộ lọc tìm kiếm.
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredList.map(st => {
+                              const defShiftBadge =
+                                st.defaultShift === 'morning' ? { text: 'Ca Sáng', color: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' } :
+                                st.defaultShift === 'afternoon' ? { text: 'Ca Chiều', color: 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300' } :
+                                st.defaultShift === 'full_day' ? { text: 'Cả Ngày', color: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' } :
+                                { text: 'Linh Hoạt', color: 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300' };
+
+                              return (
+                                <tr
+                                  key={st.id}
+                                  className="hover:bg-[#F5F7F4]/50 dark:hover:bg-[#222621]/50 transition-colors"
+                                >
+                                  {/* Column 1: Staff Info, Default Shift & Off-day */}
+                                  <td className="px-4 py-3.5 sticky left-0 bg-white dark:bg-[#1A1C19] z-10 border-r border-[#E2E6DF] dark:border-[#2D312C] shadow-xs">
+                                    <div className="flex items-center space-x-3">
+                                      <img
+                                        src={st.avatar}
+                                        alt={st.name}
+                                        className="w-10 h-10 rounded-full object-cover ring-2 ring-[#5A7D57]/20 shrink-0"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center space-x-1.5">
+                                          <span className="font-bold text-[#1C211B] dark:text-[#E0E2DF] truncate text-xs">
+                                            {st.name}
+                                          </span>
+                                        </div>
+                                        <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198] truncate">
+                                          {st.positionTitle}
+                                        </div>
+                                        <div className="flex items-center flex-wrap gap-1 mt-1">
+                                          <span
+                                            className={`px-1.5 py-0.2 rounded text-[10px] font-semibold ${defShiftBadge.color}`}
+                                            title="Ca làm việc chính được chỉ định"
+                                          >
+                                            {defShiftBadge.text}
+                                          </span>
+                                          <span
+                                            className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/40"
+                                            title="Ngày nghỉ OFF hàng tuần"
+                                          >
+                                            Off: {(st.weeklyOffDays || []).join(', ') || 'Chưa đặt'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* Columns for Each Day */}
+                                  {visibleDays.map(d => {
+                                    const dayShift = getStaffShiftForDay(st, d.key);
+                                    const isToday = d.key === todayKey;
+                                    const isCellPopoverOpen =
+                                      activeCellPopover?.staffId === st.id &&
+                                      activeCellPopover?.dayKey === d.key;
+
+                                    return (
+                                      <td
+                                        key={d.key}
+                                        className={`px-2.5 py-3 border-r border-[#E2E6DF] dark:border-[#2D312C] text-center relative ${
+                                          isToday
+                                            ? 'bg-[#5A7D57]/5 dark:bg-[#8BA888]/10'
+                                            : ''
+                                        }`}
+                                      >
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (isManagerOrOwner) {
+                                              if (isCellPopoverOpen) {
+                                                setActiveCellPopover(null);
+                                              } else {
+                                                setActiveCellPopover({ staffId: st.id, dayKey: d.key });
+                                              }
+                                            } else if (loggedStaff?.id === st.id) {
+                                              handleOpenSelfRequestModal(st);
+                                            }
+                                          }}
+                                          disabled={!isManagerOrOwner && loggedStaff?.id !== st.id}
+                                          className={`w-full p-2 rounded-xl text-center border transition-all ${
+                                            isManagerOrOwner || loggedStaff?.id === st.id
+                                              ? 'cursor-pointer group hover:scale-[1.02]'
+                                              : 'cursor-default opacity-90'
+                                          } ${
+                                            dayShift.isOff
+                                              ? 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50 hover:border-rose-400'
+                                              : dayShift.shift === 'morning'
+                                              ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50 hover:border-amber-400'
+                                              : dayShift.shift === 'afternoon'
+                                              ? 'bg-indigo-50/80 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-900/50 hover:border-indigo-400'
+                                              : dayShift.shift === 'full_day'
+                                              ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 hover:border-emerald-400'
+                                              : 'bg-stone-50 dark:bg-stone-800/40 border-stone-200 dark:border-stone-700 hover:border-stone-400'
+                                          }`}
+                                          title={
+                                            isManagerOrOwner
+                                              ? 'Nhấp để đổi ca làm hoặc báo nghỉ off nhanh'
+                                              : loggedStaff?.id === st.id
+                                              ? 'Nhấp để gửi yêu cầu đổi ca / nghỉ off cá nhân'
+                                              : 'Lịch trực của nhân viên'
+                                          }
+                                        >
+                                          <div className="font-bold text-[11px] flex items-center justify-center space-x-1">
+                                            {dayShift.isOff ? (
+                                              <span className="text-rose-700 dark:text-rose-300">
+                                                🏖️ NGHỈ OFF
+                                              </span>
+                                            ) : dayShift.shift === 'morning' ? (
+                                              <span className="text-amber-700 dark:text-amber-300">
+                                                🌅 Ca Sáng
+                                              </span>
+                                            ) : dayShift.shift === 'afternoon' ? (
+                                              <span className="text-indigo-700 dark:text-indigo-300">
+                                                🌆 Ca Chiều
+                                              </span>
+                                            ) : dayShift.shift === 'full_day' ? (
+                                              <span className="text-emerald-700 dark:text-emerald-300">
+                                                🌟 Cả Ngày
+                                              </span>
+                                            ) : (
+                                              <span className="text-stone-700 dark:text-stone-300">
+                                                ⚡ Linh Hoạt
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198] font-mono mt-0.5">
+                                            {dayShift.hours}
+                                          </div>
+                                        </button>
+
+                                        {/* Fast 1-Click Shift Selector Popover (Manager/Owner Only) */}
+                                        {isManagerOrOwner && isCellPopoverOpen && (
+                                          <div className="absolute z-30 top-full left-1/2 -translate-x-1/2 mt-1.5 w-48 bg-white dark:bg-[#1A1C19] rounded-2xl shadow-xl border border-[#E2E6DF] dark:border-[#2D312C] p-2 space-y-1 text-left">
+                                            <div className="text-[10px] font-bold text-[#5E665B] dark:text-[#9BA198] px-2 py-1 border-b border-[#E2E6DF] dark:border-[#2D312C] flex items-center justify-between">
+                                              <span>{d.vi} - {st.name}</span>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setActiveCellPopover(null);
+                                                }}
+                                                className="text-[#9BA198] hover:text-[#1C211B]"
+                                              >
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                            </div>
+
+                                            <button
+                                              onClick={() => handleQuickSetShiftForDay(st, d.key, 'morning')}
+                                              className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-semibold flex items-center space-x-2 transition-colors"
+                                            >
+                                              <span>🌅</span>
+                                              <span>Ca Sáng (08:30 - 17:30)</span>
+                                            </button>
+
+                                            <button
+                                              onClick={() => handleQuickSetShiftForDay(st, d.key, 'afternoon')}
+                                              className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 font-semibold flex items-center space-x-2 transition-colors"
+                                            >
+                                              <span>🌆</span>
+                                              <span>Ca Chiều (13:00 - 22:00)</span>
+                                            </button>
+
+                                            <button
+                                              onClick={() => handleQuickSetShiftForDay(st, d.key, 'full_day')}
+                                              className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold flex items-center space-x-2 transition-colors"
+                                            >
+                                              <span>🌟</span>
+                                              <span>Cả Ngày (08:30 - 21:30)</span>
+                                            </button>
+
+                                            <button
+                                              onClick={() => handleQuickSetShiftForDay(st, d.key, 'flexible')}
+                                              className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold flex items-center space-x-2 transition-colors"
+                                            >
+                                              <span>⚡</span>
+                                              <span>Linh Hoạt (Theo book)</span>
+                                            </button>
+
+                                            <div className="border-t border-[#E2E6DF] dark:border-[#2D312C] pt-1">
+                                              <button
+                                                onClick={() => handleQuickSetShiftForDay(st, d.key, 'off')}
+                                                className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-bold flex items-center space-x-2 transition-colors"
+                                              >
+                                                <span>🏖️</span>
+                                                <span>Nghỉ OFF (Ngày nghỉ)</span>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </td>
+                                    );
+                                  })}
+
+                                  {/* Action Column */}
+                                  <td className="px-3 py-3 text-center">
+                                    {isManagerOrOwner ? (
+                                      <button
+                                        onClick={() => handleOpenShiftModal(st)}
+                                        className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[#F0F3EF] dark:bg-[#222621] hover:bg-[#E2E6DF] dark:hover:bg-[#2D312C] text-[#1C211B] dark:text-[#E0E2DF] border border-[#E2E6DF] dark:border-[#2D312C] transition-colors inline-flex items-center space-x-1"
+                                        title="Chỉnh sửa ca làm & ngày nghỉ off chi tiết"
+                                      >
+                                        <Sliders className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                                        <span>Phân Ca</span>
+                                      </button>
+                                    ) : loggedStaff?.id === st.id ? (
+                                      <button
+                                        onClick={() => handleOpenSelfRequestModal(st)}
+                                        className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 hover:bg-[#5A7D57]/20 text-[#5A7D57] dark:text-[#8BA888] transition-colors inline-flex items-center space-x-1"
+                                        title="Gửi đơn đăng ký đổi ca / nghỉ phép"
+                                      >
+                                        <Send className="w-3.5 h-3.5" />
+                                        <span>Đổi Ca</span>
+                                      </button>
+                                    ) : (
+                                      <span className="text-[11px] text-[#5E665B] dark:text-[#9BA198] italic">
+                                        Lịch Trực
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* MODE 2: LIVE CLOCK-IN TERMINAL & ATTENDANCE LOG */}
+          {timekeepingMode === 'clock_in' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Clock In Panel */}
+              <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+                    <LogIn className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Chấm Công Trực Tiếp (GPS/Vân Tay)</span>
+                  </h2>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800">
+                    Live GPS
+                  </span>
+                </div>
+
+                {/* Selected Staff Info & Off-day Notice */}
+                {(() => {
+                  const targetStaff = staff.find(s => s.id === selectedStaffId);
+                  const todayKey = getTodayDayKey();
+                  const targetShiftInfo = targetStaff ? getStaffShiftForDay(targetStaff, todayKey) : null;
+
+                  return (
+                    <div className="space-y-3 text-xs">
+                      <div>
+                        <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                          Chọn nhân viên chấm công:
+                        </label>
+                        <select
+                          value={selectedStaffId}
+                          onChange={e => {
+                            const newId = e.target.value;
+                            setSelectedStaffId(newId);
+                            const st = staff.find(s => s.id === newId);
+                            if (st) {
+                              const sInfo = getStaffShiftForDay(st, todayKey);
+                              if (sInfo.shift === 'morning' || sInfo.shift === 'afternoon' || sInfo.shift === 'full_day') {
+                                setSelectedShift(sInfo.shift);
+                              }
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                        >
+                          {activeStaffList.map(s => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} ({s.positionTitle}) - Ca: {s.defaultShift === 'morning' ? 'Sáng' : s.defaultShift === 'afternoon' ? 'Chiều' : 'Cả ngày'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {targetShiftInfo && (
+                        <div className={`p-3 rounded-xl border space-y-1 ${
+                          targetShiftInfo.isOff
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-300'
+                            : 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/40 text-emerald-900 dark:text-emerald-200'
+                        }`}>
+                          <div className="font-bold flex items-center space-x-1.5">
+                            {targetShiftInfo.isOff ? (
+                              <>
+                                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                                <span>Lưu ý: Hôm nay là NGÀY NGHỈ (OFF) theo lịch của nhân viên này!</span>
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                <span>Ca đăng ký hôm nay: {targetShiftInfo.shift === 'morning' ? 'Ca Sáng (08:30 - 17:30)' : targetShiftInfo.shift === 'afternoon' ? 'Ca Chiều (13:00 - 22:00)' : 'Cả Ngày (08:30 - 21:30)'}</span>
+                              </>
+                            )}
+                          </div>
+                          <p className="text-[11px] opacity-90">
+                            Khung giờ chuẩn: {targetStaff?.workingHours || '08:30 - 17:30'} • Ngày nghỉ tuần: {(targetStaff?.weeklyOffDays || []).join(', ') || 'Chưa đặt'}
+                          </p>
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                          {t.shift}:
+                        </label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {[
+                            { key: 'morning', label: t.morningShift, time: '08:30 - 17:30', icon: '🌅' },
+                            { key: 'afternoon', label: t.afternoonShift, time: '13:00 - 22:00', icon: '🌆' },
+                            { key: 'full_day', label: t.fullDayShift, time: '08:30 - 21:30', icon: '🌟' },
+                          ].map(s => (
+                            <label
+                              key={s.key}
+                              className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                                selectedShift === s.key
+                                  ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#8BA888]/15 dark:bg-[#8BA888]/20 font-semibold text-[#2C492A] dark:text-[#A3C2A0]'
+                                  : 'border-[#E2E6DF] dark:border-[#2D312C] text-[#5E665B] dark:text-[#9BA198]'
+                              }`}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <span>{s.icon}</span>
+                                <div>
+                                  <span className="text-[11px] font-bold block">{s.label}</span>
+                                  <span className="text-[10px] opacity-75 font-mono">{s.time}</span>
+                                </div>
+                              </div>
+                              <input
+                                type="radio"
+                                name="shift"
+                                checked={selectedShift === s.key}
+                                onChange={() => setSelectedShift(s.key as any)}
+                                className="accent-[#5A7D57] dark:accent-[#8BA888]"
+                              />
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                          Ghi chú (Lý do muộn hoặc làm bù ngày nghỉ nếu có):
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ví dụ: Làm tăng ca, trực thay bạn, kẹt xe..."
+                          value={timeNote}
+                          onChange={e => setTimeNote(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] focus:outline-none focus:ring-2 focus:ring-[#5A7D57] dark:focus:ring-[#8BA888]"
+                        />
+                      </div>
+
+                      <button
+                        id="btn-confirm-clock-in"
+                        onClick={handleClockInAction}
+                        className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm transition-all flex items-center justify-center space-x-1.5"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        <span>{t.clockIn} (Bấm Vào Ca Làm Việc)</span>
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
 
-              <button
-                id="btn-confirm-clock-in"
-                onClick={handleClockInAction}
-                className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm transition-all flex items-center justify-center space-x-1.5"
-              >
-                <CheckCircle className="w-4 h-4" />
-                <span>{t.clockIn} (Vào Ca)</span>
-              </button>
-            </div>
-          </div>
+              {/* Real-time Timekeeping Table */}
+              <div className="lg:col-span-2 bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Nhật Ký Chấm Công Hôm Nay ({attendance.length} lượt)</span>
+                  </h2>
+                  <button
+                    onClick={handleExportAttendanceCSV}
+                    className="text-xs text-[#5A7D57] dark:text-[#8BA888] font-semibold hover:underline flex items-center space-x-1"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Xuất bảng công</span>
+                  </button>
+                </div>
 
-          {/* Real-time Timekeeping Table */}
-          <div className="lg:col-span-2 bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
-                <Clock className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
-                <span>Nhật Ký Chấm Công Hôm Nay ({attendance.length} lượt)</span>
-              </h2>
-              <button
-                onClick={handleExportAttendanceCSV}
-                className="text-xs text-[#5A7D57] dark:text-[#8BA888] font-semibold hover:underline flex items-center space-x-1"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>Xuất bảng công</span>
-              </button>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="text-[11px] uppercase bg-[#F5F7F4] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] border-b border-[#E2E6DF] dark:border-[#2D312C]">
+                      <tr>
+                        <th className="px-3 py-2.5 font-bold">Nhân Viên</th>
+                        <th className="px-3 py-2.5 font-bold">Ca Trực</th>
+                        <th className="px-3 py-2.5 font-bold">Giờ Vào</th>
+                        <th className="px-3 py-2.5 font-bold">Giờ Ra</th>
+                        <th className="px-3 py-2.5 font-bold">Trạng Thái</th>
+                        <th className="px-3 py-2.5 font-bold text-right">Thao Tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E2E6DF] dark:divide-[#2D312C]">
+                      {attendance.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-3 py-8 text-center text-[#5E665B] dark:text-[#9BA198]">
+                            Chưa có nhân viên nào bấm chấm công hôm nay.
+                          </td>
+                        </tr>
+                      ) : (
+                        attendance.map(att => (
+                          <tr key={att.id} className="hover:bg-[#F5F7F4]/60 dark:hover:bg-[#222621]/60">
+                            <td className="px-3 py-2.5 font-semibold text-[#1C211B] dark:text-[#E0E2DF]">
+                              {att.staffName}
+                            </td>
+                            <td className="px-3 py-2.5 text-[#5E665B] dark:text-[#9BA198]">
+                              {att.shift === 'morning' ? 'Ca Sáng' : att.shift === 'afternoon' ? 'Ca Chiều' : 'Cả Ngày'}
+                            </td>
+                            <td className="px-3 py-2.5 font-mono text-[#5A7D57] dark:text-[#8BA888] font-bold">
+                              {att.clockInTime}
+                            </td>
+                            <td className="px-3 py-2.5 font-mono text-[#5E665B] dark:text-[#9BA198]">
+                              {att.clockOutTime || <span className="text-amber-500 italic">Đang làm việc</span>}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  att.status === 'on_time'
+                                    ? 'bg-[#8BA888]/20 text-[#30522E] dark:text-[#A3C2A0]'
+                                    : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                                }`}
+                              >
+                                {att.status === 'on_time' ? t.statusOnTime : t.statusLate}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-right">
+                              {!att.clockOutTime && (
+                                <button
+                                  onClick={() => onClockOut(att.id)}
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition-colors inline-flex items-center space-x-1"
+                                >
+                                  <LogOut className="w-3 h-3" />
+                                  <span>Tan Ca</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="text-[11px] uppercase bg-[#F5F7F4] dark:bg-[#222621] text-[#5E665B] dark:text-[#9BA198] border-b border-[#E2E6DF] dark:border-[#2D312C]">
-                  <tr>
-                    <th className="px-3 py-2.5 font-bold">Nhân Viên</th>
-                    <th className="px-3 py-2.5 font-bold">Ca Trực</th>
-                    <th className="px-3 py-2.5 font-bold">Giờ Vào</th>
-                    <th className="px-3 py-2.5 font-bold">Giờ Ra</th>
-                    <th className="px-3 py-2.5 font-bold">Trạng Thái</th>
-                    <th className="px-3 py-2.5 font-bold text-right">Thao Tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E2E6DF] dark:divide-[#2D312C]">
-                  {attendance.map(att => (
-                    <tr key={att.id} className="hover:bg-[#F5F7F4]/60 dark:hover:bg-[#222621]/60">
-                      <td className="px-3 py-2.5 font-semibold text-[#1C211B] dark:text-[#E0E2DF]">
-                        {att.staffName}
-                      </td>
-                      <td className="px-3 py-2.5 text-[#5E665B] dark:text-[#9BA198]">
-                        {att.shift === 'morning' ? 'Ca Sáng' : att.shift === 'afternoon' ? 'Ca Chiều' : 'Cả Ngày'}
-                      </td>
-                      <td className="px-3 py-2.5 font-mono text-[#5A7D57] dark:text-[#8BA888] font-bold">
-                        {att.clockInTime}
-                      </td>
-                      <td className="px-3 py-2.5 font-mono text-[#5E665B] dark:text-[#9BA198]">
-                        {att.clockOutTime || <span className="text-amber-500 italic">Đang làm việc</span>}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            att.status === 'on_time'
-                              ? 'bg-[#8BA888]/20 text-[#30522E] dark:text-[#A3C2A0]'
-                              : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
-                          }`}
-                        >
-                          {att.status === 'on_time' ? t.statusOnTime : t.statusLate}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        {!att.clockOutTime && (
-                          <button
-                            onClick={() => onClockOut(att.id)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition-colors inline-flex items-center space-x-1"
-                          >
-                            <LogOut className="w-3 h-3" />
-                            <span>Tan Ca</span>
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
       {/* VIEW 2: ĐANG LÀM VIỆC & QUẢN LÝ THÂM NIÊN XÉT THƯỞNG */}
-      {activeSubTab === 'directory' && currentRole !== 'receptionist' && (
+      {activeSubTab === 'directory' && isManagerOrOwner && (
         <div className="space-y-4">
           {/* Filter Bar */}
           <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-4 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
@@ -2198,7 +3213,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* VIEW 3: HỒ SƠ NHÂN VIÊN ĐÃ NGHỈ VIỆC (LƯU TRỮ LỊCH SỬ & THÔNG TIN BÀN GIAO) */}
-      {activeSubTab === 'resigned' && currentRole !== 'receptionist' && (
+      {activeSubTab === 'resigned' && isManagerOrOwner && (
         <div className="space-y-4">
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2 text-amber-900 dark:text-amber-300">
@@ -2348,7 +3363,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* MODAL 1: CHỈNH SỬA THÔNG TIN NHÂN VIÊN (EDIT STAFF MODAL) */}
-      {editingStaff && currentRole !== 'receptionist' && (
+      {editingStaff && isManagerOrOwner && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={handleSaveEditedStaff}
@@ -2677,7 +3692,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* MODAL 2: XÁC NHẬN THÔI VIỆC / CHUYỂN SANG ĐÃ NGHỈ VIỆC */}
-      {resigningStaff && (
+      {resigningStaff && isManagerOrOwner && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={handleConfirmResignation}
@@ -2762,7 +3777,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* MODAL 3: THÊM NHÂN VIÊN MỚI (ADD STAFF MODAL) */}
-      {showAddStaffModal && currentRole !== 'receptionist' && (
+      {showAddStaffModal && isManagerOrOwner && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={handleCreateStaff}
@@ -3482,7 +4497,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* MODAL: ADMIN CẤP TÀI KHOẢN & MÃ PIN CHO NHÂN VIÊN */}
-      {showAdminPinModal && pinTargetStaff && (
+      {showAdminPinModal && pinTargetStaff && isManagerOrOwner && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1A1C19] rounded-2xl w-full max-w-md shadow-2xl border border-[#E2E6DF] dark:border-[#2D312C] p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E2E6DF] dark:border-[#2D312C] pb-3">
@@ -3553,6 +4568,422 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 className="px-4 py-2 rounded-xl font-bold text-xs bg-[#5A7D57] hover:bg-[#486445] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm"
               >
                 Cấp / Đổi Mã PIN
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: ĐĂNG KÝ GIỜ LÀM, PHÂN CA & NGÀY NGHỈ OFF HÀNG TUẦN (ADMIN / QUẢN LÝ) */}
+      {showShiftModal && targetShiftStaff && isManagerOrOwner && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1A1C19] rounded-2xl w-full max-w-2xl shadow-2xl border border-[#E2E6DF] dark:border-[#2D312C] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E2E6DF] dark:border-[#2D312C] pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 text-[#5A7D57] dark:text-[#8BA888] flex items-center justify-center font-bold">
+                  <CalendarRange className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
+                    <span>Đăng Ký Ca Làm Việc &amp; Ngày Nghỉ (Off) Hàng Tuần</span>
+                  </h3>
+                  <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                    Thiết lập ca chuẩn, giờ làm việc và ngày nghỉ off cố định cho nhân sự
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShiftModal(false)}
+                className="text-[#9BA198] hover:text-[#1C211B] dark:hover:text-[#E0E2DF]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Target Staff Selector & Profile Banner */}
+            <div className="p-3.5 rounded-2xl bg-[#F5F7F4] dark:bg-[#222621] border border-[#E2E6DF] dark:border-[#2D312C] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={targetShiftStaff.avatar}
+                  alt={targetShiftStaff.name}
+                  className="w-11 h-11 rounded-full object-cover ring-2 ring-[#5A7D57]/30"
+                />
+                <div>
+                  <div className="font-bold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                    {targetShiftStaff.name}
+                  </div>
+                  <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                    {targetShiftStaff.positionTitle} • SĐT: {targetShiftStaff.phone}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick switch to another staff in modal */}
+              <div className="w-full sm:w-auto">
+                <label className="block text-[10px] text-[#5E665B] dark:text-[#9BA198] font-medium mb-0.5">
+                  Đổi nhân viên:
+                </label>
+                <select
+                  value={targetShiftStaff.id}
+                  onChange={e => {
+                    const st = staff.find(s => s.id === e.target.value);
+                    if (st) handleOpenShiftModal(st);
+                  }}
+                  className="px-2.5 py-1 rounded-xl text-xs border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-semibold"
+                >
+                  {activeStaffList.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.positionTitle})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Section 1: Default Shift & Working Hours */}
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-[#1C211B] dark:text-[#E0E2DF] mb-1.5">
+                  1. Chọn Ca Làm Việc Mặc Định:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                  {[
+                    { key: 'morning', label: 'Ca Sáng', time: '08:30 - 17:30', icon: '🌅', desc: 'Chăm sóc khách ngày' },
+                    { key: 'afternoon', label: 'Ca Chiều / Tối', time: '13:00 - 22:00', icon: '🌆', desc: 'Cao điểm buổi tối' },
+                    { key: 'full_day', label: 'Cả Ngày (Full)', time: '08:30 - 21:30', icon: '🌟', desc: 'Trực toàn ca' },
+                    { key: 'flexible', label: 'Linh Hoạt', time: 'Theo Lịch Hẹn', icon: '⚡', desc: 'Theo book & sự kiện' },
+                  ].map(item => {
+                    const isSelected = shiftForm.defaultShift === item.key;
+                    return (
+                      <button
+                        type="button"
+                        key={item.key}
+                        onClick={() => {
+                          setShiftForm({
+                            ...shiftForm,
+                            defaultShift: item.key as any,
+                            workingHours: item.time,
+                          });
+                        }}
+                        className={`p-3 rounded-2xl border text-left transition-all ${
+                          isSelected
+                            ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 ring-2 ring-[#5A7D57]/30'
+                            : 'border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] hover:bg-[#F5F7F4] dark:hover:bg-[#222621]'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-1.5 font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <div className="text-[11px] font-mono text-[#5A7D57] dark:text-[#8BA888] font-semibold mt-1">
+                          {item.time}
+                        </div>
+                        <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198] mt-0.5">
+                          {item.desc}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Working Hours Input */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Khung giờ làm việc thực tế:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: 08:30 - 17:30 hoặc 09:00 - 18:00"
+                    value={shiftForm.workingHours}
+                    onChange={e => setShiftForm({ ...shiftForm, workingHours: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] font-mono font-semibold text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Ghi chú thỏa thuận ca làm việc:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: Nghỉ sớm thứ 7 để học, tăng ca chủ nhật..."
+                    value={shiftForm.workScheduleNote}
+                    onChange={e => setShiftForm({ ...shiftForm, workScheduleNote: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Section 2: Weekly Off-Days Checkboxes */}
+              <div className="p-3.5 rounded-2xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1.5">
+                    <Palmtree className="w-4 h-4 text-rose-500" />
+                    <span>2. Ngày Nghỉ (Off) Hàng Tuần Định Kỳ:</span>
+                  </label>
+                  <span className="text-[10px] text-rose-700 dark:text-rose-300 font-semibold">
+                    Đã chọn: {shiftForm.weeklyOffDays.length > 0 ? shiftForm.weeklyOffDays.join(', ') : 'Chưa có'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                  Chọn 1 hoặc nhiều ngày trong tuần để xếp lịch nghỉ cố định cho nhân viên này.
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 pt-1">
+                  {WEEK_DAYS.map(d => {
+                    const isOff = shiftForm.weeklyOffDays.includes(d.vi);
+                    return (
+                      <button
+                        type="button"
+                        key={d.key}
+                        onClick={() => handleToggleWeeklyOffDay(d.vi)}
+                        className={`p-2 rounded-xl text-center border font-bold text-xs transition-all ${
+                          isOff
+                            ? 'bg-rose-500 text-white border-rose-600 shadow-xs ring-2 ring-rose-300 dark:ring-rose-900'
+                            : 'bg-white dark:bg-[#1A1C19] border-[#E2E6DF] dark:border-[#2D312C] text-[#5E665B] dark:text-[#9BA198] hover:bg-[#F5F7F4]'
+                        }`}
+                      >
+                        <div>{d.vi}</div>
+                        <div className="text-[9px] font-normal opacity-90 mt-0.5">
+                          {isOff ? '🏖️ Nghỉ OFF' : 'Đi làm'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section 3: 7-Day Detailed Shift Schedule Customizer */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1.5">
+                    <Calendar className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>3. Tùy Biến Ca Cho Từng Ngày Trong Tuần (Matrix):</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Apply defaultShift to all days that are not in weeklyOffDays
+                      const newWeekly: Record<string, any> = {};
+                      WEEK_DAYS.forEach(d => {
+                        const isOff = shiftForm.weeklyOffDays.includes(d.vi);
+                        if (isOff) {
+                          newWeekly[d.key] = { isOff: true, shift: 'off', hours: 'Nghỉ OFF' };
+                        } else {
+                          newWeekly[d.key] = {
+                            isOff: false,
+                            shift: shiftForm.defaultShift,
+                            hours: shiftForm.workingHours,
+                          };
+                        }
+                      });
+                      setShiftForm({ ...shiftForm, weeklySchedule: newWeekly });
+                    }}
+                    className="text-[11px] text-[#5A7D57] dark:text-[#8BA888] font-bold hover:underline"
+                  >
+                    🔄 Áp dụng đồng bộ ca &amp; ngày nghỉ
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
+                  {WEEK_DAYS.map(d => {
+                    const isOffByList = shiftForm.weeklyOffDays.includes(d.vi);
+                    const dayData = shiftForm.weeklySchedule?.[d.key] || {
+                      isOff: isOffByList,
+                      shift: isOffByList ? 'off' : shiftForm.defaultShift,
+                      hours: isOffByList ? 'Nghỉ OFF' : shiftForm.workingHours,
+                    };
+
+                    return (
+                      <div
+                        key={d.key}
+                        className={`p-2.5 rounded-xl border space-y-1.5 ${
+                          dayData.isOff
+                            ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40'
+                            : 'bg-[#F5F7F4] dark:bg-[#222621] border-[#E2E6DF] dark:border-[#2D312C]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-bold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                          <span>{d.vi}</span>
+                          {dayData.isOff && (
+                            <span className="text-[9px] px-1 rounded bg-rose-200 text-rose-800 dark:bg-rose-900 dark:text-rose-200">
+                              OFF
+                            </span>
+                          )}
+                        </div>
+
+                        <select
+                          value={dayData.isOff ? 'off' : dayData.shift || shiftForm.defaultShift}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const newSched = { ...(shiftForm.weeklySchedule || {}) };
+                            if (val === 'off') {
+                              newSched[d.key] = { isOff: true, shift: 'off', hours: 'Nghỉ OFF' };
+                            } else {
+                              const hours =
+                                val === 'morning' ? '08:30 - 17:30' :
+                                val === 'afternoon' ? '13:00 - 22:00' :
+                                val === 'full_day' ? '08:30 - 21:30' : 'Theo book';
+                              newSched[d.key] = { isOff: false, shift: val, hours };
+                            }
+                            setShiftForm({ ...shiftForm, weeklySchedule: newSched });
+                          }}
+                          className="w-full text-[11px] p-1 rounded-lg border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-semibold"
+                        >
+                          <option value="morning">🌅 Ca Sáng</option>
+                          <option value="afternoon">🌆 Ca Chiều</option>
+                          <option value="full_day">🌟 Cả Ngày</option>
+                          <option value="flexible">⚡ Linh Hoạt</option>
+                          <option value="off">🏖️ Nghỉ OFF</option>
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="pt-3 border-t border-[#E2E6DF] dark:border-[#2D312C] flex items-center justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowShiftModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#5E665B] hover:bg-[#F0F3EF] dark:hover:bg-[#222621]"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveShiftSchedule}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] shadow-sm flex items-center space-x-1.5"
+              >
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span>Lưu Phân Ca &amp; Ngày Nghỉ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: NHÂN VIÊN TỰ ĐĂNG KÝ ĐỔI CA & BÁO NGHỈ OFF TRONG CỔNG TỰ PHỤC VỤ */}
+      {showSelfShiftRequestModal && loggedStaff && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1A1C19] rounded-2xl w-full max-w-lg shadow-2xl border border-[#E2E6DF] dark:border-[#2D312C] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E2E6DF] dark:border-[#2D312C] pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-xl bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 text-[#5A7D57] dark:text-[#8BA888] flex items-center justify-center font-bold">
+                  <Sliders className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+                    Đăng Ký Đổi Ca &amp; Báo Nghỉ (Off) Tuần Này
+                  </h3>
+                  <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                    Dành cho KTV/Nhân viên gửi nguyện vọng ca làm việc lên Quản lý
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSelfShiftRequestModal(false)}
+                className="text-[#9BA198] hover:text-[#1C211B] dark:hover:text-[#E0E2DF]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Chọn ca làm việc bạn mong muốn trực:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { key: 'morning', label: 'Ca Sáng', time: '08:30 - 17:30', icon: '🌅' },
+                    { key: 'afternoon', label: 'Ca Chiều', time: '13:00 - 22:00', icon: '🌆' },
+                    { key: 'full_day', label: 'Cả Ngày', time: '08:30 - 21:30', icon: '🌟' },
+                  ].map(s => (
+                    <button
+                      type="button"
+                      key={s.key}
+                      onClick={() => setSelfShiftForm({ ...selfShiftForm, defaultShift: s.key as any, workingHours: s.time })}
+                      className={`p-2.5 rounded-xl border text-center transition-all ${
+                        selfShiftForm.defaultShift === s.key
+                          ? 'border-[#5A7D57] dark:border-[#8BA888] bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 font-bold text-[#2C492A] dark:text-[#A3C2A0] ring-1 ring-[#5A7D57]'
+                          : 'border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19]'
+                      }`}
+                    >
+                      <div className="text-base">{s.icon}</div>
+                      <div className="font-bold mt-0.5">{s.label}</div>
+                      <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198] font-mono">{s.time}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Đăng ký ngày nghỉ OFF trong tuần:
+                </label>
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-1">
+                  {WEEK_DAYS.map(d => {
+                    const isSelected = selfShiftForm.weeklyOffDays.includes(d.vi);
+                    return (
+                      <button
+                        type="button"
+                        key={d.key}
+                        onClick={() => {
+                          const exists = selfShiftForm.weeklyOffDays.includes(d.vi);
+                          const updated = exists
+                            ? selfShiftForm.weeklyOffDays.filter(day => day !== d.vi)
+                            : [...selfShiftForm.weeklyOffDays, d.vi];
+                          setSelfShiftForm({ ...selfShiftForm, weeklyOffDays: updated });
+                        }}
+                        className={`p-1.5 rounded-xl text-center border font-bold text-xs transition-all ${
+                          isSelected
+                            ? 'bg-rose-500 text-white border-rose-600'
+                            : 'bg-[#F5F7F4] dark:bg-[#222621] border-[#E2E6DF] dark:border-[#2D312C] text-[#5E665B]'
+                        }`}
+                      >
+                        {d.vi}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                  Lý do / Lời nhắn gửi Quản lý:
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Ví dụ: Em xin phép trực ca chiều tuần này do bận việc gia đình buổi sáng..."
+                  value={selfShiftForm.note}
+                  onChange={e => setSelfShiftForm({ ...selfShiftForm, note: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF]"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#E2E6DF] dark:border-[#2D312C] flex items-center justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowSelfShiftRequestModal(false)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#5E665B] hover:bg-[#F0F3EF] dark:hover:bg-[#222621]"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleSelfSaveShiftRequest}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm flex items-center space-x-1"
+              >
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span>Gửi Đăng Ký Ca &amp; Ngày Nghỉ</span>
               </button>
             </div>
           </div>

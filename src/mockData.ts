@@ -43,6 +43,10 @@ export const initialStaff: Staff[] = [
     completedServicesCount: 0,
     monthlyCommission: 0,
     pinCode: '123456',
+    defaultShift: 'full_day',
+    workingHours: '08:30 - 21:30',
+    weeklyOffDays: ['Chủ Nhật'],
+    workScheduleNote: 'Ca điều hành toàn thời gian',
   },
   {
     id: 'st-01',
@@ -65,6 +69,10 @@ export const initialStaff: Staff[] = [
     completedServicesCount: 18,
     monthlyCommission: 1350000,
     pinCode: '1234',
+    defaultShift: 'morning',
+    workingHours: '08:30 - 17:30',
+    weeklyOffDays: ['Thứ 2'],
+    workScheduleNote: 'Ca sáng chuyên môn điều trị da',
   }
 ];
 

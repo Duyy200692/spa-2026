@@ -79,11 +79,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenEditSpaProfile,
 }) => {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | 'year'>('7d');
+  const [dashboardTimeline, setDashboardTimeline] = useState<'thisWeek' | 'nextMonth' | 'twoMonthsOut'>('thisWeek');
   const t = translations[lang];
 
   const trendingServices = getTrendingServices();
   const seasonalTrend = getSeasonalFutureTrends();
   const funnelData = getFunnelMetrics();
+
+  const currentTimelineData = seasonalTrend.timelines
+    ? seasonalTrend.timelines[dashboardTimeline]
+    : {
+        label: 'Gợi Ý Tuần Tới',
+        badge: 'Tăng trưởng +38%',
+        highlightReason: seasonalTrend.highlightReason,
+        suggestedBoosts: seasonalTrend.suggestedBoosts,
+        aiAdvisorTip: seasonalTrend.aiAdvisorTip,
+      };
 
   const handleNav = (tab: TabType) => {
     if (onNavigate) onNavigate(tab);
@@ -601,18 +612,60 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
           </div>
 
+          {/* Timeline Switcher Buttons */}
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-white/60 dark:bg-[#1A1C19]/60 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C]">
+            <button
+              type="button"
+              onClick={() => setDashboardTimeline('thisWeek')}
+              className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                dashboardTimeline === 'thisWeek'
+                  ? 'bg-[#5A7D57] text-white shadow-2xs'
+                  : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+            >
+              Tuần Này & Tuần Tới
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardTimeline('nextMonth')}
+              className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                dashboardTimeline === 'nextMonth'
+                  ? 'bg-[#5A7D57] text-white shadow-2xs'
+                  : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+            >
+              Tháng Tới (30N)
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardTimeline('twoMonthsOut')}
+              className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all text-center ${
+                dashboardTimeline === 'twoMonthsOut'
+                  ? 'bg-[#5A7D57] text-white shadow-2xs'
+                  : 'text-[#5E665B] dark:text-[#9BA198] hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+            >
+              2 Tháng Tới (60N)
+            </button>
+          </div>
+
           <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
-            {seasonalTrend.highlightReason}
+            {currentTimelineData.highlightReason}
           </p>
 
           <div className="space-y-2 pt-1">
-            <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] block">
-              🚀 Các gói dịch vụ nên đẩy mạnh tuần tới:
+            <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center justify-between">
+              <span>🚀 Các gói dịch vụ nên đẩy mạnh ({currentTimelineData.label}):</span>
+              {currentTimelineData.badge && (
+                <span className="text-[10px] font-semibold text-[#5A7D57] dark:text-[#8BA888]">
+                  {currentTimelineData.badge}
+                </span>
+              )}
             </span>
-            {seasonalTrend.suggestedBoosts.map((boost, idx) => (
+            {currentTimelineData.suggestedBoosts.map((boost: any, idx: number) => (
               <div key={idx} className="p-2.5 rounded-xl bg-white/80 dark:bg-[#1A1C19]/80 border border-[#E2E6DF] dark:border-[#2D312C] flex items-center justify-between text-xs">
                 <span className="font-semibold text-[#1C211B] dark:text-[#E0E2DF]">{boost.title}</span>
-                <span className="text-[11px] text-[#5A7D57] dark:text-[#8BA888] font-medium">{boost.reason}</span>
+                <span className="text-[11px] text-[#5A7D57] dark:text-[#8BA888] font-medium shrink-0 ml-2">{boost.surge || boost.reason}</span>
               </div>
             ))}
           </div>
@@ -620,8 +673,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="p-3 rounded-xl bg-[#5A7D57]/15 dark:bg-[#8BA888]/15 border border-[#5A7D57]/30 text-xs text-[#385936] dark:text-[#A3C2A0] flex items-start space-x-2">
             <Zap className="w-4 h-4 shrink-0 mt-0.5 text-[#B88352] dark:text-[#D4A373]" />
             <div>
-              <strong className="block font-semibold mb-0.5">Lời khuyên chiến lược từ AI Gemini:</strong>
-              {seasonalTrend.aiAdvisorTip}
+              <strong className="block font-semibold mb-0.5">Lời khuyên chiến lược từ Trợ Lý AI:</strong>
+              {currentTimelineData.aiAdvisorTip}
             </div>
           </div>
         </div>
