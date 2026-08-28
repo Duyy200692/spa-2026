@@ -53,7 +53,12 @@ import {
   LockKeyhole,
   Coins,
   Eye,
-  EyeOff
+  EyeOff,
+  Copy,
+  Check,
+  RefreshCw,
+  Ban,
+  UserCheck2,
 } from 'lucide-react';
 import { Staff, AttendanceRecord, Language, Role, KTVTourLog, Appointment, Service } from '../types';
 import { translations, formatCurrency } from '../i18n';
@@ -209,6 +214,40 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [showAdminPinModal, setShowAdminPinModal] = useState<boolean>(false);
   const [pinTargetStaff, setPinTargetStaff] = useState<Staff | null>(null);
   const [newPinValue, setNewPinValue] = useState<string>('1234');
+  const [adminGeneratedPass, setAdminGeneratedPass] = useState<string>('');
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+
+  // Helper: Tạo Tên Đăng Nhập / Gmail và Mật Khẩu Ngẫu Nhiên
+  const generateRandomPassword = (length = 8) => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+    let pass = '';
+    for (let i = 0; i < length; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+  };
+
+  const generateAutoEmail = (name: string, phone: string) => {
+    if (!name) return `staff${phone.slice(-4) || '2026'}@spa.vn`;
+    // Chuyển tiếng Việt có dấu thành không dấu và viết liền
+    const cleanName = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    const suffix = phone.slice(-4) || Math.floor(1000 + Math.random() * 9000);
+    return `${cleanName}${suffix}@gmail.com`;
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedKeyId(id);
+      setTimeout(() => setCopiedKeyId(null), 2000);
+    }
+  };
 
   // KTV Tour Logs & Dispatch State
   const [tourLogs, setTourLogs] = useState<KTVTourLog[]>([
@@ -2005,7 +2044,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                         <div>
                           <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1.5">
                             <span>{st.name}</span>
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" title="Đang làm việc" />
+                            {st.loginDisabled ? (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 flex items-center space-x-0.5" title="Đã khóa đăng nhập hệ thống">
+                                <Lock className="w-2.5 h-2.5" />
+                                <span>Khóa ĐN</span>
+                              </span>
+                            ) : (
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" title="Đang làm việc & được phép đăng nhập" />
+                            )}
                           </h3>
                           <p className="text-xs text-[#5A7D57] dark:text-[#8BA888] font-medium">
                             {st.positionTitle}
@@ -2458,31 +2504,95 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
               </div>
 
-              {/* Login Credentials & Password Management */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <div>
-                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                    Tên đăng nhập (Username)
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStaff.username || ''}
-                    onChange={e => setEditingStaff({ ...editingStaff, username: e.target.value })}
-                    placeholder="Ví dụ: hang_ktv hoặc SĐT"
-                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
-                  />
+              {/* Login Credentials & Access Control (Admin Quản Lý Cấp & Khóa Quyền) */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1.5 font-bold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                    <KeyRound className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Quản Lý Tài Khoản & Quyền Truy Cập Hệ Thống</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const randPass = generateRandomPassword(8);
+                      setEditingStaff({ ...editingStaff, password: randPass, pinCode: randPass });
+                    }}
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 text-[#5A7D57] dark:text-[#8BA888] hover:bg-[#5A7D57]/20 flex items-center space-x-1 transition-colors"
+                  >
+                    <RefreshCw className="w-2.5 h-2.5" />
+                    <span>Tạo Pass Mới</span>
+                  </button>
                 </div>
-                <div>
-                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                    Mật khẩu cá nhân / PIN
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStaff.password || ''}
-                    onChange={e => setEditingStaff({ ...editingStaff, password: e.target.value, pinCode: e.target.value })}
-                    placeholder="Mật khẩu tài khoản cá nhân..."
-                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-medium text-[11px] text-[#5E665B] dark:text-[#9BA198] mb-1">
+                      Tên Đăng Nhập / Gmail
+                    </label>
+                    <input
+                      type="text"
+                      value={editingStaff.username || ''}
+                      onChange={e => setEditingStaff({ ...editingStaff, username: e.target.value })}
+                      placeholder="Ví dụ: hang88@gmail.com"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium text-[11px] text-[#5E665B] dark:text-[#9BA198] mb-1">
+                      Mật Khẩu Nhân Viên
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={editingStaff.password || ''}
+                        onChange={e => setEditingStaff({ ...editingStaff, password: e.target.value, pinCode: e.target.value })}
+                        placeholder="Mật khẩu tài khoản..."
+                        className="w-full pl-3 pr-8 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-400"
+                      />
+                      {editingStaff.password && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(`Tài khoản: ${editingStaff.username || editingStaff.email}\nMật khẩu: ${editingStaff.password}`, 'edit-staff-cred')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#5E665B] hover:text-[#1C211B] dark:text-[#9BA198] dark:hover:text-[#E0E2DF]"
+                          title="Sao chép tài khoản và mật khẩu"
+                        >
+                          {copiedKeyId === 'edit-staff-cred' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Control Lock Access Switch */}
+                <div className="p-2.5 rounded-xl bg-white dark:bg-[#1A1C19] border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {editingStaff.loginDisabled ? (
+                      <Ban className="w-4 h-4 text-rose-600" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    )}
+                    <div>
+                      <div className="font-bold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                        {editingStaff.loginDisabled ? 'ĐÃ KHÓA ĐĂNG NHẬP VÀO HỆ THỐNG' : 'Cho phép đăng nhập hệ thống'}
+                      </div>
+                      <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198]">
+                        {editingStaff.loginDisabled
+                          ? 'Nhân viên này không thể đăng nhập vào cổng nhân viên / hệ thống'
+                          : 'Nhân viên có thể đăng nhập bằng Gmail/Username và Mật khẩu trên'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingStaff({ ...editingStaff, loginDisabled: !editingStaff.loginDisabled })}
+                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                      editingStaff.loginDisabled
+                        ? 'bg-rose-600 text-white hover:bg-rose-700'
+                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-200'
+                    }`}
+                  >
+                    {editingStaff.loginDisabled ? 'Mở Khóa Đăng Nhập' : 'Khóa Đăng Nhập'}
+                  </button>
                 </div>
               </div>
 
@@ -2755,30 +2865,85 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <div>
-                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                    Tên Đăng Nhập (Username)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ví dụ: hang_ktv hoặc 0933..."
-                    value={newStaffForm.username}
-                    onChange={e => setNewStaffForm({ ...newStaffForm, username: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
-                  />
+              {/* Login Credentials & Random Generation - Cấp Quyền & Mật Khẩu Tự Động */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1.5 font-bold text-xs text-[#1C211B] dark:text-[#E0E2DF]">
+                    <KeyRound className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                    <span>Cấp Tài Khoản Đăng Nhập & Mật Khẩu Ngẫu Nhiên</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const autoEmail = generateAutoEmail(newStaffForm.name, newStaffForm.phone);
+                      const randPass = generateRandomPassword(8);
+                      setNewStaffForm({
+                        ...newStaffForm,
+                        email: newStaffForm.email || autoEmail,
+                        username: autoEmail,
+                        password: randPass,
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#5A7D57]/10 dark:bg-[#8BA888]/20 text-[#5A7D57] dark:text-[#8BA888] hover:bg-[#5A7D57]/20 flex items-center space-x-1 transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Tạo Gmail & Pass Random</span>
+                  </button>
                 </div>
-                <div>
-                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
-                    Mật Khẩu / PIN Khởi Tạo
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Mặc định: 123456"
-                    value={newStaffForm.password}
-                    onChange={e => setNewStaffForm({ ...newStaffForm, password: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-medium text-[11px] text-[#5E665B] dark:text-[#9BA198] mb-1">
+                      Tên Đăng Nhập / Gmail Cấp Cho Nhân Viên *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: lehang88@gmail.com"
+                      value={newStaffForm.username}
+                      onChange={e => setNewStaffForm({ ...newStaffForm, username: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-medium text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                        Mật Khẩu Khởi Tạo *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const randPass = generateRandomPassword(8);
+                          setNewStaffForm({ ...newStaffForm, password: randPass });
+                        }}
+                        className="text-[10px] text-[#5A7D57] dark:text-[#8BA888] hover:underline"
+                      >
+                        Đổi Pass Random
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Mật khẩu ngẫu nhiên..."
+                        value={newStaffForm.password}
+                        onChange={e => setNewStaffForm({ ...newStaffForm, password: e.target.value })}
+                        className="w-full pl-3 pr-8 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs font-semibold tracking-wider text-emerald-700 dark:text-emerald-400"
+                      />
+                      {newStaffForm.password && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(`Tài khoản: ${newStaffForm.username || newStaffForm.email}\nMật khẩu: ${newStaffForm.password}`, 'new-staff-cred')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#5E665B] hover:text-[#1C211B] dark:text-[#9BA198] dark:hover:text-[#E0E2DF]"
+                          title="Sao chép tài khoản và mật khẩu gửi cho nhân viên"
+                        >
+                          {copiedKeyId === 'new-staff-cred' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[10px] text-[#5E665B] dark:text-[#9BA198] italic flex items-center justify-between">
+                  <span>💡 Tài khoản này lưu trên Firebase Firestore, Admin có thể vô hiệu hóa đăng nhập tức thì khi nhân viên thôi việc.</span>
                 </div>
               </div>
 

@@ -126,6 +126,12 @@ export const RolePasswordModal: React.FC<RolePasswordModalProps> = ({
       return;
     }
 
+    // Kiểm tra nếu tài khoản bị Admin tắt quyền đăng nhập
+    if (staffMember.loginDisabled || staffMember.status === 'resigned' || staffMember.status === 'inactive') {
+      setErrorMsg('⛔ Tài khoản này đã bị Quản trị viên khóa quyền truy cập hệ thống! Vui lòng liên hệ Admin.');
+      return;
+    }
+
     const inputPass = personalPassword.trim();
     const staffPass = staffMember.password || staffMember.pinCode || '123456';
     const isMasterPass = inputPass === passwords.ownerPin || inputPass === 'spa2026' || inputPass === '123456';

@@ -499,6 +499,7 @@ export default function App() {
             updatedMember = {
               ...st,
               status: 'resigned',
+              loginDisabled: true, // Tự động khóa quyền đăng nhập vào hệ thống
               endDate: resignationData?.endDate || new Date().toISOString().slice(0, 10),
               resignationReason: resignationData?.reason || 'Thôi việc theo nguyện vọng cá nhân',
             };
@@ -506,8 +507,15 @@ export default function App() {
             updatedMember = {
               ...st,
               status: 'active',
+              loginDisabled: false, // Mở lại quyền đăng nhập
               endDate: undefined,
               resignationReason: undefined,
+            };
+          } else if (newStatus === 'inactive') {
+            updatedMember = {
+              ...st,
+              status: 'inactive',
+              loginDisabled: true, // Tạm khóa đăng nhập
             };
           } else {
             updatedMember = { ...st, status: newStatus };
