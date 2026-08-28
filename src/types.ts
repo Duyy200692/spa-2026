@@ -54,6 +54,17 @@ export interface TreatmentSession {
   cost: number;
 }
 
+export interface ServiceStep {
+  id: string;
+  stepNumber: number;
+  title: string;
+  durationMinutes?: number;
+  description?: string;
+  productsUsed?: string;
+  toolsUsed?: string;
+  notes?: string;
+}
+
 export interface ServiceCostItem {
   inventoryItemId: string;
   name: string;
@@ -80,6 +91,14 @@ export interface Service {
   totalCalculatedCost: number; // sum of costItems + commission + overheads
   grossProfit: number; // price - totalCalculatedCost
   profitMarginPercent: number; // (grossProfit / price) * 100
+
+  // Standard Operating Procedure (SOP) & Internal Protocol Steps for Staff
+  steps?: ServiceStep[];
+  preparationSteps?: string[];
+  targetSkinType?: string;
+  benefitsSummary?: string;
+  contraindications?: string;
+  homeCareNotes?: string;
 }
 
 export interface InventoryItem {

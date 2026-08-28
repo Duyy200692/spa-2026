@@ -142,9 +142,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'cost_calculation',
-      label: t.costCalc,
-      icon: Calculator,
-      roles: ['owner', 'manager'],
+      label: currentRole === 'technician' || currentRole === 'receptionist'
+        ? (lang === 'vi' ? 'Quy Trình SOP Kỹ Thuật' : 'SOP Manuals')
+        : t.costCalc,
+      icon: BookOpen,
+      roles: ['owner', 'manager', 'technician', 'receptionist'],
     },
     {
       id: 'inventory',

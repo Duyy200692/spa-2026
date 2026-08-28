@@ -7,7 +7,7 @@ export const translations = {
     dashboard: 'Tổng Quan',
     appointments: 'Lịch Hẹn',
     customers: 'Khách Hàng',
-    costCalc: 'Tính Giá Cost',
+    costCalc: 'Định Mức & Quy Trình SOP',
     inventory: 'Kho Mỹ Phẩm',
     staff: 'Nhân Viên & Ca',
     timekeeping: 'Chấm Công',

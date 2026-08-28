@@ -306,32 +306,31 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </button>
             </div>
 
-            {/* GROUP 1: QUẢN TRỊ VẬN HÀNH & KHO */}
-            {(currentRole === 'owner' || currentRole === 'manager') && (
-              <div className="space-y-2">
-                <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
-                  Quản Trị Vận Hành & Giá Vốn
-                </div>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => handleSelect('cost_calculation')}
-                    className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                      activeTab === 'cost_calculation'
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-sm'
-                        : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <Calculator className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold">Tính Giá Cost & Định Mức</h4>
-                        <p className="text-[11px] opacity-75">Định lượng nguyên liệu & tính lãi gộp dịch vụ</p>
-                      </div>
+            {/* GROUP 1: QUẢN TRỊ VẬN HÀNH & QUY TRÌNH SOP */}
+            <div className="space-y-2">
+              <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                Quy Trình SOP & Vận Hành
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => handleSelect('cost_calculation')}
+                  className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                    activeTab === 'cost_calculation'
+                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-sm'
+                      : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <BookOpen className="w-4 h-4" />
                     </div>
-                    <ChevronRight className="w-4 h-4 opacity-50" />
-                  </button>
+                    <div>
+                      <h4 className="text-xs font-bold">Định Mức & Quy Trình SOP Kỹ Thuật</h4>
+                      <p className="text-[11px] opacity-75">Quy trình từng bước KTV, chuẩn bị & định lượng mỹ phẩm</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-50" />
+                </button>
 
                   <button
                     onClick={() => handleSelect('inventory')}
@@ -361,7 +360,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   </button>
                 </div>
               </div>
-            )}
 
             {/* GROUP 2: NHÂN SỰ & CA TRỰC */}
             <div className="space-y-2">

@@ -714,6 +714,7 @@ export default function App() {
               services={services}
               inventory={inventory}
               lang={lang}
+              currentRole={currentRole}
               onAddService={handleAddService}
               onUpdateService={handleUpdateService}
               onDeleteService={handleDeleteService}
