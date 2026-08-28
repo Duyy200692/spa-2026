@@ -42,6 +42,7 @@ import {
   Language,
   Role
 } from '../types';
+import { B2BPitchDeckModal, B2BPartnerCategory } from './B2BPitchDeckModal';
 
 interface CustomerPortalViewProps {
   lang: Language;
@@ -81,6 +82,18 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   const [viewDetailService, setViewDetailService] = useState<Service | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [showPortalLangMenu, setShowPortalLangMenu] = useState<boolean>(false);
+
+  // B2B Partnership Modal State
+  const [showB2BModal, setShowB2BModal] = useState<boolean>(false);
+  const [b2bPartnerType, setB2BPartnerType] = useState<B2BPartnerCategory>('hotel');
+  const [b2bName, setB2BName] = useState<string>('');
+  const [b2bPhone, setB2BPhone] = useState<string>('');
+  const [b2bNote, setB2BNote] = useState<string>('');
+  const [b2bSuccess, setB2BSuccess] = useState<boolean>(false);
+
+  // B2B Pitch Deck Slide Viewer Modal State
+  const [showPitchDeckModal, setShowPitchDeckModal] = useState<boolean>(false);
+  const [pitchDeckCategory, setPitchDeckCategory] = useState<B2BPartnerCategory>('hotel');
 
   const portalTexts = {
     vi: {
@@ -559,10 +572,11 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Left Navigation Links (Desktop) */}
-          <nav className="hidden lg:flex items-center space-x-7 text-xs tracking-wider uppercase font-medium text-[#4A4744]">
+          <nav className="hidden lg:flex items-center space-x-6 text-xs tracking-wider uppercase font-medium text-[#4A4744]">
             <a href="#services-catalog" className="hover:text-black transition-colors">{pt.servicesTab}</a>
             <a href="#bestseller-feature" className="hover:text-black transition-colors">{pt.bestsellerTab}</a>
             <a href="#bath-and-body" className="hover:text-black transition-colors">{pt.bodyTab}</a>
+            <a href="#b2b-partnerships" className="hover:text-emerald-800 text-amber-900 font-bold transition-colors">Giới Thiệu & Hợp Tác B2B</a>
             <a href="#promotions-vouchers" className="hover:text-black transition-colors">{pt.promotionsTab}</a>
           </nav>
 
@@ -1174,6 +1188,197 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
         </div>
       </section>
 
+      {/* NEW B2B PARTNERSHIPS & WHOLESALE SERVICES SECTION */}
+      <section id="b2b-partnerships" className="py-12 sm:py-16 border-t border-[#EAE4DA] bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto space-y-8 px-4 sm:px-8">
+          
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#EAE4DA]">
+            <div>
+              <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-[#8C5E32] block mb-1">
+                B2B PARTNERSHIPS & NETWORK
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-bold text-[#181716]">
+                Giới Thiệu & Hợp Tác Doanh Nghiệp
+              </h2>
+              <p className="text-xs sm:text-sm text-[#736E69] font-normal mt-1">
+                Giải pháp đóng gói bài liệu trình Spa, phục hồi thể thao & điều động nhân sự chuyển giao cho các đối tác
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setB2BPartnerType('hotel');
+                setShowB2BModal(true);
+              }}
+              className="px-6 py-3 rounded-full bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center space-x-2 shrink-0 self-start md:self-auto"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>Đăng Ký Hợp Tác B2B</span>
+            </button>
+          </div>
+
+          {/* 3 Core B2B Cards inspired by user's reference layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Card 1: Hotel & Short-stay */}
+            <div className="bg-white rounded-3xl border border-[#EAE4DA] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div>
+                <div className="p-6 bg-gradient-to-br from-emerald-900 to-emerald-950 text-white space-y-3 relative overflow-hidden">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300">
+                    <Building className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
+                    DỊCH VỤ LƯU TRÚ & HOTEL
+                  </span>
+                  <h3 className="text-xl font-bold leading-snug">
+                    In-Room Spa Rituals Cho Khách Du Lịch
+                  </h3>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <p className="text-xs text-[#57534E] leading-relaxed">
+                    Kết hợp với Khách sạn, Homestay, Resort mang đến trải nghiệm Spa thư giãn tận phòng cho du khách. Đóng gói bài trị liệu chuẩn 5 sao, cung cấp QR menu đặt lịch trực tiếp & chia sẻ hoa hồng tự động.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-[11px] text-emerald-900 font-medium space-y-1">
+                    <span className="font-bold block">✓ Quyền lợi đối tác:</span>
+                    <p>Tăng 15 - 25% doanh thu phụ trợ / phòng mà không tốn chi phí vận hành hay tuyển dụng nhân sự.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 pt-0 space-y-2">
+                <button
+                  onClick={() => {
+                    setPitchDeckCategory('hotel');
+                    setShowPitchDeckModal(true);
+                  }}
+                  className="w-full py-2.5 rounded-full bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Xem Slide Đề Án & Phân Tích →</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setB2BPartnerType('hotel');
+                    setShowB2BModal(true);
+                  }}
+                  className="w-full py-2 rounded-full border border-emerald-800 text-emerald-800 hover:bg-emerald-50 text-[11px] font-bold transition-all text-center"
+                >
+                  Đăng Ký Hợp Tác Lưu Trú
+                </button>
+              </div>
+            </div>
+
+            {/* Card 2: Sports & Pickleball/Golf B2B Brand Activation */}
+            <div className="bg-white rounded-3xl border border-[#EAE4DA] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div>
+                <div className="p-6 bg-gradient-to-br from-amber-900 to-amber-950 text-[#FAF8F5] space-y-3 relative overflow-hidden">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
+                    DỊCH VỤ TỔ CHỨC GIẢI & BRAND ACTIVATION
+                  </span>
+                  <h3 className="text-xl font-bold leading-snug">
+                    Giải Đấu Mang Tên Thương Hiệu & VIP Recovery Lounge
+                  </h3>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <p className="text-xs text-[#57534E] leading-relaxed">
+                    Tổ chức giải đấu Pickleball, Golf, Tennis trọn gói cho Doanh nghiệp, Ngân hàng & Thương hiệu (Concept, trọng tài, cổng đăng ký, media). Kết hợp dựng VIP Recovery & Beauty Lounge tại sân giúp tiếp cận tệp khách hàng trả giá cao.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 font-medium space-y-1">
+                    <span className="font-bold block">✓ Chiến lược chuyển đổi VIP:</span>
+                    <p>Khách hàng của bạn đang ở trên sân thể thao — Biến giải đấu thành kênh thu hút & giữ chân khách hàng giá trị cao (HNWI).</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 pt-0 space-y-2">
+                <button
+                  onClick={() => {
+                    setPitchDeckCategory('sports');
+                    setShowPitchDeckModal(true);
+                  }}
+                  className="w-full py-2.5 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Xem Slide Đề Án & Giải Pháp B2B →</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setB2BPartnerType('sports');
+                    setShowB2BModal(true);
+                  }}
+                  className="w-full py-2 rounded-full border border-amber-800 text-amber-900 hover:bg-amber-50 text-[11px] font-bold transition-all text-center"
+                >
+                  Đăng Ký Tổ Chức Giải & Activation
+                </button>
+              </div>
+            </div>
+
+            {/* Card 3: B2B Staff & SOP Transfer */}
+            <div className="bg-white rounded-3xl border border-[#EAE4DA] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div>
+                <div className="p-6 bg-gradient-to-br from-zinc-900 to-zinc-950 text-white space-y-3 relative overflow-hidden">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300">
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] tracking-widest uppercase font-bold text-amber-300 block">
+                    B2B SPA OUTSOURCING
+                  </span>
+                  <h3 className="text-xl font-bold leading-snug">
+                    Chuyển Giao SOP & Cung Ứng Nhân Sự
+                  </h3>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <p className="text-xs text-[#57534E] leading-relaxed">
+                    Bán sỉ quy trình bài liệu trình đóng gói sẵn & chuyển giao KTV bài bản cho các Spa đối tác khi thiếu người vào giờ cao điểm hoặc muốn mở rộng thêm menu dịch vụ chuyên sâu.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-zinc-100 border border-zinc-200 text-[11px] text-zinc-900 font-medium space-y-1">
+                    <span className="font-bold block">✓ Giải pháp mở rộng:</span>
+                    <p>Tối ưu hóa nguồn lực nhân sự dư thừa, gia tăng dòng tiền từ mảng đào tạo & nhượng quyền SOP.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 pt-0 space-y-2">
+                <button
+                  onClick={() => {
+                    setPitchDeckCategory('spa_outsourcing');
+                    setShowPitchDeckModal(true);
+                  }}
+                  className="w-full py-2.5 rounded-full bg-zinc-900 hover:bg-black text-amber-300 text-xs font-bold transition-all text-center flex items-center justify-center space-x-1.5 shadow-xs"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Xem Slide Đề Án & Phân Tích →</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setB2BPartnerType('spa_outsourcing');
+                    setShowB2BModal(true);
+                  }}
+                  className="w-full py-2 rounded-full border border-zinc-900 text-zinc-900 hover:bg-zinc-100 text-[11px] font-bold transition-all text-center"
+                >
+                  Nhận Hồ Sơ Năng Lực
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
       {/* 9. PROMOTIONS & VOUCHERS SHOWCASE */}
       <section id="promotions-vouchers" className="py-12 sm:py-16 px-4 sm:px-8 border-b border-[#EAE4DA] bg-white">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
@@ -1453,6 +1658,130 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* B2B PARTNERSHIP REGISTRATION MODAL */}
+      {showB2BModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-[#EAE4DA] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#8C5E32] tracking-wider block">
+                  B2B NETWORK PARTNERSHIP
+                </span>
+                <h3 className="text-lg font-bold text-zinc-900">
+                  Đăng Ký Hợp Tác & Nhận Proposal B2B
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowB2BModal(false);
+                  setB2BSuccess(false);
+                }}
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {b2bSuccess ? (
+              <div className="py-8 text-center space-y-3 animate-in fade-in">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-7 h-7 text-emerald-700" />
+                </div>
+                <h4 className="text-base font-bold text-zinc-900">Đã Gửi Yêu Cầu Hợp Tác Thành Công!</h4>
+                <p className="text-xs text-zinc-600 max-w-xs mx-auto leading-relaxed">
+                  Đội ngũ B2B của chúng tôi sẽ liên hệ lại với Quý đối tác qua SĐT <strong>{b2bPhone}</strong> trong vòng 24 giờ làm việc.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowB2BModal(false);
+                    setB2BSuccess(false);
+                  }}
+                  className="px-6 py-2.5 rounded-full bg-emerald-800 text-white text-xs font-bold"
+                >
+                  Đóng Cửa Sổ
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!b2bName || !b2bPhone) return;
+                  setB2BSuccess(true);
+                }}
+                className="space-y-4 text-xs"
+              >
+                <div>
+                  <label className="block font-bold text-zinc-800 mb-1">Mô hình hợp tác mong muốn:</label>
+                  <select
+                    value={b2bPartnerType}
+                    onChange={(e) => setB2BPartnerType(e.target.value as any)}
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-zinc-50 font-medium text-zinc-900 focus:outline-none focus:border-emerald-700"
+                  >
+                    <option value="hotel">🏨 Khách Sạn / Resort / Lưu Trú Short-stay</option>
+                    <option value="sports">🎾 CLB Thể Thao (Pickleball, Golf, Tennis, Gym)</option>
+                    <option value="spa_outsourcing">💆‍♀️ Spa Đối Tác (Cung ứng KTV & Chuyển giao SOP)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-zinc-800 mb-1">Tên Đơn vị / Đại diện đối tác (*):</label>
+                  <input
+                    type="text"
+                    required
+                    value={b2bName}
+                    onChange={(e) => setB2BName(e.target.value)}
+                    placeholder="Ví dụ: Khách Sạn L'Aura / Anh Nam"
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-white font-medium text-zinc-900 focus:outline-none focus:border-emerald-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-zinc-800 mb-1">Số điện thoại / Zalo liên hệ (*):</label>
+                  <input
+                    type="tel"
+                    required
+                    value={b2bPhone}
+                    onChange={(e) => setB2BPhone(e.target.value)}
+                    placeholder="0901234567"
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-white font-medium text-zinc-900 focus:outline-none focus:border-emerald-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-zinc-800 mb-1">Ghi chú nhu cầu thêm (Nếu có):</label>
+                  <textarea
+                    rows={2}
+                    value={b2bNote}
+                    onChange={(e) => setB2BNote(e.target.value)}
+                    placeholder="Số lượng phòng / Tệp hội viên / Yêu cầu KTV..."
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-white font-medium text-zinc-900 focus:outline-none focus:border-emerald-700"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                >
+                  Gửi Yêu Cầu Hợp Tác B2B
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* B2B PITCH DECK SLIDE READER MODAL */}
+      <B2BPitchDeckModal
+        isOpen={showPitchDeckModal}
+        onClose={() => setShowPitchDeckModal(false)}
+        initialType={pitchDeckCategory}
+        onRegisterPartner={(category) => {
+          setShowPitchDeckModal(false);
+          setB2BPartnerType(category);
+          setShowB2BModal(true);
+        }}
+      />
 
       {/* 11. MOBILE FLOATING ACTION BAR (STICKY BOTTOM DOCK) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 p-2.5 bg-white/95 backdrop-blur-lg border-t border-[#EAE4DA] shadow-xl">
