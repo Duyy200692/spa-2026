@@ -764,6 +764,8 @@ export default function App() {
             <StaffView
               staff={staff}
               attendance={attendance}
+              appointments={appointments}
+              services={services}
               lang={lang}
               currentRole={currentRole}
               initialSubTab={currentRole === 'receptionist' ? 'tours' : 'directory'}
@@ -779,6 +781,8 @@ export default function App() {
             <StaffView
               staff={staff}
               attendance={attendance}
+              appointments={appointments}
+              services={services}
               lang={lang}
               currentRole={currentRole}
               initialSubTab="timekeeping"

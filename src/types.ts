@@ -167,6 +167,7 @@ export interface Staff {
   notes?: string;
   completedServicesCount: number;
   monthlyCommission: number;
+  pinCode?: string; // Mã PIN cá nhân 4-6 số do Admin cấp để đăng nhập Cổng Nhân Viên
 }
 
 export interface AttendanceRecord {
@@ -179,6 +180,25 @@ export interface AttendanceRecord {
   clockOutTime?: string; // HH:mm
   status: 'on_time' | 'late' | 'early_leave' | 'absent';
   workingHours: number;
+  notes?: string;
+}
+
+export interface KTVTourLog {
+  id: string;
+  staffId: string;
+  staffName: string;
+  customerName: string;
+  customerPhone?: string;
+  serviceName: string;
+  roomBed: string;
+  tourType: 'random' | 'request'; // 'random': xoay tour xoay vòng, 'request': khách chọn KTV
+  startTime: string; // HH:mm
+  endTime?: string; // HH:mm
+  status: 'in_progress' | 'completed' | 'cancelled';
+  commissionEarned: number;
+  tipAmount?: number; // Tiền tip/boa từ khách hàng thưởng riêng cho KTV
+  date: string; // YYYY-MM-DD
+  assignedBy?: string; // Tên Lễ tân xếp tour
   notes?: string;
 }
 
