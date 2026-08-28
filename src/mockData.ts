@@ -20,11 +20,13 @@ export const initialServices: Service[] = [];
 // Dữ liệu khách hàng ban đầu (Trống)
 export const initialCustomers: Customer[] = [];
 
-// Danh sách nhân sự & Kỹ thuật viên (Tài khoản Chủ Spa / Điều Hành)
+// Danh sách nhân sự & Kỹ thuật viên (Tài khoản Chủ Spa / Điều Hành & KTV Mẫu)
 export const initialStaff: Staff[] = [
   {
     id: 'st-owner',
     name: 'Chủ Spa / Quản Lý',
+    username: 'admin',
+    password: 'spa',
     phone: '0908 688 888',
     email: 'quanly.spa@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
@@ -40,6 +42,29 @@ export const initialStaff: Staff[] = [
     notes: 'Tài khoản quản trị điều hành spa.',
     completedServicesCount: 0,
     monthlyCommission: 0,
+    pinCode: '123456',
+  },
+  {
+    id: 'st-01',
+    name: 'Nguyễn Thị Lan',
+    username: 'ktv_lan',
+    password: '123',
+    phone: '0912 345 678',
+    email: 'lan.ktv@lauraspa.com',
+    avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=200&q=80',
+    role: 'technician',
+    positionTitle: 'Kỹ Thuật Viên Chăm Sóc Da',
+    specialty: ['Chăm sóc da mặt chuyên sâu', 'Điện di tinh chất Cryo', 'Trị mụn y khoa'],
+    baseSalary: 7500000,
+    commissionRate: 15,
+    rating: 4.9,
+    status: 'active',
+    startDate: '2026-02-01',
+    seniorityBonusAmount: 0,
+    notes: 'Kỹ thuật viên tay nghề cao, thái độ nhiệt tình.',
+    completedServicesCount: 18,
+    monthlyCommission: 1350000,
+    pinCode: '1234',
   }
 ];
 

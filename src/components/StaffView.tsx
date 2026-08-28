@@ -6,6 +6,7 @@ import {
   Search,
   Star,
   CheckCircle,
+  CheckCircle2,
   FileSpreadsheet,
   LogIn,
   LogOut,
@@ -65,7 +66,8 @@ interface StaffViewProps {
   services?: Service[];
   lang: Language;
   currentRole?: Role;
-  initialSubTab?: 'directory' | 'timekeeping' | 'tours' | 'resigned';
+  currentStaffUser?: Staff | null;
+  initialSubTab?: 'directory' | 'timekeeping' | 'tours' | 'resigned' | 'self_portal';
   onClockIn: (record: AttendanceRecord) => void;
   onClockOut: (id: string) => void;
   onAddStaff: (newStaff: Staff) => void;
@@ -128,6 +130,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
   services = [],
   lang,
   currentRole = 'owner',
+  currentStaffUser,
   initialSubTab = 'tours',
   onClockIn,
   onClockOut,
@@ -171,7 +174,20 @@ export const StaffView: React.FC<StaffViewProps> = ({
   }, []);
 
   // Staff Portal Login & PIN State
-  const [loggedStaff, setLoggedStaff] = useState<Staff | null>(null);
+  const [loggedStaff, setLoggedStaff] = useState<Staff | null>(currentStaffUser || null);
+
+  React.useEffect(() => {
+    if (currentStaffUser) {
+      setLoggedStaff(currentStaffUser);
+    }
+  }, [currentStaffUser]);
+
+  // Self Password Change Modal State
+  const [showSelfPassModal, setShowSelfPassModal] = useState<boolean>(false);
+  const [selfNewPass, setSelfNewPass] = useState<string>('');
+  const [selfConfirmPass, setSelfConfirmPass] = useState<string>('');
+  const [selfPassError, setSelfPassError] = useState<string>('');
+  const [selfPassSuccess, setSelfPassSuccess] = useState<boolean>(false);
   const [loginStaffSelect, setLoginStaffSelect] = useState<string>(activeStaffList[0]?.id || '');
   const [loginPinInput, setLoginPinInput] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
@@ -296,6 +312,8 @@ export const StaffView: React.FC<StaffViewProps> = ({
     name: '',
     phone: '',
     email: '',
+    username: '',
+    password: '',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
     role: 'technician' as Role,
     positionTitle: 'Kỹ Thuật Viên Da Liễu',
@@ -306,6 +324,37 @@ export const StaffView: React.FC<StaffViewProps> = ({
     seniorityBonusAmount: 0,
     notes: '',
   });
+
+  const handleSaveSelfPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSelfPassError('');
+    if (selfNewPass.trim().length < 4) {
+      setSelfPassError('Mật khẩu tối thiểu 4 ký tự!');
+      return;
+    }
+    if (selfNewPass !== selfConfirmPass) {
+      setSelfPassError('Xác nhận mật khẩu mới không trùng khớp!');
+      return;
+    }
+    if (!loggedStaff) return;
+
+    const updatedStaffMember: Staff = {
+      ...loggedStaff,
+      password: selfNewPass.trim(),
+      pinCode: selfNewPass.trim(),
+    };
+    setLoggedStaff(updatedStaffMember);
+    if (onUpdateStaff) {
+      onUpdateStaff(updatedStaffMember);
+    }
+    setSelfPassSuccess(true);
+    setTimeout(() => {
+      setSelfPassSuccess(false);
+      setShowSelfPassModal(false);
+      setSelfNewPass('');
+      setSelfConfirmPass('');
+    }, 1200);
+  };
 
   // Clock In Action
   const handleClockInAction = () => {
@@ -501,7 +550,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
       id: `st-${Date.now()}`,
       name: newStaffForm.name,
       phone: newStaffForm.phone,
-      email: newStaffForm.email,
+      email: newStaffForm.email || `${newStaffForm.phone}@spa.vn`,
+      username: newStaffForm.username.trim() || newStaffForm.phone || `staff_${Date.now().toString().slice(-4)}`,
+      password: newStaffForm.password.trim() || '123456',
+      pinCode: newStaffForm.password.trim() || '1234',
       avatar: newStaffForm.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
       role: newStaffForm.role,
       positionTitle: newStaffForm.positionTitle,
@@ -524,6 +576,8 @@ export const StaffView: React.FC<StaffViewProps> = ({
       name: '',
       phone: '',
       email: '',
+      username: '',
+      password: '',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
       role: 'technician',
       positionTitle: 'Kỹ Thuật Viên Da Liễu',
@@ -1072,8 +1126,8 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                  <div className="text-right">
+                <div className="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="text-right mr-1">
                     <div className="text-xs font-mono font-bold text-[#5A7D57] dark:text-[#8BA888]">
                       ⏰ {liveTime}
                     </div>
@@ -1081,6 +1135,18 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       Hôm nay, {new Date().toLocaleDateString('vi-VN')}
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      setSelfPassError('');
+                      setSelfNewPass('');
+                      setSelfConfirmPass('');
+                      setShowSelfPassModal(true);
+                    }}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors flex items-center space-x-1.5"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>Đổi Mật Khẩu</span>
+                  </button>
                   <button
                     onClick={handleStaffPortalLogout}
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center space-x-1.5"
@@ -1090,6 +1156,88 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Self Change Password Modal */}
+              {showSelfPassModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+                  <div className="bg-white dark:bg-[#1A1C19] border border-stone-200 dark:border-stone-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
+                          <KeyRound className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-sm text-[#1C211B] dark:text-[#E0E2DF]">Đổi Mật Khẩu Cá Nhân</h3>
+                          <p className="text-[11px] text-stone-500">Tài khoản: {loggedStaff.username || loggedStaff.phone}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowSelfPassModal(false)}
+                        className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {selfPassSuccess ? (
+                      <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold text-center flex flex-col items-center space-y-2">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                        <span>Mật khẩu cá nhân đã được đổi thành công!</span>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSaveSelfPassword} className="space-y-3">
+                        {selfPassError && (
+                          <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300 text-xs font-medium">
+                            {selfPassError}
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                            Mật khẩu mới (tối thiểu 4 ký tự)
+                          </label>
+                          <input
+                            type="password"
+                            required
+                            value={selfNewPass}
+                            onChange={(e) => setSelfNewPass(e.target.value)}
+                            placeholder="Nhập mật khẩu mới..."
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                            Xác nhận mật khẩu mới
+                          </label>
+                          <input
+                            type="password"
+                            required
+                            value={selfConfirmPass}
+                            onChange={(e) => setSelfConfirmPass(e.target.value)}
+                            placeholder="Nhập lại mật khẩu mới..."
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white"
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowSelfPassModal(false)}
+                            className="px-4 py-2 rounded-xl text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                          >
+                            Lưu Mật Khẩu
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Real-Time Check-In Card & Financial Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -2310,6 +2458,34 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
               </div>
 
+              {/* Login Credentials & Password Management */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Tên đăng nhập (Username)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStaff.username || ''}
+                    onChange={e => setEditingStaff({ ...editingStaff, username: e.target.value })}
+                    placeholder="Ví dụ: hang_ktv hoặc SĐT"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Mật khẩu cá nhân / PIN
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStaff.password || ''}
+                    onChange={e => setEditingStaff({ ...editingStaff, password: e.target.value, pinCode: e.target.value })}
+                    placeholder="Mật khẩu tài khoản cá nhân..."
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
+                  />
+                </div>
+              </div>
+
               {/* If status is resigned, show resignation details */}
               {editingStaff.status === 'resigned' && (
                 <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-2">
@@ -2575,6 +2751,33 @@ export const StaffView: React.FC<StaffViewProps> = ({
                     value={newStaffForm.startDate}
                     onChange={e => setNewStaffForm({ ...newStaffForm, startDate: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4] dark:bg-[#222621] text-[#1C211B] dark:text-[#E0E2DF] font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Tên Đăng Nhập (Username)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: hang_ktv hoặc 0933..."
+                    value={newStaffForm.username}
+                    onChange={e => setNewStaffForm({ ...newStaffForm, username: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#1C211B] dark:text-[#E0E2DF] mb-1">
+                    Mật Khẩu / PIN Khởi Tạo
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Mặc định: 123456"
+                    value={newStaffForm.password}
+                    onChange={e => setNewStaffForm({ ...newStaffForm, password: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] font-mono text-xs"
                   />
                 </div>
               </div>

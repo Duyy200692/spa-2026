@@ -152,6 +152,9 @@ export interface Appointment {
 export interface Staff {
   id: string;
   name: string;
+  username?: string; // Tên đăng nhập cá nhân (VD: ktv_lan, ngoc_spa)
+  password?: string; // Mật khẩu cá nhân do nhân viên tự đặt hoặc Admin cấp
+  tempPassword?: boolean; // Đánh dấu nếu đang dùng mật khẩu tạm để nhắc đổi pass
   phone: string;
   email: string;
   avatar: string;

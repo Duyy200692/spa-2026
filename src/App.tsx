@@ -80,6 +80,7 @@ export default function App() {
   const [rolePasswords, setRolePasswords] = useState<RolePasswords>(initialRolePasswords);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
   const [pendingTargetRole, setPendingTargetRole] = useState<Role>('owner');
+  const [currentStaffUser, setCurrentStaffUser] = useState<Staff | null>(null);
 
   // Application Data States
   const [spaProfile, setSpaProfile] = useState<SpaProfile>(initialSpaProfile);
@@ -567,33 +568,38 @@ export default function App() {
     trackSync(syncDocToFirestore(COLLECTIONS.SYSTEM, newConfig));
   };
 
-  // Role Switching with Passwords / PIN Authentication
+  // Role Switching with Passwords / PIN Authentication & Personal Staff Login
   const handleRequestRoleChange = (targetRole: Role) => {
     if (targetRole === 'customer') {
       setCurrentRole('customer');
+      setCurrentStaffUser(null);
       setActiveTab('customer_intro');
       return;
     }
 
-    // If current role is already owner and switching to another internal role, allow directly
-    if (currentRole === 'owner') {
-      applyRoleChange(targetRole);
-      return;
-    }
-
-    // Require PIN modal
+    // Require PIN / Personal Login modal
     setPendingTargetRole(targetRole);
     setIsPasswordModalOpen(true);
   };
 
-  const applyRoleChange = (verifiedRole: Role) => {
+  const applyRoleChange = (verifiedRole: Role, loggedStaff?: Staff) => {
     setCurrentRole(verifiedRole);
-    if (verifiedRole === 'owner') {
-      setActiveTab('dashboard');
-    } else if (verifiedRole === 'manager') {
+    if (loggedStaff) {
+      setCurrentStaffUser(loggedStaff);
+    } else {
+      // Find matching staff for the role if any
+      const matching = staff.find((s) => s.role === verifiedRole && s.status !== 'resigned');
+      if (matching && (verifiedRole === 'technician' || verifiedRole === 'receptionist')) {
+        setCurrentStaffUser(matching);
+      } else if (verifiedRole === 'owner') {
+        setCurrentStaffUser(null);
+      }
+    }
+
+    if (verifiedRole === 'owner' || verifiedRole === 'manager') {
       setActiveTab('dashboard');
     } else if (verifiedRole === 'technician') {
-      setActiveTab('appointments');
+      setActiveTab('staff'); // Opens technician personal space & attendance
     } else if (verifiedRole === 'receptionist') {
       setActiveTab('appointments');
     } else {
@@ -793,7 +799,8 @@ export default function App() {
               services={services}
               lang={lang}
               currentRole={currentRole}
-              initialSubTab={currentRole === 'receptionist' ? 'tours' : 'directory'}
+              currentStaffUser={currentStaffUser}
+              initialSubTab={currentRole === 'technician' ? 'self_portal' : currentRole === 'receptionist' ? 'tours' : 'directory'}
               onClockIn={handleClockIn}
               onClockOut={handleClockOut}
               onAddStaff={handleAddStaff}
@@ -810,6 +817,7 @@ export default function App() {
               services={services}
               lang={lang}
               currentRole={currentRole}
+              currentStaffUser={currentStaffUser}
               initialSubTab="timekeeping"
               onClockIn={handleClockIn}
               onClockOut={handleClockOut}
@@ -871,15 +879,16 @@ export default function App() {
         />
       )}
 
-      {/* Role PIN / Password Protection Modal */}
+      {/* Role PIN / Password & Personal Staff Login Modal */}
       <RolePasswordModal
         targetRole={pendingTargetRole}
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
-        onSuccess={(verifiedRole) => applyRoleChange(verifiedRole)}
+        onSuccess={(verifiedRole, loggedStaff) => applyRoleChange(verifiedRole, loggedStaff)}
         passwords={rolePasswords}
         onUpdatePasswords={handleUpdateRolePasswords}
         isOwnerLoggedIn={currentRole === 'owner'}
+        staffList={staff}
       />
 
       {/* Checkout & Multi-Payment Modal */}
