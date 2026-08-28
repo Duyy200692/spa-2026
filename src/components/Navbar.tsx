@@ -115,20 +115,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const roleLabels: Record<Role, { label: string; badgeColor: string }> = {
-    owner: { label: t.roleOwner || 'Chủ Spa', badgeColor: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' },
-    manager: { label: t.roleManager || 'Quản Lý', badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700' },
-    technician: { label: t.roleTech || 'Kỹ Thuật Viên', badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
-    receptionist: { label: t.roleReception || 'Lễ Tân / Thu Ngân', badgeColor: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700' },
-    customer: { label: 'Khách Hàng (Portal)', badgeColor: 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700' },
+    owner: { label: t.roleOwner || 'Chủ Spa', badgeColor: 'bg-emerald-700 text-white border-emerald-800' },
+    manager: { label: t.roleManager || 'Quản Lý', badgeColor: 'bg-zinc-100 text-zinc-900 border-zinc-300' },
+    technician: { label: t.roleTech || 'Kỹ Thuật Viên', badgeColor: 'bg-zinc-100 text-zinc-800 border-zinc-200' },
+    receptionist: { label: t.roleReception || 'Lễ Tân / Thu Ngân', badgeColor: 'bg-zinc-100 text-zinc-800 border-zinc-200' },
+    customer: { label: 'Khách Hàng (Portal)', badgeColor: 'bg-zinc-100 text-zinc-900 border-zinc-200' },
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#141619]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm transition-colors overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-800 text-white flex items-center justify-center shadow-sm transition-colors overflow-hidden shrink-0 border border-emerald-700">
               {spaProfile?.logo ? (
                 <img
                   src={spaProfile.logo}
@@ -140,19 +140,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }}
                 />
               ) : (
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300" />
               )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="font-bold text-sm sm:text-base md:text-lg tracking-tight text-zinc-950 dark:text-zinc-50 truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[240px]">
+                <span className="font-bold text-sm sm:text-base md:text-lg tracking-tight text-zinc-950 truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[240px]">
                   {spaProfile?.name || t.appName}
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold tracking-wider uppercase bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shrink-0">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
                   {currentRole === 'customer' ? 'PORTAL' : 'PRO'}
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 hidden md:block truncate max-w-[320px]">
+              <p className="text-[11px] text-zinc-500 hidden md:block truncate max-w-[320px]">
                 {currentRole === 'customer'
                   ? (spaProfile?.address || 'Cổng Thông Tin & Khuyến Mãi Khách Hàng')
                   : (spaProfile?.tagline || t.appTagline)}
@@ -167,20 +167,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-nav-edit-spa-profile"
                 onClick={onOpenEditSpaProfile}
-                className="hidden md:inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm whitespace-nowrap"
+                className="hidden md:inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 transition-all shadow-xs whitespace-nowrap"
                 title="Chỉnh sửa thông tin cơ sở, địa chỉ & logo Spa"
               >
-                <Building className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
+                <Building className="w-3.5 h-3.5 text-zinc-700" />
                 <span>Sửa Info & Logo</span>
               </button>
             )}
 
-            {/* Quick Action Button - Hidden on small mobile to avoid header clutter since BottomNav has prominent + button */}
+            {/* Quick Action Button */}
             <div className="hidden sm:flex items-center space-x-1.5">
               <button
                 id="btn-nav-quick-booking"
                 onClick={handleBooking}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all whitespace-nowrap"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition-all whitespace-nowrap"
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
                 <span>{currentRole === 'customer' ? 'Đặt Lịch Hẹn' : t.newBooking}</span>
@@ -190,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="btn-nav-quick-invoice"
                   onClick={handleCheckout}
-                  className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 transition-all whitespace-nowrap"
+                  className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-all whitespace-nowrap"
                 >
                   <Receipt className="w-3.5 h-3.5" />
                   <span>{t.newInvoice}</span>
@@ -203,7 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-role-switcher"
                 onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className={`inline-flex items-center space-x-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${roleLabels[currentRole].badgeColor}`}
+                className={`inline-flex items-center space-x-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold border transition-all whitespace-nowrap ${roleLabels[currentRole].badgeColor}`}
                 title={t.currentRole}
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -211,10 +211,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showRoleMenu && (
-                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-80 max-w-sm bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
-                  <div className="px-2 py-1 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 pb-1.5 flex items-center justify-between">
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-80 max-w-sm bg-white rounded-2xl shadow-xl border border-zinc-200 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 space-y-1.5">
+                  <div className="px-2 py-1 text-[11px] font-bold text-zinc-500 uppercase tracking-wider border-b border-zinc-100 pb-1.5 flex items-center justify-between">
                     <span>Phân Quyền & Bảo Mật Mật Khẩu:</span>
-                    <span className="text-[10px] font-mono text-zinc-900 dark:text-zinc-100">PIN LOCK</span>
+                    <span className="text-[10px] font-mono text-zinc-800">PIN LOCK</span>
                   </div>
 
                   {[
@@ -255,27 +255,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={() => handleSelectRole(item.role)}
                       className={`w-full text-left p-2.5 rounded-xl text-xs transition-all border ${
                         currentRole === item.role
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm'
-                          : 'border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800/60 text-zinc-800 dark:text-zinc-200'
+                          ? 'bg-emerald-50 text-emerald-950 border-emerald-300 shadow-xs'
+                          : 'border-transparent hover:bg-zinc-50 text-zinc-800'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold flex items-center space-x-1.5">
                           <span>{item.title}</span>
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded font-normal ${
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${
                             currentRole === item.role
-                              ? 'bg-white/20 dark:bg-black/20 text-current'
-                              : 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                              ? 'bg-emerald-200 text-emerald-900'
+                              : 'bg-zinc-100 text-zinc-600'
                           }`}>
                             {item.badge}
                           </span>
                         </span>
                         {currentRole === item.role && (
-                          <CheckCircle className="w-4 h-4 text-current shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                         )}
                       </div>
                       <p className={`text-[11px] mt-0.5 leading-snug ${
-                        currentRole === item.role ? 'text-zinc-300 dark:text-zinc-700' : 'text-zinc-500 dark:text-zinc-400'
+                        currentRole === item.role ? 'text-emerald-700' : 'text-zinc-500'
                       }`}>
                         {item.desc}
                       </p>
@@ -317,16 +317,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-lang-toggle"
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className="p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center space-x-1 text-xs font-semibold border border-zinc-200 dark:border-zinc-700/80 shadow-sm shrink-0"
+                className="p-1.5 sm:p-2 rounded-xl text-zinc-700 hover:bg-zinc-100 transition-colors flex items-center space-x-1 text-xs font-semibold border border-zinc-200 shadow-xs shrink-0"
                 title="Đổi ngôn ngữ / Language"
               >
-                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8C5E32] dark:text-[#D4A373]" />
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700" />
                 <span className="uppercase text-[10px] sm:text-[11px] font-bold">{lang}</span>
               </button>
 
               {showLangMenu && (
-                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-48 bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 space-y-1">
-                  <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 mb-1">
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-zinc-200 p-2 z-50 animate-in fade-in slide-in-from-top-2 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 mb-1">
                     Chọn Ngôn Ngữ / Language
                   </div>
                   {[
@@ -343,15 +343,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                       }}
                       className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium transition-all ${
                         lang === item.code
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-bold shadow'
-                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
+                          ? 'bg-emerald-700 text-white font-bold shadow-xs'
+                          : 'hover:bg-zinc-100 text-zinc-800'
                       }`}
                     >
                       <span className="flex items-center space-x-2">
                         <span>{item.flag}</span>
                         <span>{item.label}</span>
                       </span>
-                      {lang === item.code && <CheckCircle className="w-3.5 h-3.5 text-current" />}
+                      {lang === item.code && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                     </button>
                   ))}
                 </div>
@@ -362,15 +362,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-theme-toggle"
               onClick={handleToggleDark}
-              className="p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-all active:scale-95 shadow-sm shrink-0"
-              title={effectiveDarkMode ? (lang === 'vi' ? 'Chuyển sang chế độ Sáng (Light Mode)' : 'Switch to Light Mode') : (lang === 'vi' ? 'Chuyển sang chế độ Tối (Dark Mode)' : 'Switch to Dark Mode')}
-              aria-label="Toggle Dark Mode"
+              className="p-1.5 sm:p-2 rounded-xl text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all active:scale-95 shadow-xs shrink-0"
+              title="Chế độ Sáng (Light Mode)"
+              aria-label="Toggle Light Mode"
             >
-              {effectiveDarkMode ? (
-                <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-100 transition-transform hover:rotate-45" />
-              ) : (
-                <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-900 transition-transform hover:-rotate-12" />
-              )}
+              <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700" />
             </button>
 
             {/* Notification Center */}
@@ -378,24 +374,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-1.5 sm:p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 transition-colors"
+                className="relative p-1.5 sm:p-2 rounded-xl text-zinc-700 hover:bg-zinc-100 border border-zinc-200 transition-colors"
                 title={t.notifications}
               >
                 <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-2 h-2 rounded-full bg-rose-600 ring-2 ring-white dark:ring-zinc-900" />
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-2 h-2 rounded-full bg-rose-600 ring-2 ring-white" />
                 )}
               </button>
 
               {showNotifications && (
-                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-96 max-w-sm bg-white dark:bg-[#18181B] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-2 w-[calc(100vw-16px)] sm:w-96 max-w-sm bg-white rounded-2xl shadow-xl border border-zinc-200 p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100">
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-xs text-zinc-950 dark:text-zinc-50">
+                      <span className="font-semibold text-xs text-zinc-950">
                         {t.notifications}
                       </span>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-900 text-white dark:bg-white dark:text-zinc-950">
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-700 text-white">
                           {unreadCount} mới
                         </span>
                       )}
@@ -404,14 +400,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {unreadCount > 0 && (
                         <button
                           onClick={() => handleMarkRead('all')}
-                          className="text-[11px] text-zinc-900 dark:text-zinc-100 font-semibold hover:underline"
+                          className="text-[11px] text-emerald-800 font-semibold hover:underline"
                         >
                           Đọc hết
                         </button>
                       )}
                       <button
                         onClick={() => setShowNotifications(false)}
-                        className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        className="text-zinc-400 hover:text-zinc-900"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -420,7 +416,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                   <div className="max-h-72 overflow-y-auto space-y-2">
                     {notifications.length === 0 ? (
-                      <p className="text-center py-4 text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="text-center py-4 text-xs text-zinc-500">
                         Không có thông báo mới
                       </p>
                     ) : (
@@ -430,15 +426,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onClick={() => handleMarkRead(notif.id)}
                           className={`p-2.5 rounded-xl text-xs cursor-pointer transition-colors ${
                             notif.read
-                              ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 border-l-2 border-zinc-950 dark:border-white'
+                              ? 'bg-zinc-50 text-zinc-600'
+                              : 'bg-emerald-50/70 text-zinc-950 border-l-2 border-emerald-600'
                           }`}
                         >
                           <div className="flex items-center justify-between font-semibold mb-0.5">
                             <span>{notif.title}</span>
                             <span className="text-[10px] text-zinc-400">{notif.timestamp}</span>
                           </div>
-                          <p className="text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
+                          <p className="text-[11px] leading-relaxed text-zinc-600">
                             {notif.message}
                           </p>
                         </div>

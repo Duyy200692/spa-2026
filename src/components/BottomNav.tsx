@@ -25,7 +25,8 @@ import {
   ExternalLink,
   ShieldAlert,
   LogOut,
-  Home
+  Home,
+  Target
 } from 'lucide-react';
 import { Role, Language, TabType } from '../types';
 import { translations } from '../i18n';
@@ -417,6 +418,28 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 Doanh Thu & Tiếp Thị
               </div>
               <div className="grid grid-cols-1 gap-2">
+                {(currentRole === 'owner' || currentRole === 'manager') && (
+                  <button
+                    onClick={() => handleSelect('analytics')}
+                    className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                      activeTab === 'analytics'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-sm'
+                        : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Target className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold">Phân Tích Phễu & AI Trend</h4>
+                        <p className="text-[11px] opacity-75">Tỷ lệ chuyển đổi phễu, AI dự báo & cứu khách rơi bỏ</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 opacity-50" />
+                  </button>
+                )}
+
                 {(currentRole === 'owner' || currentRole === 'manager') && (
                   <button
                     onClick={() => handleSelect('reports')}

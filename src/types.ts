@@ -3,6 +3,7 @@ export type UserRole = Role;
 
 export type TabType =
   | 'dashboard'
+  | 'analytics'
   | 'appointments'
   | 'customers'
   | 'cost_calculation'

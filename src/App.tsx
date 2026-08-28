@@ -36,6 +36,7 @@ import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { BottomNav } from './components/BottomNav';
 import { DashboardView } from './components/DashboardView';
+import { AnalyticsView } from './components/AnalyticsView';
 import { CostCalculationView } from './components/CostCalculationView';
 import { AppointmentsView } from './components/AppointmentsView';
 import { CustomersView } from './components/CustomersView';
@@ -105,22 +106,13 @@ export default function App() {
   const [bookingInitialServiceId, setBookingInitialServiceId] = useState<string | undefined>(undefined);
   const [bookingInitialPromoCode, setBookingInitialPromoCode] = useState<string | undefined>(undefined);
 
-  // Dark Mode Sync & Local Persistence
+  // Force Pure Light Mode Theme
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      try {
-        localStorage.setItem('spa_theme', 'dark');
-      } catch (e) {
-        /* ignore */
-      }
-    } else {
-      document.documentElement.classList.remove('dark');
-      try {
-        localStorage.setItem('spa_theme', 'light');
-      } catch (e) {
-        /* ignore */
-      }
+    document.documentElement.classList.remove('dark');
+    try {
+      localStorage.setItem('spa_theme', 'light');
+    } catch (e) {
+      /* ignore */
     }
   }, [isDarkMode]);
 
@@ -621,7 +613,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-zinc-50 dark:bg-[#09090B] text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-200 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#FAF9F6] text-slate-900 font-sans transition-colors duration-200 selection:bg-emerald-800 selection:text-white overflow-x-hidden">
       {/* Top Header Navigation - Rendered in Staff Management Mode */}
       {!isCustomerTab && (
         <Navbar
@@ -706,6 +698,19 @@ export default function App() {
                 onOpenQuickBooking={() => setShowQuickBookingModal(true)}
                 onOpenEditSpaProfile={() => setIsEditSpaProfileOpen(true)}
                 onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
+              />
+            )}
+
+            {!isCustomerTab && activeTab === 'analytics' && (
+              <AnalyticsView
+                appointments={appointments}
+                customers={customers}
+                services={services}
+                staff={staff}
+                lang={lang}
+                currentRole={currentRole}
+                onOpenPromotions={() => setActiveTab('promotions')}
+                onOpenBookingModal={() => setShowQuickBookingModal(true)}
               />
             )}
 

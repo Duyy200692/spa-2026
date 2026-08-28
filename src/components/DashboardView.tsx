@@ -176,21 +176,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Welcome Banner & Quick Action */}
-      <div className="bg-gradient-to-r from-[#5A7D57] via-[#6D8E6A] to-[#8BA888] dark:from-[#1E251D] dark:via-[#263025] dark:to-[#2F3A2E] rounded-2xl p-5 sm:p-6 text-white dark:text-[#E0E2DF] border border-transparent dark:border-[#2D312C] shadow-lg shadow-[#5A7D57]/10">
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 rounded-2xl p-5 sm:p-6 text-emerald-950 border border-emerald-200 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 dark:bg-[#8BA888]/20 backdrop-blur-md text-white dark:text-[#8BA888]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600/15 text-emerald-800">
                 Spa Live Dashboard
               </span>
-              <span className="text-xs text-white/80 dark:text-[#9BA198]">
+              <span className="text-xs text-emerald-700 font-medium">
                 Thứ 3, 25 Tháng 8, 2026
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-950">
               {lang === 'vi' ? 'Chào mừng bạn quay trở lại!' : 'Welcome back to SpaMaster!'}
             </h1>
-            <p className="text-xs sm:text-sm text-white/90 dark:text-[#9BA198] max-w-xl">
+            <p className="text-xs sm:text-sm text-emerald-800 font-medium max-w-xl">
               {lang === 'vi'
                 ? 'Hôm nay có 4 lịch hẹn đã lên lịch, doanh thu tạm tính đang tăng 18.5% so với tuần trước.'
                 : 'You have 4 bookings scheduled today. Estimated revenue is up 18.5% compared to last week.'}
@@ -202,10 +202,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <button
                 id="btn-dash-edit-spa"
                 onClick={onOpenEditSpaProfile}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/20 dark:bg-[#1A1C19] hover:bg-white/30 dark:hover:bg-[#222621] text-white dark:text-[#E0E2DF] border border-white/30 dark:border-[#2D312C] transition-all shadow-sm"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 transition-all shadow-xs"
                 title="Chỉnh sửa thông tin cơ sở, địa chỉ & logo Spa"
               >
-                <Building className="w-4 h-4" />
+                <Building className="w-4 h-4 text-emerald-700" />
                 <span>Sửa Info & Logo</span>
               </button>
             )}
@@ -213,7 +213,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               id="btn-dash-booking"
               onClick={onOpenBookingModal}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white dark:bg-[#8BA888] text-[#334A31] dark:text-[#121412] hover:bg-[#F0F3EF] dark:hover:bg-[#7A9877] transition-all shadow-md"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition-all shadow-xs"
             >
               <CalendarPlus className="w-4 h-4" />
               <span>{t.newBooking}</span>
@@ -221,7 +221,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               id="btn-dash-invoice"
               onClick={onOpenCheckoutModal}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/20 dark:bg-[#1A1C19] hover:bg-white/30 dark:hover:bg-[#222621] text-white dark:text-[#E0E2DF] border border-white/30 dark:border-[#2D312C] transition-all"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-xs"
             >
               <Receipt className="w-4 h-4" />
               <span>{t.newInvoice}</span>
@@ -232,23 +232,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Low Stock Warning Alert if any */}
       {lowStockItems.length > 0 && (
-        <div className="bg-[#D4A373]/10 dark:bg-[#D4A373]/10 border border-[#D4A373]/30 rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#B88352] dark:bg-[#D4A373] text-white dark:text-[#121412]">
+            <div className="p-2 rounded-lg bg-amber-600 text-white">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+              <h2 className="text-xs font-bold text-amber-950">
                 {t.lowStockAlerts} ({lowStockItems.length} sản phẩm)
               </h2>
-              <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+              <p className="text-xs text-amber-800">
                 {lowStockItems.map(i => `${i.name} (còn ${i.stockSubUnits} ${i.subUnitName})`).join(', ')}
               </p>
             </div>
           </div>
           <button
             onClick={() => onNavigateTab('inventory')}
-            className="text-xs font-semibold text-[#B88352] dark:text-[#D4A373] hover:underline flex items-center shrink-0 ml-2"
+            className="text-xs font-semibold text-amber-800 hover:underline flex items-center shrink-0 ml-2"
           >
             <span>{lang === 'vi' ? 'Nhập kho ngay' : 'Restock now'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -259,76 +259,76 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Key Real-time Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Today Revenue */}
-        <div className="bg-white dark:bg-[#1A1C19] p-4 sm:p-5 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-2">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#5E665B] dark:text-[#9BA198]">
+            <span className="text-xs font-medium text-zinc-500">
               {t.todayRevenue}
             </span>
-            <div className="p-2 rounded-xl bg-[#8BA888]/15 text-[#4D6E4A] dark:text-[#8BA888]">
+            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+          <div className="text-lg sm:text-2xl font-bold text-zinc-950">
             {formatCurrency(todayRevenue, lang)}
           </div>
-          <div className="flex items-center space-x-1 text-xs text-[#4D6E4A] dark:text-[#8BA888] font-medium">
+          <div className="flex items-center space-x-1 text-xs text-emerald-700 font-medium">
             <ArrowUpRight className="w-3.5 h-3.5" />
             <span>+14.2% {lang === 'vi' ? 'so với hôm qua' : 'vs yesterday'}</span>
           </div>
         </div>
 
         {/* Metric 2: Today Bookings */}
-        <div className="bg-white dark:bg-[#1A1C19] p-4 sm:p-5 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-2">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#5E665B] dark:text-[#9BA198]">
+            <span className="text-xs font-medium text-zinc-500">
               {t.todayBookings}
             </span>
-            <div className="p-2 rounded-xl bg-[#A3B18A]/20 text-[#4A7049] dark:text-[#CCD5AE]">
+            <div className="p-2 rounded-xl bg-teal-100 text-teal-800">
               <CalendarCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-[#1C211B] dark:text-[#E0E2DF]">
-            {todayAppointments.length} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">{lang === 'vi' ? 'lượt hẹn' : 'slots'}</span>
+          <div className="text-lg sm:text-2xl font-bold text-zinc-950">
+            {todayAppointments.length} <span className="text-xs font-normal text-zinc-500">{lang === 'vi' ? 'lượt hẹn' : 'slots'}</span>
           </div>
-          <div className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+          <div className="text-xs text-zinc-500 font-medium">
             1 đang làm • 1 đã đến • 2 đã đặt
           </div>
         </div>
 
         {/* Metric 3: Active Clients */}
-        <div className="bg-white dark:bg-[#1A1C19] p-4 sm:p-5 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-2">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#5E665B] dark:text-[#9BA198]">
+            <span className="text-xs font-medium text-zinc-500">
               {t.activeCustomers}
             </span>
-            <div className="p-2 rounded-xl bg-[#D4A373]/20 text-[#9E6B38] dark:text-[#D4A373]">
+            <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-[#1C211B] dark:text-[#E0E2DF]">
-            {customers.length * 18} <span className="text-xs font-normal text-[#5E665B] dark:text-[#9BA198]">{lang === 'vi' ? 'khách' : 'clients'}</span>
+          <div className="text-lg sm:text-2xl font-bold text-zinc-950">
+            {customers.length * 18} <span className="text-xs font-normal text-zinc-500">{lang === 'vi' ? 'khách' : 'clients'}</span>
           </div>
-          <div className="flex items-center space-x-1 text-xs text-[#4D6E4A] dark:text-[#8BA888] font-medium">
+          <div className="flex items-center space-x-1 text-xs text-emerald-700 font-medium">
             <ArrowUpRight className="w-3.5 h-3.5" />
             <span>+8 khách mới tháng này</span>
           </div>
         </div>
 
         {/* Metric 4: Avg Profit Margin % */}
-        <div className="bg-white dark:bg-[#1A1C19] p-4 sm:p-5 rounded-2xl border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-2">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#5E665B] dark:text-[#9BA198]">
+            <span className="text-xs font-medium text-zinc-500">
               {t.profitMarginAvg}
             </span>
-            <div className="p-2 rounded-xl bg-[#8BA888]/20 text-[#4D6E4A] dark:text-[#8BA888]">
+            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
               <Percent className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-[#5A7D57] dark:text-[#8BA888]">
+          <div className="text-lg sm:text-2xl font-bold text-emerald-700">
             {avgMargin}%
           </div>
-          <div className="text-xs text-[#5E665B] dark:text-[#9BA198] flex items-center space-x-1">
-            <Sparkles className="w-3 h-3 text-[#B88352] dark:text-[#D4A373]" />
+          <div className="text-xs text-zinc-500 flex items-center space-x-1">
+            <Sparkles className="w-3 h-3 text-amber-600" />
             <span>{lang === 'vi' ? 'Tính từ cost mỹ phẩm & KTV' : 'Calculated from BOM & labor'}</span>
           </div>
         </div>
@@ -337,27 +337,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Main Grid: Revenue & Profit Chart + Today's Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Revenue & Profit Analysis Recharts */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
-                <TrendingUp className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+              <h3 className="text-sm font-bold text-zinc-950 flex items-center space-x-2">
+                <TrendingUp className="w-4 h-4 text-emerald-700" />
                 <span>{t.revenueTrends} (Biểu đồ Recharts)</span>
               </h3>
-              <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+              <p className="text-xs text-zinc-500">
                 {lang === 'vi' ? 'Đối chiếu Doanh Thu và Lợi Nhuận Gộp theo ngày trong tuần' : 'Revenue vs Gross Profit breakdown'}
               </p>
             </div>
 
-            <div className="flex items-center space-x-1 bg-[#F0F3EF] dark:bg-[#222621] p-1 rounded-xl text-xs">
+            <div className="flex items-center space-x-1 bg-zinc-100 p-1 rounded-xl text-xs">
               {(['7d', '30d', 'year'] as const).map(p => (
                 <button
                   key={p}
                   onClick={() => setChartPeriod(p)}
                   className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
                     chartPeriod === p
-                      ? 'bg-white dark:bg-[#1A1C19] text-[#1C211B] dark:text-[#E0E2DF] shadow-xs'
-                      : 'text-[#5E665B] hover:text-[#1C211B] dark:text-[#9BA198] dark:hover:text-[#E0E2DF]'
+                      ? 'bg-white text-zinc-950 shadow-xs font-bold'
+                      : 'text-zinc-500 hover:text-zinc-900'
                   }`}
                 >
                   {p === '7d' ? '7 Ngày' : p === '30d' ? '30 Ngày' : 'Năm Nay'}
@@ -370,40 +370,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="pt-2 h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E6DF" opacity={0.4} />
-                <XAxis dataKey="day" stroke="#5E665B" fontSize={11} />
-                <YAxis stroke="#5E665B" fontSize={11} tickFormatter={(val) => `${val / 1000000}M`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4E4E7" opacity={0.7} />
+                <XAxis dataKey="day" stroke="#71717A" fontSize={11} />
+                <YAxis stroke="#71717A" fontSize={11} tickFormatter={(val) => `${val / 1000000}M`} />
                 <Tooltip
                   formatter={(value: any) => formatCurrency(Number(value), lang)}
                   contentStyle={{
-                    backgroundColor: '#1A1C19',
+                    backgroundColor: '#FFFFFF',
                     borderRadius: '12px',
-                    color: '#E0E2DF',
-                    border: '1px solid #2D312C',
+                    color: '#09090B',
+                    border: '1px solid #E4E4E7',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     fontSize: '12px'
                   }}
                 />
-                <Bar dataKey="doanhThu" name="Doanh Thu" fill="#5A7D57" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="loiNhuan" name="Lợi Nhuận" fill="#D4A373" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="doanhThu" name="Doanh Thu" fill="#059669" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="loiNhuan" name="Lợi Nhuận" fill="#D97706" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-[#5E665B] dark:text-[#9BA198] pt-2 border-t border-[#E2E6DF] dark:border-[#2D312C]">
-            <span>Tổng tuần: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">61.100.000đ</strong></span>
-            <span>Lợi nhuận ròng: <strong className="text-[#4D6E4A] dark:text-[#8BA888]">42.400.000đ (69.4%)</strong></span>
+          <div className="flex items-center justify-between text-xs text-zinc-600 pt-2 border-t border-zinc-100">
+            <span>Tổng tuần: <strong className="text-zinc-950 font-bold">61.100.000đ</strong></span>
+            <span>Lợi nhuận ròng: <strong className="text-emerald-700 font-bold">42.400.000đ (69.4%)</strong></span>
           </div>
         </div>
 
         {/* Right 1 Col: Star Services & Cost Calculator Teaser */}
-        <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+            <h3 className="text-sm font-bold text-zinc-950">
               {t.topServices}
             </h3>
             <button
               onClick={() => onNavigateTab('costCalc')}
-              className="text-xs font-semibold text-[#5A7D57] dark:text-[#8BA888] hover:underline flex items-center"
+              className="text-xs font-semibold text-emerald-700 hover:underline flex items-center"
             >
               <span>{t.costCalc}</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -415,25 +416,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div
                 key={srv.id}
                 onClick={() => onNavigateTab('costCalc')}
-                className="p-3 rounded-xl bg-[#F5F7F4] dark:bg-[#222621]/60 hover:bg-[#8BA888]/10 dark:hover:bg-[#8BA888]/10 transition-colors cursor-pointer border border-transparent hover:border-[#8BA888]/30 space-y-1.5"
+                className="p-3 rounded-xl bg-zinc-50 hover:bg-emerald-50/70 transition-colors cursor-pointer border border-zinc-200 space-y-1.5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] line-clamp-1">
+                  <span className="text-xs font-bold text-zinc-950 line-clamp-1">
                     {srv.name}
                   </span>
-                  <span className="text-xs font-bold text-[#5A7D57] dark:text-[#8BA888] shrink-0 ml-2">
+                  <span className="text-xs font-bold text-emerald-700 shrink-0 ml-2">
                     {formatCurrency(srv.price, lang)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                <div className="flex items-center justify-between text-[11px] text-zinc-500">
                   <span>Cost gốc: {formatCurrency(srv.totalCalculatedCost, lang)}</span>
-                  <span className="font-semibold text-[#4D6E4A] dark:text-[#8BA888]">
+                  <span className="font-semibold text-emerald-700">
                     Lãi {srv.profitMarginPercent}%
                   </span>
                 </div>
-                <div className="w-full bg-[#E2E6DF] dark:bg-[#2D312C] h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
                   <div
-                    className="bg-[#5A7D57] dark:bg-[#8BA888] h-full rounded-full"
+                    className="bg-emerald-600 h-full rounded-full"
                     style={{ width: `${srv.profitMarginPercent}%` }}
                   />
                 </div>
@@ -444,21 +445,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Today's Appointments Action Board */}
-      <div className="bg-white dark:bg-[#1A1C19] rounded-2xl p-5 border border-[#E2E6DF] dark:border-[#2D312C] shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-2">
-              <CalendarCheck className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
+            <h3 className="text-sm font-bold text-zinc-950 flex items-center space-x-2">
+              <CalendarCheck className="w-4 h-4 text-emerald-700" />
               <span>{t.recentAppointments} (Hôm nay 25/08)</span>
             </h3>
-            <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
+            <p className="text-xs text-zinc-500">
               {lang === 'vi' ? 'Tiếp đón khách hàng, check-in và thực hiện dịch vụ' : 'Check-in clients and initiate treatments'}
             </p>
           </div>
 
           <button
             onClick={() => onNavigateTab('appointments')}
-            className="text-xs font-semibold text-[#5A7D57] dark:text-[#8BA888] hover:underline flex items-center"
+            className="text-xs font-semibold text-emerald-700 hover:underline flex items-center"
           >
             <span>{t.viewAll}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -469,12 +470,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {appointments.map(apt => (
             <div
               key={apt.id}
-              className="p-4 rounded-xl border border-[#E2E6DF] dark:border-[#2D312C] bg-[#F5F7F4]/60 dark:bg-[#222621]/40 space-y-3 flex flex-col justify-between"
+              className="p-4 rounded-xl border border-zinc-200 bg-zinc-50/80 space-y-3 flex flex-col justify-between"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF] flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-[#5E665B] dark:text-[#9BA198]" />
+                  <span className="text-xs font-bold text-zinc-900 flex items-center space-x-1">
+                    <Clock className="w-3.5 h-3.5 text-zinc-500" />
                     <span>{apt.time} ({apt.duration}p)</span>
                   </span>
                   {statusBadge(apt.status)}
@@ -484,34 +485,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <img
                     src={apt.customerAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
                     alt={apt.customerName}
-                    className="w-9 h-9 rounded-full object-cover ring-2 ring-[#8BA888]/40"
+                    className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/30"
                   />
                   <div>
-                    <div className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF]">
+                    <div className="text-xs font-bold text-zinc-950">
                       {apt.customerName}
                     </div>
-                    <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
+                    <div className="text-[11px] text-zinc-500">
                       {apt.customerPhone}
                     </div>
                   </div>
                 </div>
 
-                <div className="text-xs text-[#1C211B] dark:text-[#E0E2DF] font-medium line-clamp-1">
+                <div className="text-xs text-zinc-900 font-semibold line-clamp-1">
                   💆‍♀️ {apt.serviceName}
                 </div>
 
-                <div className="text-[11px] text-[#5E665B] dark:text-[#9BA198]">
-                  KTV: <strong className="text-[#1C211B] dark:text-[#E0E2DF]">{apt.staffName}</strong> • {apt.roomBed}
+                <div className="text-[11px] text-zinc-500">
+                  KTV: <strong className="text-zinc-900">{apt.staffName}</strong> • {apt.roomBed}
                 </div>
               </div>
 
               {/* Action Buttons depending on status */}
-              <div className="pt-2 border-t border-[#E2E6DF] dark:border-[#2D312C] flex items-center space-x-2">
+              <div className="pt-2 border-t border-zinc-200 flex items-center space-x-2">
                 {apt.status === 'confirmed' && (
                   <button
                     id={`btn-checkin-${apt.id}`}
                     onClick={() => onCheckInAppointment(apt.id)}
-                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-[#B88352] hover:bg-[#A57445] dark:bg-[#D4A373] dark:hover:bg-[#C2956A] text-white dark:text-[#121412] transition-colors"
+                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors"
                   >
                     {t.checkIn}
                   </button>
@@ -521,7 +522,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <button
                     id={`btn-start-${apt.id}`}
                     onClick={() => onStartServiceAppointment(apt.id)}
-                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] transition-colors"
+                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors"
                   >
                     {t.startService}
                   </button>
@@ -531,7 +532,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <button
                     id={`btn-checkout-${apt.id}`}
                     onClick={() => onCheckoutAppointment(apt)}
-                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-[#5A7D57] hover:bg-[#4D6D4A] dark:bg-[#8BA888] dark:hover:bg-[#7A9877] text-white dark:text-[#121412] transition-colors flex items-center justify-center space-x-1"
+                    className="w-full py-1.5 rounded-lg text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center space-x-1"
                   >
                     <Receipt className="w-3.5 h-3.5" />
                     <span>{t.checkout}</span>
@@ -539,7 +540,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 )}
 
                 {apt.status === 'completed' && (
-                  <div className="w-full text-center text-xs font-semibold text-[#4D6E4A] dark:text-[#8BA888] py-1 flex items-center justify-center space-x-1">
+                  <div className="w-full text-center text-xs font-semibold text-emerald-700 py-1 flex items-center justify-center space-x-1">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>{t.statusCompleted}</span>
                   </div>
@@ -559,9 +560,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Target className="w-4 h-4 text-[#5A7D57] dark:text-[#8BA888]" />
               <span>Phễu Chuyển Đổi Khách Hàng (Funnel Analytics)</span>
             </h3>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#5A7D57]/15 text-[#5A7D57] dark:text-[#8BA888] font-semibold">
-              Live Tracked
-            </span>
+            <button
+              onClick={() => handleNav('analytics')}
+              className="text-xs font-bold text-emerald-800 hover:text-emerald-900 dark:text-emerald-400 underline flex items-center space-x-1"
+            >
+              <span>Mở Module Phân Tích Chuyên Sâu →</span>
+            </button>
           </div>
           <p className="text-xs text-[#5E665B] dark:text-[#9BA198]">
             Theo dõi hành vi từ lúc khách tìm kiếm dịch vụ cho đến khi hoàn tất thanh toán hóa đơn tại Spa.

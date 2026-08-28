@@ -394,17 +394,26 @@ export const StaffView: React.FC<StaffViewProps> = ({
   };
 
   // Save Customer Tip for a Tour Log
-  const handleSaveCustomerTip = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tipTourTarget) return;
+  const handleSaveCustomerTip = (targetIdOrEvent?: string | React.FormEvent, amount?: number) => {
+    let tId = tipTourTarget?.id;
+    let amt = tipAmountInput;
+
+    if (typeof targetIdOrEvent === 'string') {
+      tId = targetIdOrEvent;
+      if (amount !== undefined) amt = amount;
+    } else if (targetIdOrEvent && 'preventDefault' in targetIdOrEvent) {
+      targetIdOrEvent.preventDefault();
+    }
+
+    if (!tId) return;
 
     setTourLogs(prev =>
       prev.map(t =>
-        t.id === tipTourTarget.id
+        t.id === tId
           ? {
               ...t,
-              tipAmount: tipAmountInput,
-              notes: tipNoteInput ? `${t.notes || ''} (Tip: ${formatCurrency(tipAmountInput)} - ${tipNoteInput})` : t.notes,
+              tipAmount: amt,
+              notes: tipNoteInput ? `${t.notes || ''} (Tip: ${formatCurrency(amt)} - ${tipNoteInput})` : t.notes,
             }
           : t
       )
@@ -415,20 +424,31 @@ export const StaffView: React.FC<StaffViewProps> = ({
   };
 
   // Admin PIN Assign Handler
-  const handleSaveAdminPin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pinTargetStaff) return;
+  const handleSaveAdminPin = (staffIdOrEvent?: string | React.FormEvent, pinVal?: string) => {
+    let sId = pinTargetStaff?.id;
+    let val = newPinValue.trim() || '1234';
 
-    const updatedPin = newPinValue.trim() || '1234';
+    if (typeof staffIdOrEvent === 'string') {
+      sId = staffIdOrEvent;
+      if (pinVal !== undefined) val = pinVal;
+    } else if (staffIdOrEvent && 'preventDefault' in staffIdOrEvent) {
+      staffIdOrEvent.preventDefault();
+    }
+
+    if (!sId) return;
+
     setStaffPinMap(prev => ({
       ...prev,
-      [pinTargetStaff.id]: updatedPin,
+      [sId]: val,
     }));
 
-    onUpdateStaff({
-      ...pinTargetStaff,
-      pinCode: updatedPin,
-    });
+    const target = staff.find(st => st.id === sId);
+    if (target) {
+      onUpdateStaff({
+        ...target,
+        pinCode: val,
+      });
+    }
 
     setShowAdminPinModal(false);
     setPinTargetStaff(null);

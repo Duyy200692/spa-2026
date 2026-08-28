@@ -131,7 +131,7 @@ export const ServiceSOPManualModal: React.FC<ServiceSOPManualModalProps> = ({
                   {service.category} • {service.durationMinutes} phút
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold font-serif text-white truncate">
+              <h2 className="text-lg sm:text-xl font-bold text-white truncate">
                 {service.name}
               </h2>
             </div>
