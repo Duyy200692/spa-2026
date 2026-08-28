@@ -40,10 +40,12 @@ import {
   SpaProfile,
   NewsArticle,
   Language,
-  Role
+  Role,
+  AppNotification
 } from '../types';
 import { B2BPitchDeckModal, B2BPartnerCategory } from './B2BPitchDeckModal';
-import { getStoredB2BConfig } from '../data/b2bConfigData';
+import { B2BFullConfig, getStoredB2BConfig } from '../data/b2bConfigData';
+import { COLLECTIONS, syncDocToFirestore } from '../firebase';
 
 interface CustomerPortalViewProps {
   lang: Language;
@@ -57,6 +59,7 @@ interface CustomerPortalViewProps {
   currentRole?: Role;
   onOpenEditSpaProfile?: () => void;
   onOpenStaffLogin?: () => void;
+  b2bConfig?: B2BFullConfig;
 }
 
 export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
@@ -71,6 +74,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   currentRole,
   onOpenEditSpaProfile,
   onOpenStaffLogin,
+  b2bConfig: propB2BConfig,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +101,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   const [pitchDeckCategory, setPitchDeckCategory] = useState<B2BPartnerCategory>('hotel');
 
   // Dynamic B2B Content configuration
-  const b2bConfig = useMemo(() => getStoredB2BConfig(), [showPitchDeckModal, showB2BModal]);
+  const b2bConfig = propB2BConfig || useMemo(() => getStoredB2BConfig(), [showPitchDeckModal, showB2BModal]);
 
   const portalTexts = {
     vi: {
@@ -1708,10 +1712,29 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
               </div>
             ) : (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   if (!b2bName || !b2bPhone) return;
                   setB2BSuccess(true);
+                  try {
+                    const partnerTypeName = b2bPartnerType === 'hotel' 
+                      ? 'Lưu Trú / Khách Sạn' 
+                      : b2bPartnerType === 'sports' 
+                      ? 'CLB Thể Thao' 
+                      : 'Cung Ứng KTV Spa';
+
+                    const notifId = `notif_b2b_${Date.now()}`;
+                    await syncDocToFirestore(COLLECTIONS.NOTIFICATIONS, {
+                      id: notifId,
+                      title: `Yêu cầu hợp tác B2B: ${b2bName}`,
+                      message: `[${partnerTypeName}] SĐT: ${b2bPhone}. Ghi chú: ${b2bNote || 'Không có'}`,
+                      type: 'customer_lead',
+                      timestamp: new Date().toISOString(),
+                      read: false
+                    });
+                  } catch (err) {
+                    console.warn('Non-blocking B2B lead sync to Firestore:', err);
+                  }
                 }}
                 className="space-y-4 text-xs"
               >

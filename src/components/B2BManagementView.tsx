@@ -28,23 +28,29 @@ import { Role, Language } from '../types';
 interface B2BManagementViewProps {
   currentRole: Role;
   lang: Language;
+  initialConfig?: B2BFullConfig;
   onSaveConfig?: (newConfig: B2BFullConfig) => void;
 }
 
 export const B2BManagementView: React.FC<B2BManagementViewProps> = ({
   currentRole,
   lang,
+  initialConfig,
   onSaveConfig
 }) => {
-  const [config, setConfig] = useState<B2BFullConfig>(getStoredB2BConfig());
+  const [config, setConfig] = useState<B2BFullConfig>(initialConfig || getStoredB2BConfig());
   const [activeTab, setActiveTab] = useState<'cards' | 'slides'>('cards');
   const [selectedCategory, setSelectedCategory] = useState<'hotel' | 'sports' | 'spa_outsourcing'>('hotel');
   const [selectedSlideIndex, setSelectedSlideIndex] = useState<number>(0);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   useEffect(() => {
-    setConfig(getStoredB2BConfig());
-  }, []);
+    if (initialConfig) {
+      setConfig(initialConfig);
+    } else {
+      setConfig(getStoredB2BConfig());
+    }
+  }, [initialConfig]);
 
   const handleSaveAll = () => {
     const updated = {

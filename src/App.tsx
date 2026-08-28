@@ -51,6 +51,7 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { QuickBookingModal } from './components/QuickBookingModal';
 import { FirebaseSyncModal } from './components/FirebaseSyncModal';
 import { SpaProfileEditModal } from './components/SpaProfileEditModal';
+import { B2BFullConfig, getStoredB2BConfig, saveStoredB2BConfig } from './data/b2bConfigData';
 import {
   COLLECTIONS,
   subscribeToCollection,
@@ -92,6 +93,7 @@ export default function App() {
   const [promotions, setPromotions] = useState<Promotion[]>(initialPromotions);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
+  const [b2bConfig, setB2BConfig] = useState<B2BFullConfig>(getStoredB2BConfig);
 
   // Cloud & Firebase Sync States
   const [isFirebaseConnected, setIsFirebaseConnected] = useState<boolean>(true);
@@ -231,7 +233,7 @@ export default function App() {
         })
       );
 
-      // Subscribe to System Settings (Passwords)
+      // Subscribe to System Settings (Passwords & B2B Configuration)
       unsubs.push(
         subscribeToCollection<any>(COLLECTIONS.SYSTEM, (items) => {
           const passDoc = items?.find((i) => i.id === 'passwords');
@@ -241,8 +243,18 @@ export default function App() {
               managerPin: passDoc.managerPin || initialRolePasswords.managerPin,
               staffPin: passDoc.staffPin || initialRolePasswords.staffPin,
             });
-            setLastSyncedTime(new Date());
           }
+
+          const b2bDoc = items?.find((i) => i.id === 'b2b_config');
+          if (b2bDoc) {
+            setB2BConfig((prev) => ({
+              ...prev,
+              ...b2bDoc,
+            }));
+            saveStoredB2BConfig(b2bDoc);
+          }
+
+          setLastSyncedTime(new Date());
         })
       );
     } catch (err) {
@@ -549,6 +561,12 @@ export default function App() {
     trackSync(syncDocToFirestore(COLLECTIONS.APPOINTMENTS, updatedApt));
   };
 
+  const handleSaveB2BConfig = async (newConfig: B2BFullConfig) => {
+    setB2BConfig(newConfig);
+    saveStoredB2BConfig(newConfig);
+    trackSync(syncDocToFirestore(COLLECTIONS.SYSTEM, newConfig));
+  };
+
   // Role Switching with Passwords / PIN Authentication
   const handleRequestRoleChange = (targetRole: Role) => {
     if (targetRole === 'customer') {
@@ -661,6 +679,7 @@ export default function App() {
               setShowQuickBookingModal(true);
             }}
             activeCustomerSubTab={getCustomerSubTab()}
+            b2bConfig={b2bConfig}
           />
         </main>
       ) : (
@@ -826,6 +845,8 @@ export default function App() {
             <B2BManagementView
               currentRole={currentRole}
               lang={lang}
+              initialConfig={b2bConfig}
+              onSaveConfig={handleSaveB2BConfig}
             />
           )}
           </main>
