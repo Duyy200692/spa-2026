@@ -1,4 +1,5 @@
 import { ServiceStep } from '../types';
+import { OFFICIAL_SPA_SERVICES } from './officialMenuData';
 
 export interface ServiceSOPData {
   benefitsSummary: string;
@@ -394,19 +395,150 @@ export const SPIRULINA_FACIAL_SOP: ServiceSOPData = {
 export function getDefaultSOPForService(serviceName: string, category: string = ''): ServiceSOPData {
   const text = (serviceName + ' ' + category).toLowerCase();
 
-  if (text.includes('detox') || text.includes('đá nóng') && text.includes('face')) {
+  // 1. Chăm sóc da nám (Cấy nano)
+  if (text.includes('nám') || text.includes('nano')) {
+    const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-nam-nano');
+    if (srv && srv.steps) {
+      return {
+        steps: srv.steps,
+        preparationSteps: srv.preparationSteps || [],
+        targetSkinType: srv.targetSkinType || '',
+        benefitsSummary: srv.benefitsSummary || '',
+        contraindications: srv.contraindications,
+        homeCareNotes: srv.homeCareNotes
+      };
+    }
+  }
+
+  // 2. Chăm sóc da mụn (Chuẩn y khoa)
+  if (text.includes('mụn') || text.includes('acne')) {
+    const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-mun-y-khoa');
+    if (srv && srv.steps) {
+      return {
+        steps: srv.steps,
+        preparationSteps: srv.preparationSteps || [],
+        targetSkinType: srv.targetSkinType || '',
+        benefitsSummary: srv.benefitsSummary || '',
+        contraindications: srv.contraindications,
+        homeCareNotes: srv.homeCareNotes
+      };
+    }
+  }
+
+  // 3. Da lão hoá, da khô, nhạy cảm
+  if (text.includes('lão') || text.includes('khô') || text.includes('nhạy cảm') || text.includes('lão hoá') || text.includes('lão hóa')) {
+    const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-lao-hoa-kho');
+    if (srv && srv.steps) {
+      return {
+        steps: srv.steps,
+        preparationSteps: srv.preparationSteps || [],
+        targetSkinType: srv.targetSkinType || '',
+        benefitsSummary: srv.benefitsSummary || '',
+        contraindications: srv.contraindications,
+        homeCareNotes: srv.homeCareNotes
+      };
+    }
+  }
+
+  // 4 & 5. Gội đầu dưỡng sinh (120 phút vs 75 phút)
+  if (text.includes('gội') || text.includes('dưỡng sinh') || text.includes('shampoo')) {
+    if (text.includes('120') || text.includes('hoàng cung') || text.includes('chuyên sâu')) {
+      const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-goi-120');
+      if (srv && srv.steps) {
+        return {
+          steps: srv.steps,
+          preparationSteps: srv.preparationSteps || [],
+          targetSkinType: srv.targetSkinType || '',
+          benefitsSummary: srv.benefitsSummary || '',
+          contraindications: srv.contraindications,
+          homeCareNotes: srv.homeCareNotes
+        };
+      }
+    }
+    const srv75 = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-goi-75');
+    if (srv75 && srv75.steps) {
+      return {
+        steps: srv75.steps,
+        preparationSteps: srv75.preparationSteps || [],
+        targetSkinType: srv75.targetSkinType || '',
+        benefitsSummary: srv75.benefitsSummary || '',
+        contraindications: srv75.contraindications,
+        homeCareNotes: srv75.homeCareNotes
+      };
+    }
+  }
+
+  // 6 & 7. Massa body (60 vs 90)
+  if (text.includes('body') || text.includes('toàn thân')) {
+    if (text.includes('90')) {
+      const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-body-90');
+      if (srv && srv.steps) {
+        return {
+          steps: srv.steps,
+          preparationSteps: srv.preparationSteps || [],
+          targetSkinType: srv.targetSkinType || '',
+          benefitsSummary: srv.benefitsSummary || '',
+          contraindications: srv.contraindications,
+          homeCareNotes: srv.homeCareNotes
+        };
+      }
+    }
+    const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-body-60');
+    if (srv && srv.steps) {
+      return {
+        steps: srv.steps,
+        preparationSteps: srv.preparationSteps || [],
+        targetSkinType: srv.targetSkinType || '',
+        benefitsSummary: srv.benefitsSummary || '',
+        contraindications: srv.contraindications,
+        homeCareNotes: srv.homeCareNotes
+      };
+    }
+  }
+
+  // 8 & 9. Massa foot (60 vs 90)
+  if (text.includes('foot') || text.includes('chân')) {
+    if (text.includes('90')) {
+      const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-foot-90');
+      if (srv && srv.steps) {
+        return {
+          steps: srv.steps,
+          preparationSteps: srv.preparationSteps || [],
+          targetSkinType: srv.targetSkinType || '',
+          benefitsSummary: srv.benefitsSummary || '',
+          contraindications: srv.contraindications,
+          homeCareNotes: srv.homeCareNotes
+        };
+      }
+    }
+    const srv = OFFICIAL_SPA_SERVICES.find(s => s.id === 'srv-foot-60');
+    if (srv && srv.steps) {
+      return {
+        steps: srv.steps,
+        preparationSteps: srv.preparationSteps || [],
+        targetSkinType: srv.targetSkinType || '',
+        benefitsSummary: srv.benefitsSummary || '',
+        contraindications: srv.contraindications,
+        homeCareNotes: srv.homeCareNotes
+      };
+    }
+  }
+
+  if (text.includes('detox') || (text.includes('đá nóng') && text.includes('face'))) {
     return DETOX_60M_SOP;
   }
-  if (text.includes('mụn') || text.includes('acne')) {
-    return ACNE_TREATMENT_SOP;
-  }
-  if (text.includes('massage') || text.includes('body') || text.includes('đá nóng')) {
-    return MASSAGE_BODY_SOP;
-  }
-  if (text.includes('tảo') || text.includes('spirulina') || text.includes('cấy')) {
+  if (text.includes('tảo') || text.includes('spirulina')) {
     return SPIRULINA_FACIAL_SOP;
   }
 
-  // Fallback default Detox 60m SOP (matching user's uploaded image sheet!)
-  return DETOX_60M_SOP;
+  // Fallback: Default to Nam Nano SOP
+  const defaultSrv = OFFICIAL_SPA_SERVICES[0];
+  return {
+    steps: defaultSrv.steps || DETOX_60M_SOP.steps,
+    preparationSteps: defaultSrv.preparationSteps || DETOX_60M_SOP.preparationSteps,
+    targetSkinType: defaultSrv.targetSkinType || DETOX_60M_SOP.targetSkinType,
+    benefitsSummary: defaultSrv.benefitsSummary || DETOX_60M_SOP.benefitsSummary,
+    contraindications: defaultSrv.contraindications,
+    homeCareNotes: defaultSrv.homeCareNotes
+  };
 }

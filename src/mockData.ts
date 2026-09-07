@@ -10,12 +10,13 @@ import {
   AppNotification,
   SpaProfile
 } from './types';
+import { OFFICIAL_SPA_SERVICES, OFFICIAL_SPA_INVENTORY } from './data/officialMenuData';
 
-// Dữ liệu kho mỹ phẩm ban đầu (Trống - sẵn sàng tạo mới hoặc nạp từ mẫu)
-export const initialInventory: InventoryItem[] = [];
+// Dữ liệu kho mỹ phẩm ban đầu (Nạp sẵn các vật tư & mỹ phẩm thiết yếu cho menu dịch vụ chuẩn)
+export const initialInventory: InventoryItem[] = OFFICIAL_SPA_INVENTORY;
 
-// Dữ liệu bài dịch vụ ban đầu (Trống - sẵn sàng để bạn tự tạo bài dịch vụ của riêng mình)
-export const initialServices: Service[] = [];
+// Dữ liệu bài dịch vụ ban đầu (Menu 9 dịch vụ chuẩn chính thức của cửa hàng)
+export const initialServices: Service[] = OFFICIAL_SPA_SERVICES;
 
 // Dữ liệu khách hàng ban đầu (Trống)
 export const initialCustomers: Customer[] = [];

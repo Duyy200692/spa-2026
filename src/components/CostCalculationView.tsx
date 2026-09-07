@@ -38,6 +38,7 @@ import { translations, formatCurrency } from '../i18n';
 import { generateServiceCode, getServiceShortName, resolveServiceMeta } from '../utils/serviceUtils';
 import { getDefaultSOPForService } from '../data/defaultSOPs';
 import { ServiceSOPManualModal } from './ServiceSOPManualModal';
+import { OFFICIAL_SPA_SERVICES } from '../data/officialMenuData';
 
 interface CostCalculationViewProps {
   services: Service[];
@@ -140,6 +141,18 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
   const [inventorySearchQuery, setInventorySearchQuery] = useState<string>('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState(false);
+  const [menuAppliedMsg, setMenuAppliedMsg] = useState(false);
+
+  // Apply all 9 official spa services to the system
+  const handleApplyOfficialMenu = () => {
+    OFFICIAL_SPA_SERVICES.forEach(srv => {
+      onUpdateService(srv);
+    });
+    setSelectedServiceId(OFFICIAL_SPA_SERVICES[0].id);
+    setIsCreatingNew(false);
+    setMenuAppliedMsg(true);
+    setTimeout(() => setMenuAppliedMsg(false), 4000);
+  };
 
   // Filtered inventory list based on quick search query
   const filteredInventoryForAdd = inventory.filter(inv =>
@@ -453,6 +466,16 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
           {isAdminOrManager && (
             <div className="flex items-center space-x-2 shrink-0">
               <button
+                id="btn-apply-official-menu"
+                onClick={handleApplyOfficialMenu}
+                title="Nạp bảng menu 9 dịch vụ chuẩn chính thức của Spa"
+                className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-[#8BA888]/20 hover:bg-[#8BA888]/30 dark:bg-[#8BA888]/25 dark:hover:bg-[#8BA888]/35 text-[#30522E] dark:text-[#A3C2A0] border border-[#8BA888]/40 transition-colors shadow-xs"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#5A7D57] dark:text-[#8BA888]" />
+                <span>Nạp Menu Chuẩn (9 Dịch Vụ)</span>
+              </button>
+
+              <button
                 id="btn-sync-inventory-prices"
                 onClick={handleSyncPricesFromInventory}
                 title="Đồng bộ giá cost mới nhất từ kho hàng"
@@ -483,12 +506,20 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                 <strong>Ví dụ thực tế:</strong> 1 Hộp Bông tẩy trang (50.000đ/200 miếng = 250đ/miếng) ➔ Dùng 4 miếng = <strong>1.000đ</strong> tiền bông.
               </span>
             </div>
-            {syncSuccessMsg && (
-              <span className="text-xs font-bold text-[#30522E] dark:text-[#A3C2A0] flex items-center space-x-1">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Đã cập nhật đơn giá mới từ Kho!</span>
-              </span>
-            )}
+            <div className="flex items-center space-x-3">
+              {menuAppliedMsg && (
+                <span className="text-xs font-bold text-[#30522E] dark:text-[#A3C2A0] flex items-center space-x-1 bg-[#8BA888]/20 px-2.5 py-1 rounded-lg border border-[#8BA888]/30">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Đã cập nhật Menu chuẩn 9 Dịch Vụ Mới!</span>
+                </span>
+              )}
+              {syncSuccessMsg && (
+                <span className="text-xs font-bold text-[#30522E] dark:text-[#A3C2A0] flex items-center space-x-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Đã cập nhật đơn giá mới từ Kho!</span>
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -521,8 +552,18 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
                   </div>
                   <p className="text-xs font-bold text-[#1C211B] dark:text-[#E0E2DF]">Chưa có bài dịch vụ nào</p>
                   <p className="text-[11px] text-[#5E665B] dark:text-[#9BA198] leading-relaxed">
-                    Điền thông tin và quy trình ở bên phải để tạo bài dịch vụ đầu tiên!
+                    Bấm nút bên dưới để nạp nhanh toàn bộ 9 bài dịch vụ chuẩn chính thức của Spa:
                   </p>
+                  {isAdminOrManager && (
+                    <button
+                      type="button"
+                      onClick={handleApplyOfficialMenu}
+                      className="mt-2 inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#5A7D57] dark:bg-[#8BA888] text-white dark:text-[#121412] shadow-sm hover:opacity-90"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Nạp Menu Chuẩn (9 Dịch Vụ Mới)</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 services.map(srv => {

@@ -121,6 +121,11 @@ export interface InventoryItem {
   expiryDate: string;
   supplier: string;
   lastRestocked: string;
+  costCalculationUnit?: string;
+  usageQuantityPerSubUnit?: number;
+  costPerUsageUnit?: number;
+  lastRestockedDate?: string;
+  notes?: string;
 }
 
 export type AppointmentStatus = 'confirmed' | 'arrived' | 'in_progress' | 'completed' | 'cancelled';

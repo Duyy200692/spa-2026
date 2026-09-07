@@ -65,6 +65,7 @@ import {
   CalendarRange,
   Sliders,
   AlertTriangle,
+  Send,
 } from 'lucide-react';
 import { Staff, AttendanceRecord, Language, Role, KTVTourLog, Appointment, Service } from '../types';
 import { translations, formatCurrency } from '../i18n';
@@ -457,6 +458,19 @@ export const StaffView: React.FC<StaffViewProps> = ({
     weeklyOffDays: ['Thứ 2'],
     note: '',
   });
+
+  const handleOpenSelfRequestModal = (st?: Staff) => {
+    const target = st || loggedStaff;
+    if (target) {
+      setSelfShiftForm({
+        defaultShift: (target.defaultShift as any) || 'morning',
+        workingHours: target.workingHours || '08:30 - 17:30',
+        weeklyOffDays: target.weeklyOffDays || ['Thứ 2'],
+        note: '',
+      });
+      setShowSelfShiftRequestModal(true);
+    }
+  };
 
   // Modals State
   const [showAddStaffModal, setShowAddStaffModal] = useState<boolean>(false);
