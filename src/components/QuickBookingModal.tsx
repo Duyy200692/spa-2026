@@ -134,11 +134,15 @@ export const QuickBookingModal: React.FC<QuickBookingModalProps> = ({
               onChange={e => setSelectedServiceId(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-medium focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
             >
-              {services.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.durationMinutes}p - {formatCurrency(s.price, lang)})
-                </option>
-              ))}
+              {services.length === 0 ? (
+                <option value="">(Chưa có bài dịch vụ nào)</option>
+              ) : (
+                services.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.durationMinutes}p - {formatCurrency(s.price, lang)})
+                  </option>
+                ))
+              )}
             </select>
           </div>
 

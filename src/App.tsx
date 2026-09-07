@@ -148,17 +148,7 @@ export default function App() {
       unsubs.push(
         subscribeToCollection<Service>(COLLECTIONS.SERVICES, (items) => {
           if (Array.isArray(items)) {
-            const hasOfficialServices = items.some(
-              (s) => s.id === 'srv-nam-nano' || s.id === 'srv-goi-75' || s.id === 'srv-mun-y-khoa'
-            );
-            if (items.length === 0 || !hasOfficialServices) {
-              setServices(initialServices);
-              initialServices.forEach((srv) => {
-                syncDocToFirestore(COLLECTIONS.SERVICES, srv);
-              });
-            } else {
-              setServices(items);
-            }
+            setServices(items);
             setLastSyncedTime(new Date());
           }
         })
@@ -468,6 +458,11 @@ export default function App() {
     trackSync(deleteDocFromFirestore(COLLECTIONS.SERVICES, serviceId));
   };
 
+  const handleClearAllServices = async () => {
+    setServices([]);
+    await clearCollectionFromFirebase(COLLECTIONS.SERVICES);
+  };
+
   const handleClockIn = (newRecord: AttendanceRecord) => {
     setAttendance((prev) => [newRecord, ...prev]);
     trackSync(syncDocToFirestore(COLLECTIONS.ATTENDANCE, newRecord));
@@ -774,6 +769,7 @@ export default function App() {
               onAddService={handleAddService}
               onUpdateService={handleUpdateService}
               onDeleteService={handleDeleteService}
+              onClearAllServices={handleClearAllServices}
               onSaveServiceCost={handleSaveServiceCost}
             />
           )}

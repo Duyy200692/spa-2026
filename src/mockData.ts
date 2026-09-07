@@ -15,7 +15,7 @@ import { OFFICIAL_SPA_SERVICES, OFFICIAL_SPA_INVENTORY } from './data/officialMe
 // Dữ liệu kho mỹ phẩm ban đầu (Nạp sẵn các vật tư & mỹ phẩm thiết yếu cho menu dịch vụ chuẩn)
 export const initialInventory: InventoryItem[] = OFFICIAL_SPA_INVENTORY;
 
-// Dữ liệu bài dịch vụ ban đầu (Menu 9 dịch vụ chuẩn chính thức của cửa hàng)
+// Dữ liệu bài dịch vụ ban đầu (Bao gồm đầy đủ 9 quy trình spa: Da nám, Da mụn, Da lão hoá/khô, Gội 75, Gội 120, Body 60/90, Foot 60/90)
 export const initialServices: Service[] = OFFICIAL_SPA_SERVICES;
 
 // Dữ liệu khách hàng ban đầu (Trống)

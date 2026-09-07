@@ -48,6 +48,7 @@ interface CostCalculationViewProps {
   onUpdateService?: (updatedService: Service) => void;
   onAddService?: (newService: Service) => void;
   onDeleteService?: (serviceId: string) => void;
+  onClearAllServices?: () => void;
   onSaveServiceCost?: (savedService: Service) => void;
 }
 
@@ -59,6 +60,7 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
   onUpdateService,
   onAddService,
   onDeleteService,
+  onClearAllServices,
   onSaveServiceCost,
 }) => {
   const t = translations[lang];
@@ -121,7 +123,7 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
       setFormData({
         id: newId,
         code: generateServiceCode('Chăm sóc & Điều trị da mặt', 1),
-        shortName: 'Chăm Sóc Tái Sinh',
+        shortName: 'Dịch vụ mới',
         name: '',
         category: 'Chăm sóc & Điều trị da mặt',
         price: 350000,
@@ -130,6 +132,12 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
         technicianCommission: 50000,
         otherOverheads: 20000,
         costItems: [],
+        steps: [],
+        preparationSteps: [],
+        targetSkinType: '',
+        benefitsSummary: '',
+        contraindications: '',
+        homeCareNotes: '',
       });
     } else if (!isCreatingNew && !services.find(s => s.id === selectedServiceId)) {
       handleSelectService(services[0].id);
@@ -143,10 +151,24 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
   const [syncSuccessMsg, setSyncSuccessMsg] = useState(false);
   const [menuAppliedMsg, setMenuAppliedMsg] = useState(false);
 
+  // Clear all services and reset data
+  const handleClearAllServicesClick = () => {
+    if (window.confirm('Bạn có chắc chắn muốn XÓA TẤT CẢ dịch vụ trong bảng và làm sạch lại toàn bộ dữ liệu? Toàn bộ bài dịch vụ sẽ được xóa hoàn toàn.')) {
+      if (onClearAllServices) {
+        onClearAllServices();
+      }
+      setIsCreatingNew(true);
+      const newId = `srv-${Date.now()}`;
+      setSelectedServiceId(newId);
+    }
+  };
+
   // Apply all 9 official spa services to the system
   const handleApplyOfficialMenu = () => {
     OFFICIAL_SPA_SERVICES.forEach(srv => {
-      onUpdateService(srv);
+      if (onUpdateService) {
+        onUpdateService(srv);
+      }
     });
     setSelectedServiceId(OFFICIAL_SPA_SERVICES[0].id);
     setIsCreatingNew(false);
@@ -465,6 +487,18 @@ export const CostCalculationView: React.FC<CostCalculationViewProps> = ({
 
           {isAdminOrManager && (
             <div className="flex items-center space-x-2 shrink-0">
+              {services.length > 0 && onClearAllServices && (
+                <button
+                  id="btn-clear-all-services"
+                  onClick={handleClearAllServicesClick}
+                  title="Xóa toàn bộ các bài dịch vụ hiện có và làm sạch lại dữ liệu"
+                  className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 transition-colors shadow-xs"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Xóa Tất Cả Dịch Vụ</span>
+                </button>
+              )}
+
               <button
                 id="btn-apply-official-menu"
                 onClick={handleApplyOfficialMenu}

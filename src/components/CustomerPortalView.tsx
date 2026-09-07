@@ -1063,7 +1063,17 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Product & Service Grid (Clean Text & Details without images) */}
-          {filteredServices.length === 0 ? (
+          {services.length === 0 ? (
+            <div className="text-center py-16 px-6 bg-white rounded-3xl border border-[#EAE4DA] space-y-3 max-w-lg mx-auto shadow-xs">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 text-emerald-800 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-emerald-700" />
+              </div>
+              <h3 className="text-lg font-bold text-[#181716]">Bảng Dịch Vụ Đã Được Làm Sạch</h3>
+              <p className="text-xs text-[#736E69] leading-relaxed">
+                Toàn bộ dữ liệu bài dịch vụ cũ đã được dọn dẹp sạch sẽ. Bạn có thể thêm bài dịch vụ mới bất kỳ lúc nào trong giao diện Quản Trị hoặc nạp lại Menu theo nhu cầu.
+              </p>
+            </div>
+          ) : filteredServices.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-[#EAE4DA] space-y-3">
               <Sparkles className="w-8 h-8 text-[#8C5E32] mx-auto" />
               <p className="text-sm text-[#736E69]">Không tìm thấy dịch vụ hoặc mỹ phẩm phù hợp với bộ lọc.</p>
@@ -1640,6 +1650,39 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
               <p className="text-xs sm:text-sm text-zinc-600 font-light leading-relaxed pt-2">
                 {viewDetailService.description}
               </p>
+
+              {viewDetailService.steps && viewDetailService.steps.length > 0 && (
+                <div className="pt-3 border-t border-zinc-100">
+                  <h4 className="text-xs font-bold text-emerald-950 mb-2.5 uppercase tracking-wider flex items-center justify-between">
+                    <span>Quy trình thực hiện ({viewDetailService.steps.length} bước chuẩn y khoa)</span>
+                    <span className="text-[10px] text-emerald-700 font-medium lowercase">cam kết an toàn</span>
+                  </h4>
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                    {viewDetailService.steps.map((st) => (
+                      <div key={st.id} className="flex items-start space-x-2.5 text-xs text-zinc-700 bg-[#FAF7F2] p-2.5 rounded-xl border border-[#F0EAE1]">
+                        <span className="w-5 h-5 rounded-full bg-emerald-700 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                          {st.stepNumber}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-semibold text-zinc-900 text-xs">{st.title}</p>
+                            {st.durationMinutes && (
+                              <span className="text-[10px] text-[#8C5E32] font-medium shrink-0 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200/60">
+                                {st.durationMinutes} phút
+                              </span>
+                            )}
+                          </div>
+                          {st.description && (
+                            <p className="text-[11px] text-zinc-500 font-light mt-0.5 leading-relaxed">
+                              {st.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="pt-4 flex items-center gap-2 border-t border-zinc-100">
